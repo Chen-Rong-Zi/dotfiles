@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+time=$(date "+%y-%m-%d_%H:%M:%S")
+shot_path="/home/rongzi/Pictures/screenshot/$time.jpg"
+scrot -s --file $shot_path  -q 100
