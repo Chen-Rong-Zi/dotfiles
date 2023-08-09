@@ -1,0 +1,3 @@
+#!/bin/bash
+sudo xmodmap -pke > ~/.Xmodmap
+xmodmap ~/.Xmodmap 

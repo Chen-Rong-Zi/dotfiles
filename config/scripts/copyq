@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+copyq read {0..20} | rofi -dmenu

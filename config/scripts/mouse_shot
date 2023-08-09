@@ -1,4 +1,10 @@
 #!/usr/bin/bash
 time=$(date "+%y-%m-%d_%H:%M:%S")
 shot_path="/home/rongzi/Pictures/screenshot/$time.jpg"
-scrot -s --file $shot_path  -q 100
+maim -s  $shot_path  -m 10
+if [ -f "$shot_path" ]
+then
+    dunstify -t 1500 -i com.deepin.ScreenShot "saved as $time .jpg"
+else
+    dunstify -i error "ERROR!!!"
+fi
