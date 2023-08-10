@@ -36,7 +36,6 @@ font pango:monospace 10
 # bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle && $refresh_i3status
 # bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle && $refresh_i3status
 # bindsym $mod+p       exec --no-startup-id ~/.config/polybar/launch.sh --pwidgets
-bindsym $mod+p       exec --no-startup-id "killall dunst;dunstify -i firefox nihao"
 bindsym $mod+Shift+p       exec --no-startup-id killall polybar
 bindsym $mod+Shift+b exec --no-startup-id blueman-manager
 bindsym $mod+t       exec --no-startup-id pcmanfm
@@ -326,9 +325,10 @@ exec_always --no-startup-id sleep 0.5; picom -b
 exec        --no-startup-id sleep 1  ; cfw
 exec        --no-startup-id sleep 1.5; xfce4-power-manager
 # exec        --no-startup-id sleep 2  ; blueman-applet
-exec        --no-startup-id sleep 3  ; fcitx5
-exec_always --no-startup-id sleep 3.5; copyq &
-exec        --no-startup-id sleep 1;notify-send -t 3000 -i manjaro "rongzi, welcome back!" 
+exec        --no-startup-id sleep 2; /usr/lib/kdeconnectd &
+exec        --no-startup-id sleep 2.5; fcitx5
+exec_always --no-startup-id sleep 3.0; gpaste-client start
+exec        --no-startup-id sleep 3.5;notify-send -t 3000 -i manjaro "rongzi, welcome back!" 
 exec        --no-startup-id dunst -config ~/.config/dunst/dunstrc
 
 
@@ -342,4 +342,4 @@ bindsym $mod+Shift+w exec --no-startup-id rofi -modi "window" -show window -conf
 bindsym $mod+i exec --no-startup-id dunstctl close
 bindsym $mod+Shift+i exec --no-startup-id dunstctl history-pop
 bindsym $mod+u exec --no-startup-id variety -n
-bindsym Control+o exec --no-startup-id copyq menu
+bindsym $mod+p exec --no-startup-id gpaste-client ui

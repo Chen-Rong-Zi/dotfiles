@@ -165,7 +165,7 @@ alias unsetproxy="unset ALL_PROXY; echo 'UNSET PROXY SUCCESS!!!'"
 alias shot="import $image_path"
 
 export EDITOR=/usr/bin/vim
-export PATH=$PATH:~
+export PATH=$PATH:/home/rongzi/cProgram
 export LC_CTYPE=zh_CN.UTF-8
 # export https_proxy="https://127.0.0.1:8090"
 # export http_proxy="http://127.0.0.1:8090"
@@ -182,6 +182,6 @@ export LogoutCommand="i3-msg exit"
 setproxy
 export CM_DIR=/run/user/1000
 
-if [ $(who | wc --lines ) -ge 2 ];then
+if [ $(who | grep -oE tty[2,3,4,5,6] | wc --lines ) -ge 1 ];then
     setfont ter-228b.psf.gz
 fi
