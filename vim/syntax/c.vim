@@ -1,5 +1,5 @@
 "let python_highlight_all = 1
-syn keyword Identifier reversed sorted sum self
+syn keyword Identifier reversed sorted self
 
 " match The Function and Methods!!!
 "syntax match Special /\w+\{-}(?=()/
@@ -21,8 +21,10 @@ syntax match Preproc /\s\/\s/
 syntax match Preproc /\s%\s/
 syntax match Preproc /\s\++=\s\+/
 syntax match Identifier /\s\+=\s\+/
-syntax match Comment /{/
-syntax match Comment /}/
+syntax match Comment /^\s*{$/
+syntax match Comment /^\s*}$/
+syntax match Comment /^};$/
+
 
 
 " syntax match Preproc /\s\+\-\s\+/

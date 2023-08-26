@@ -14,43 +14,92 @@
 " Leader map
 let mapleader = ","
 syntax on 
+set noruler
+set rnu
+set nowrap
+set wildmenu
+set cursorline
+set nocp
+set ignorecase
+set encoding=utf-8
+set scrolloff=5
+set showcmd
 
+" highlight setting
+set nohlsearch
+set incsearch
+
+" " share the clipboard
+set clipboard=unnamed
+set laststatus=2
+
+" fold tab method
+set expandtab
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+set smarttab
+set autoindent
+set smartindent
+set foldmethod=indent
+
+" Better scrolling
+set lz
 " Comment the line in visual mode
 vn # <c-v>0I# <esc>
 vn " <c-v>0I" <esc> 
 vn / <C-v>0I// <esc>
+
+" use python3 socket
+vn rp !python3<CR>
+
+"In case that keyborad is sensitive
+" vn <s-k> <Nop>
 " Transform the word to UPPER-CASE
 ino <c-u> <esc>viwUviwA
 
 " swich to the head or the end
-nno <c-h> 0
-nno <c-l> $
-" <Backspace> in insert mode
-ino <c-o> <BS>
-cno <c-o> <BS>
+nno <c-h> ^
+nno <c-l> g_
+" " <Backspace> in insert mode
+" ino <c-o> <BS>
+" cno <c-o> <BS>
 
 
-"(<++>)
+       
+"    mmm 
+"  m"   "
+"  #     
+"  #     
+"   'mmm'
+"        
+"<++>
 aug C
 autocmd!
 au filetype c ino ; <ESC>A;<CR>
 au filetype c ino ( ()<left>
 au filetype c ino " ""<left>
 au filetype c ino { <esc>o{}<left><CR><esc>O
+au filetype c ino ] {}<left>
+au filetype c ino [ []<left>
 au filetype c ino <buffer> # #<space><left><right>
 
+au filetype c ino <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+
 " au filetype c ino <cr> <esc>o
-au filetype c ino <c-h> <left>
-au filetype c ino <c-l> <right>
-au filetype c ino <c-j> <down>
-au filetype c ino <c-k> <up>
+" au filetype c ino <c-h> <left>
+" au filetype c ino <c-l> <right>
+" au filetype c ino <c-j> <down>
+" au filetype c ino <c-k> <up>
 au filetype c ino <CR>  <ESC>o
 au filetype c ino \\ /*    */<esc>4<left>a
 " # au filetype c nno <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c nno <leader>r :w!<CR>:vert ter<CR>
+au filetype c nno <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 
 " ABBREVIATION
-au filetype c inorea  for for (; (<++>); (<++>))<Esc>16<left>i
+au filetype c inorea  for for (<++>; <++>; <++>)<esc>o{}<left><CR><esc>O<++><esc>/<++><CR>ca<
+
 au filetype c ino iif if ()<left>
 au filetype c inorea fuck abcd
 
@@ -71,7 +120,7 @@ aug end
 " ██╔═══╝   ╚██╔╝     ██║   ██╔══██║██║   ██║██║╚██╗██║
 " ██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║
 " ╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
-"(<++>)
+"<++>
 aug python
 autocmd!
 " au BufNewFile *.py i#date:<C-r>=strftime("20%y/%m/%d/%A")
@@ -150,7 +199,7 @@ aug end
 " ╚██╗ ██╔╝██║██║╚██╔╝██║
 "  ╚████╔╝ ██║██║ ╚═╝ ██║
 "   ╚═══╝  ╚═╝╚═╝     ╚═╝
-" (<++>)
+" <++>
 aug vim 
 autocmd!
 au filetype vim  nn <leader>c I" <esc>
@@ -173,44 +222,20 @@ set guifont:Consolas:h13
 " │                                          │
 " │                                          │
 " └──────────────────────────────────────────┘
+" <++>
 aug normal
 autocmd!
 ""autocmd StdinReadPre * let s:std_in=1
-""autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif
+" au BufWinEnter * if argc() == 0 && !exists('s:std_in') |tt|endif
 
 " " number in front of lines
-au BufWinEnter *  setl noruler
-au BufWinEnter *  setl rnu
-au BufWinEnter *  setl nowrap
-au BufWinEnter *  setl nowildmenu
-au BufWinEnter *  setl showcmd
-au BufWinEnter *  setl cursorline
-au BufWinEnter *  setl nocp
-au BufWinEnter *  setl ignorecase
-au BufWinEnter *  setl encoding=utf-8
-au BufWinEnter *  setl scrolloff=5
+au BufWinEnter * ino <c-@> <Nop>
 
-" highlight setting
-au BufWinEnter *  setl nohlsearch
-au BufWinEnter *  setl incsearch
+" replace  { [
+au BufWinEnter * nn [ {
+au BufWinEnter * nn ] }
 
-" " share the clipboard
-" au BufWinEnter *  setl clipboard=unnamed
-" au BufWinEnter *  setl laststatus=2
-
-" fold tab method
-au BufWinEnter *  setl expandtab
-au BufWinEnter *  setl tabstop=4
-au BufWinEnter *  setl shiftwidth=4
-au BufWinEnter *  setl softtabstop=4
-au BufWinEnter *  setl smarttab
-au BufWinEnter *  setl autoindent
-au BufWinEnter *  setl smartindent
-au BufWinEnter *  setl foldmethod=indent
-
-" Better scrolling
-au BufWinEnter *  setl lz
-
+" fold method
 au BufWinEnter * nn s <Nop>
 au BufWinEnter * nn ff za
 au BufWinEnter * nn fk zm
@@ -251,8 +276,8 @@ au BufWinEnter * nn = :vertical resize +15<CR>
 
 "cmap 1 !
 au BufWinEnter * nn w <c-w>
-au BufWinEnter * nn 7 5j
-au BufWinEnter * nn 8 5k
+" au BufWinEnter * nn 7 5j
+" au BufWinEnter * nn 8 5k
 
 " terminal
 au BufWinEnter * nn <leader>r :w<CR>:vert terminal<CR><c-w>L
@@ -262,6 +287,10 @@ au BufWinEnter * nn S :w<CR>
 
 " shortcuts
 au BufWinEnter * ino jk <esc>
+au BufWinEnter * ino <c-f> <right>
+au BufWinEnter * ino <c-b> <left>
+au BufWinEnter * ino <c-a> <Esc>^i
+au BufWinEnter * ino <c-e> <Esc>g_a
 
 " Turn the ; into <CR> 
 " au BufWinEnter * cno ; <CR>
@@ -269,19 +298,20 @@ au BufWinEnter * ino jk <esc>
 " au BufWinEnter * ino ; <esc>o
 
 " spell check
-au BufWinEnter * nn  sc :set spell!<CR>
+au BufWinEnter * nn  sc :setl spell!<CR>
 au BufWinEnter * ino <s-s><s-c> <c-x>s
 
 " shortcuts switched
 au BufWinEnter * nn  <space> :
 
 " move easily by <c-h><c-l>
-au BufWinEnter * cno <c-h> <left>
-au BufWinEnter * cno <c-l> <right>
+au BufWinEnter * cno <c-a> 100<left>
+au BufWinEnter * cno <c-f> <right>
+au BufWinEnter * cno <c-b> <left>
 
 " Anchor Point
-au BufWinEnter * ino <leader>f <esc>/(<++>)<CR>ca(
-au BufWinEnter * nn  <leader>f /(<++>)<CR>
+au BufWinEnter * ino <leader>f <esc>/<++><CR>ca<
+au BufWinEnter * nn  <leader>f /<++><CR>
 
 au BufWinEnter * nn <leader>t :set termguicolors!<CR>
 
@@ -309,7 +339,7 @@ nn <leader>e :e .<CR>
 " ██╔═══╝ ██║     ██║   ██║██║   ██║╚════╝██║██║╚██╗██║
 " ██║     ███████╗╚██████╔╝╚██████╔╝      ██║██║ ╚████║
 " ╚═╝     ╚══════╝ ╚═════╝  ╚═════╝       ╚═╝╚═╝  ╚═══╝
-"(<++>)
+"<++>
 " NERDTree
 nn tt :NERDTreeToggle<CR>
 " 

@@ -157,6 +157,7 @@ alias tl="tldr"
 alias ala="swl alacritty"
 alias swl="swallow"
 alias trans="trans en:zh-CH -show-prompt-message n -show-original-dictionary N -show-alternatives n -show-translation-phonetics n -show-original-phonetics n -no-warn -show-translation-phonetics N -show-languages n -show-dictionary n"
+alias rtrans="trans zh-CH:en -show-prompt-message n -show-original-dictionary N -show-alternatives n -show-translation-phonetics n -show-original-phonetics n -no-warn -show-translation-phonetics N -show-languages n -show-dictionary n"
 alias dtrans="trans en:zh-CH -show-prompt-message n -show-original-dictionary Y -show-alternatives Y -show-translation-phonetics Y -show-original-phonetics Y -no-warn -show-translation-phonetics Y -show-languages n -show-dictionary Y"
 # alias cfw="~/.config/usr/'Clash for Windows-0.18.5-x64-linux'/cfw"
 # 打开终端自动开启代理
@@ -164,6 +165,7 @@ alias setproxy="export https_proxy=http://127.0.0.1:7890;export http_proxy=http:
 alias unsetproxy="unset ALL_PROXY; echo 'UNSET PROXY SUCCESS!!!'"
 alias shot="import $image_path"
 
+export token=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
 export EDITOR=/usr/bin/vim
 export PATH=$PATH:/home/rongzi/cProgram
 export LC_CTYPE=zh_CN.UTF-8
@@ -175,13 +177,13 @@ export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export XMODIFIERS=@im=fcitx
 
-export RANGER_LOAD_DEFAULT_RC=FALSE
 export LC_CTYPE=zh_CN.UTF-8
+export RANGER_LOAD_DEFAULT_RC=FALSE
 export RANGER_DEVICONS_SEPARATOR="  "
 export LogoutCommand="i3-msg exit"
 setproxy
 export CM_DIR=/run/user/1000
 
-if [ $(who | grep -oE tty[2,3,4,5,6] | wc --lines ) -ge 1 ];then
+if [ -z "$DISPLAY" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
     setfont ter-228b.psf.gz
 fi

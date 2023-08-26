@@ -22,7 +22,7 @@ env:
 window:
   # Window dimensions (changes require restart)
   #
-  opacity: 0.85
+  opacity: 0.89
   # Specified in number of columns/lines, not pixels.
   # If both are `0`, this setting is ignored.
   dimensions:
@@ -99,8 +99,10 @@ font:
     #   - (macOS) Menlo
     #   - (Linux) sourcecodepro 14
     #   - (Windows) Consolas
-    family: Inconsolata Nerd Font
-    style: Regular
+    #     family: Inconsolata Nerd Font
+    #     family: Intel One Mono
+    family: JetBrainsMonoNL Nerd Font
+    style: Medium 
 
     # The `style` can be specified to pick a specific face.
     #style: Regular
@@ -111,7 +113,8 @@ font:
     #
     # If the bold family is not specified, it will fall back to the
     # value specified for the normal font.
-    family: Inconsolata Nerd Font
+    #     family: Inconsolata Nerd Font
+    #     family: JetBrainsMonoNL Nerd Font
 
     # The `style` can be specified to pick a specific face.
     style: Bold
@@ -122,13 +125,14 @@ font:
     #
     # If the italic family is not specified, it will fall back to the
     # value specified for the normal font.
-    family: Inconsolata Nerd Font
+    #     family: Inconsolata Nerd Font
+    #     family: JetBrainsMonoNL Nerd Font
 
     # The `style` can be specified to pick a specific face.
     style: Italic
 
   # Point size
-  size: 17
+  size: 15
 
   # Offset is the extra space around each character. `offset.y` can be thought of
   # as modifying the line spacing, and `offset.x` as modifying the letter spacing.

@@ -15,6 +15,7 @@ set $control  Control
 # Font for window titles. Will also be used by the bar unless a different font
 # is used in the bar {} block below.
 font pango:monospace 10
+# family: JetBrainsMonoNL Nerd Font
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
@@ -45,8 +46,9 @@ bindsym $mod+Shift+v exec --no-startup-id pavucontrol
 bindsym $mod+Shift+x exec --no-startup-id sh ~/.config/scripts/lock
 bindsym $mod+Shift+s exec --no-startup-id ~/.config/scripts/shot
 bindsym $mod+Shift+a exec --no-startup-id "~/.config/scripts/mouse_shot "
-bindsym $control+Shift+Return exec --no-startup-id  "alacritty -T btop -e btop "
-bindsym $control+Shift+h exec --no-startup-id  "alacritty -T ranger -e ranger "
+bindsym $control+Shift+Return exec --no-startup-id  "alacritty --config-file ~/.config/alacritty/for_btop.yml -T btop -e btop -p 4 "
+bindsym $control+Shift+h exec --no-startup-id  "alacritty -T quick_ranger -e joshuto "
+# bindsym $control+Shift+p exec --no-startup-id  "alacritty -T quick_ranger -e joshuto "
 bindsym $mod+minus scratchpad show
 bindsym $mod+Shift+minus move scratchpad
 
@@ -107,24 +109,23 @@ default_border none
 default_floating_border none
 
 # enable windows to start form floating mode
-for_window [class="Pavucontrol"] floating enable
-for_window [class="Pavucontrol"] border pixel 5
 
-for_window [title="悬浮窗口"] floating enable
-for_window [title="悬浮窗口"] border pixel 5
+# for_window [title="悬浮窗口"] floating enable
+# for_window [title="悬浮窗口"] border pixel 5
+for_window [title="btop"] floating enable, resize set 900 212, move up 250 px, move left 50
 
-for_window [title="btop"] floating enable, resize set 900 252, move up 250 px, move left 50
+# for_window [title="mouse"]floating enable, resize set 1 1, move workspace 10
+for_window [class="Pavucontrol"] floating enable, border pixel 5
 
-for_window [title="mouse"]floating enable, resize set 1 1, move workspace 10
+for_window [title="EmojiFloatWnd"] floating enable
 
-for_window [title="EmojiFloatWnd"]floating enable
+for_window [title="quick_ranger"] floating enable, resize set 1400 700,  move left 250 px, move up 100 px
 
-for_window [title="ranger"] floating enable, resize set 1400 700,  move left 250 px, move up 100 px
+for_window [title="quick_terminal"] floating enable, resize set 1900 500,  move left 550 px, move up 258 px , sticky enable
 
-for_window [title="terminal"] floating enable, resize set 1900 500,  move left 550 px
+for_window [class="Pcmanfm"] gaps inner plus 10
 
-for_window [class="Pcmanfm"] floating enable, border pixel 5
-
+for_window [class="Viewnior"] floating enable
 
 for_window [class="Thunar"] floating enable, border pixel 5
 
@@ -134,10 +135,11 @@ for_window [class="copyq"] floating enable, border pixel 5
 
 for_window [class="Gcolor3"] floating enable, border pixel 5
 
+for_window [title="Friends List"] floating enable, border pixel 5
 
-for_window [title="图片查看器"] floating enable;border pixel 5
-
-for_window [title="视频播放器"] floating enable;border pixel 5
+for_window [title="图片查看器"] floating enable, border pixel 5
+                                                 
+for_window [title="视频播放器"] floating enable, border pixel 5
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -148,7 +150,7 @@ tiling_drag modifier titlebar
 
 # start a terminal
 bindsym $mod+Return  exec "alacritty" split toggle  
-bindsym $control+Return exec "alacritty -T terminal"
+bindsym $control+Return  exec "alacritty -T quick_terminal"
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -161,7 +163,7 @@ bindsym $mod+Shift+q kill
 # .desktop file. It is a wrapper around dmenu, so you need that installed.
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 
-gaps inner 8
+gaps inner 10
 gaps outer 0
 # # Examples
 # gaps inner all set 20
@@ -321,7 +323,7 @@ exec_always --no-startup-id ~/.config/polybar/launch.sh --pwidgets
 exec        --no-startup-id variety
 # https://wiki.archlinux.org/index.php/XDG_Autostart
 # exec --no-startup-id dex --autostart --environment i3
-exec_always --no-startup-id sleep 0.5; picom -b
+exec        --no-startup-id killall picom; sleep 0.5; picom -b
 exec        --no-startup-id sleep 1  ; cfw
 exec        --no-startup-id sleep 1.5; xfce4-power-manager
 # exec        --no-startup-id sleep 2  ; blueman-applet
