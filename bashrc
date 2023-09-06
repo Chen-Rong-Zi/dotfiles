@@ -171,9 +171,9 @@ alias tm="if [ -z "$TMUX" ] && [ -n "$DISPLAY" ];then
           fi"
 alias restore="io ~/cProgram/fulfill.c"
 alias cc="gcc -Wall -Werror -O2"
-alias git-graph=git log --all --graph --decorate --oneline
+alias git-log="git log --all --graph --decorate --oneline"
 
-export token=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
+export token=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
 export EDITOR=/usr/bin/vim
 export PATH=$PATH:/home/rongzi/cProgram
 export LC_CTYPE=zh_CN.UTF-8
