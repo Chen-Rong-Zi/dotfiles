@@ -154,16 +154,24 @@ alias scrot="scrot ~/Pictures/screenshot/%y-%m-%d_%T.jpg"
 alias volume="pavucontrol"
 alias s="neofetch"
 alias tl="tldr"
-alias ala="swl alacritty"
+alias ala="swl alacritty &"
 alias swl="swallow"
 alias trans="trans en:zh-CH -show-prompt-message n -show-original-dictionary N -show-alternatives n -show-translation-phonetics n -show-original-phonetics n -no-warn -show-translation-phonetics N -show-languages n -show-dictionary n"
 alias rtrans="trans zh-CH:en -show-prompt-message n -show-original-dictionary N -show-alternatives n -show-translation-phonetics n -show-original-phonetics n -no-warn -show-translation-phonetics N -show-languages n -show-dictionary n"
 alias dtrans="trans en:zh-CH -show-prompt-message n -show-original-dictionary Y -show-alternatives Y -show-translation-phonetics Y -show-original-phonetics Y -no-warn -show-translation-phonetics Y -show-languages n -show-dictionary Y"
+alias ags="xargs"
 # alias cfw="~/.config/usr/'Clash for Windows-0.18.5-x64-linux'/cfw"
 # 打开终端自动开启代理
 alias setproxy="export https_proxy=http://127.0.0.1:7890;export http_proxy=http://127.0.0.1:7890;export all_proxy=socks5://127.0.0.1:7890"
 alias unsetproxy="unset ALL_PROXY; echo 'UNSET PROXY SUCCESS!!!'"
 alias shot="import $image_path"
+alias rm="rm -i"
+alias tm="if [ -z "$TMUX" ] && [ -n "$DISPLAY" ];then
+              tmux
+          fi"
+alias restore="io ~/cProgram/fulfill.c"
+alias cc="gcc -Wall -Werror -O2"
+alias git-graph=git log --all --graph --decorate --oneline
 
 export token=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
 export EDITOR=/usr/bin/vim
@@ -187,3 +195,6 @@ export CM_DIR=/run/user/1000
 if [ -z "$DISPLAY" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
     setfont ter-228b.psf.gz
 fi
+
+# If not running interactively, do not do anything
+export img=/run/media/rongzi/9022EA7A22EA64A6/Users/Administrator/Desktop/科大讯飞X1Pro-远程服务破解系统/system.img

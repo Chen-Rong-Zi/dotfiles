@@ -123,23 +123,23 @@ for_window [title="quick_ranger"] floating enable, resize set 1400 700,  move le
 
 for_window [title="quick_terminal"] floating enable, resize set 1900 500,  move left 550 px, move up 258 px , sticky enable
 
-for_window [class="Pcmanfm"] gaps inner plus 10
+for_window [class="Pcmanfm"] floating enable, border pixel 3, gaps inner plus 10
 
 for_window [class="Viewnior"] floating enable
 
-for_window [class="Thunar"] floating enable, border pixel 5
+# for_window [class="Thunar"] floating enable, border pixel 5
 
 for_window [class="Blueman-manager"] floating enable, border pixel 5
 
-for_window [class="copyq"] floating enable, border pixel 5
+# for_window [class="copyq"] floating enable, border pixel 5
 
 for_window [class="Gcolor3"] floating enable, border pixel 5
 
-for_window [title="Friends List"] floating enable, border pixel 5
+# for_window [title="Friends List"] floating enable, border pixel 5
 
-for_window [title="图片查看器"] floating enable, border pixel 5
-                                                 
-for_window [title="视频播放器"] floating enable, border pixel 5
+for_window [title="*器"] floating enable, border pixel 5
+# for_window [title="图片查看器"] floating enable, border pixel 5
+# for_window [title="视频播放器"] floating enable, border pixel 5
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -223,7 +223,7 @@ bindsym $mod+a focus parent
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
-set $ws1 "1_"
+set $ws1 "1_"
 set $ws2 "2_ "
 set $ws3 "3_ "
 set $ws4 "4_ "
@@ -345,3 +345,6 @@ bindsym $mod+i exec --no-startup-id dunstctl close
 bindsym $mod+Shift+i exec --no-startup-id dunstctl history-pop
 bindsym $mod+u exec --no-startup-id variety -n
 bindsym $mod+p exec --no-startup-id gpaste-client ui
+bindsym $mod+b exec --no-startup-id ~/.config/scripts/my_picom
+bindsym $mod+n exec --no-startup-id ~/.config/scripts/picom
+# bindsym $mod+Shift+m exec --no-startup-id killall picom; picom 

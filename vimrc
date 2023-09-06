@@ -76,10 +76,12 @@ nno <c-l> g_
 "<++>
 aug C
 autocmd!
-au filetype c ino ; <ESC>A;<CR>
+au filetype c ino ; <ESC>A;
 au filetype c ino ( ()<left>
 au filetype c ino " ""<left>
-au filetype c ino { <esc>o{}<left><CR><esc>O
+au filetype c ino ' ''<left>
+" au filetype c ino { <esc>o{}<left><CR><esc>O
+au filetype c ino { <esc>A<space>{<CR>}<ESC>O
 au filetype c ino ] {}<left>
 au filetype c ino [ []<left>
 au filetype c ino <buffer> # #<space><left><right>
@@ -98,9 +100,9 @@ au filetype c nno <leader>r :w!<CR>:vert ter<CR>
 au filetype c nno <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 
 " ABBREVIATION
-au filetype c inorea  for for (<++>; <++>; <++>)<esc>o{}<left><CR><esc>O<++><esc>/<++><CR>ca<
+au filetype c inorea  for for (<++>; <++>; <++>) {}<left><CR><esc>O<++><esc>/<++><CR>ca<
 
-au filetype c ino iif if ()<left>
+au filetype c ino if if ()<left>
 au filetype c inorea fuck abcd
 
 
@@ -251,10 +253,10 @@ au BufWinEnter * nn th :-tabnext<CR>
 au BufWinEnter * nn tl :+tabnext<CR>
 
 " screen create
-au BufWinEnter * nn sh :set nosplitright<CR>:vsplit<CR>
-au BufWinEnter * nn sl :set splitright<CR>:vsplit<CR>
-au BufWinEnter * nn sk :set splitright<CR>:split<CR>
-au BufWinEnter * nn sj :set nosplitright<CR>:split<CR>
+au BufWinEnter * nn <c-s><c-h> :set nosplitright<CR>:vsplit<CR>
+au BufWinEnter * nn <c-s><c-l> :set splitright<CR>:vsplit<CR>
+au BufWinEnter * nn <c-s><c-k> :set splitright<CR>:split<CR>
+au BufWinEnter * nn <c-s><c-j> :set nosplitright<CR>:split<CR>
 
 " screen switch
 au BufWinEnter * nn wk <c-w>k

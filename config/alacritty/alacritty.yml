@@ -22,7 +22,7 @@ env:
 window:
   # Window dimensions (changes require restart)
   #
-  opacity: 0.89
+  opacity: 0.85
   # Specified in number of columns/lines, not pixels.
   # If both are `0`, this setting is ignored.
   dimensions:
