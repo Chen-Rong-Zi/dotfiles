@@ -172,6 +172,7 @@ alias tm="if [ -z "$TMUX" ] && [ -n "$DISPLAY" ];then
 alias restore="io ~/cProgram/fulfill.c"
 alias cc="gcc -Wall -Werror -O2"
 alias git-log="git log --all --graph --decorate --oneline"
+alias python="python3"
 
 export token=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
 export EDITOR=/usr/bin/vim
