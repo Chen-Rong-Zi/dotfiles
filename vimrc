@@ -24,6 +24,7 @@ set ignorecase
 set encoding=utf-8
 set scrolloff=5
 set showcmd
+set fillchars=vert:┃
 
 " highlight setting
 set nohlsearch
@@ -57,6 +58,7 @@ vn rp !python3<CR>
 " vn <s-k> <Nop>
 " Transform the word to UPPER-CASE
 ino <c-u> <esc>viwUviwA
+ino <c-j> <esc>o
 
 " swich to the head or the end
 nno <c-h> ^
@@ -132,12 +134,12 @@ autocmd!
 " When typing ' =  -  +  /  *  % ', add spaces automatically
 " au filetype python ino <buffer> + <space>+<space><left><right>
 " au filetype python ino <buffer> - <space>-<space><left><right>
-au filetype python ino <buffer> * <space>*<space><left><right>
+" au filetype python ino <buffer> * <space>*<space><left><right>
 " au filetype python ino <buffer> / <space>/<space><left><right>
-au filetype python ino <buffer> % <space>%<space><left><right>
+" au filetype python ino <buffer> % <space>%<space><left><right>
 " au filetype python ino <buffer> = <space>=<space><left><right>
 au filetype python ino <buffer> # #<space><left><right>
-au filetype python ino <buffer> , ,<space><left><right>
+" au filetype python ino <buffer> , ,<space><left><right>
 
 " auto complete the () <> [] {}
 " au filetype python ino <buffer> < <><left>
@@ -145,6 +147,7 @@ au filetype python ino <buffer> ( ()<left>
 au filetype python ino <buffer> [ []<left>
 au filetype python ino <buffer> { {}<left>
 au filetype python ino <buffer> ' ''<left>
+au filetype python ino <buffer> " ""<left>
 au filetype python ino <buffer> __ ____<left><left>
 
 
@@ -176,7 +179,7 @@ au filetype python ono <buffer> ( :<C-u>normal!t)lvi(<cr>
 
 au filetype python ia <buffer> if if:<left>
 au filetype python ia <buffer> for for:<left>
-au filetype python ia <buffer> else else:<left>
+" au filetype python ia <buffer> else else:<left>
 au filetype python ia <buffer> while while:<left>
 au filetype python ia <buffer> def def:<left>
 au filetype python ia <buffer> class class:<left>
@@ -253,10 +256,10 @@ au BufWinEnter * nn th :-tabnext<CR>
 au BufWinEnter * nn tl :+tabnext<CR>
 
 " screen create
-au BufWinEnter * nn <c-s><c-h> :set nosplitright<CR>:vsplit<CR>
-au BufWinEnter * nn <c-s><c-l> :set splitright<CR>:vsplit<CR>
-au BufWinEnter * nn <c-s><c-k> :set splitright<CR>:split<CR>
-au BufWinEnter * nn <c-s><c-j> :set nosplitright<CR>:split<CR>
+au BufWinEnter * nn <c-s><c-h> :set splitright<CR>:vsplit<CR>
+au BufWinEnter * nn <c-s><c-l> :set nosplitright<CR>:vsplit<CR>
+au BufWinEnter * nn <c-s><c-k> :set splitbelow<CR>:split<CR>
+au BufWinEnter * nn <c-s><c-j> :set nosplitbelow<CR>:split<CR>
 
 " screen switch
 au BufWinEnter * nn wk <c-w>k
@@ -273,8 +276,8 @@ au BufWinEnter * nn <s-L> <c-w>L
 " screen size
 au BufWinEnter * nn _ :resize -10<CR>
 au BufWinEnter * nn + :resize +10<CR>
-au BufWinEnter * nn - :vertical resize -15<CR>
-au BufWinEnter * nn = :vertical resize +15<CR>
+au BufWinEnter * nn - :vertical resize -10<CR>
+au BufWinEnter * nn = :vertical resize +10<CR>
 
 "cmap 1 !
 au BufWinEnter * nn w <c-w>

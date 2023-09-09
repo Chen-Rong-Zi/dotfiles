@@ -156,7 +156,7 @@ let s:cursor_grey = s:colors.cursor_grey
 let s:visual_grey = s:colors.visual_grey
 let s:menu_grey = s:colors.menu_grey
 let s:special_grey = s:colors.special_grey
-let s:vertsplit = s:colors.vertsplit
+let s:vertsplit = s:colors.green
 
 " }}}
 
@@ -281,8 +281,8 @@ call s:h("StatusLineNC", { "fg": s:comment_grey }) " status lines of not-current
 call s:h("StatusLineTerm", { "fg": s:white, "bg": s:cursor_grey }) " status line of current :terminal window
 call s:h("StatusLineTermNC", { "fg": s:comment_grey }) " status line of non-current :terminal window
 call s:h("TabLine", { "fg": s:comment_grey }) " tab pages line, not active tab page label
-call s:h("TabLineFill", {}) " tab pages line, where there are no labels
-call s:h("TabLineSel", { "fg": s:white }) " tab pages line, active tab page label
+call s:h("TabLineFill", {"fg" : s:green}) " tab pages line, where there are no labels
+call s:h("TabLineSel", { "fg": s:green }) " tab pages line, active tab page label
 call s:h("Terminal", { "fg": s:white, "bg": s:black }) " terminal window (see terminal-size-color)
 call s:h("Title", { "fg": s:green }) " titles for output from ":set all", ":autocmd" etc.
 call s:h("Visual", { "bg": s:visual_grey }) " Visual mode selection

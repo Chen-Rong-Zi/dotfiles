@@ -172,9 +172,11 @@ alias tm="if [ -z "$TMUX" ] && [ -n "$DISPLAY" ];then
 alias restore="io ~/cProgram/fulfill.c"
 alias cc="gcc -Wall -Werror -O2"
 alias git-log="git log --all --graph --decorate --oneline"
-alias python="python3"
+alias py="python3"
+alias open="pcmanfm"
+alias ll="exa"
 
-export token=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
+export token="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"
 export EDITOR=/usr/bin/vim
 export PATH=$PATH:/home/rongzi/cProgram
 export LC_CTYPE=zh_CN.UTF-8

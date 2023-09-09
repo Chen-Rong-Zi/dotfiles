@@ -327,7 +327,7 @@ exec        --no-startup-id killall picom; sleep 0.5; picom -b
 exec        --no-startup-id sleep 1  ; cfw
 exec        --no-startup-id sleep 1.5; xfce4-power-manager
 # exec        --no-startup-id sleep 2  ; blueman-applet
-exec        --no-startup-id sleep 2; /usr/lib/kdeconnectd &
+# exec        --no-startup-id sleep 2; /usr/lib/kdeconnectd &
 exec        --no-startup-id sleep 2.5; fcitx5
 exec_always --no-startup-id sleep 3.0; gpaste-client start
 exec        --no-startup-id sleep 3.5;notify-send -t 3000 -i manjaro "rongzi, welcome back!" 
