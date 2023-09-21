@@ -13,17 +13,19 @@
 "      ╚═╝     ╚═╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝
 " Leader map
 let mapleader = ","
-syntax on 
-set noruler
-set rnu
+set nocp
+set showcmd
+set list
+set listchars=leadmultispace:⏐\ \ \ ,trail:-
+set ruler
 set nowrap
 set wildmenu
 set cursorline
-set nocp
+set rnu
 set ignorecase
 set encoding=utf-8
 set scrolloff=5
-set showcmd
+set termwinsize=10x0
 set fillchars=vert:┃
 
 " highlight setting
@@ -58,62 +60,60 @@ vn rp !python3<CR>
 " vn <s-k> <Nop>
 " Transform the word to UPPER-CASE
 ino <c-u> <esc>viwUviwA
-ino <c-j> <esc>o
+ino <c-j> <esc>A<CR>
 
 " swich to the head or the end
 nno <c-h> ^
 nno <c-l> g_
+nno <c-j> <CR>
 " " <Backspace> in insert mode
 " ino <c-o> <BS>
 " cno <c-o> <BS>
 
 
        
-"    mmm 
-"  m"   "
-"  #     
-"  #     
-"   'mmm'
+"   ____ 
+"  / ___|
+" | |    
+" | |___ 
+"  \____|
 "        
 "<++>
 aug C
 autocmd!
-au filetype c ino ; <ESC>A;
-au filetype c ino ( ()<left>
-au filetype c ino " ""<left>
-au filetype c ino ' ''<left>
+au filetype c,cpp ino ; <ESC>A;
+au filetype c,cpp ino ( ()<left>
+au filetype c,cpp ino " ""<left>
+au filetype c,cpp ino ' ''<left>
 " au filetype c ino { <esc>o{}<left><CR><esc>O
-au filetype c ino { <esc>A<space>{<CR>}<ESC>O
-au filetype c ino ] {}<left>
-au filetype c ino [ []<left>
-au filetype c ino <buffer> # #<space><left><right>
+au filetype c,cpp ino { <esc>A{<CR>}<ESC>O
+au filetype c,cpp ino ] {}<left>
+au filetype c,cpp ino [ []<left>
+au filetype c,cpp ino <buffer> # #<space><left><right>
 
-au filetype c ino <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+au filetype c,cpp ino <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 
 " au filetype c ino <cr> <esc>o
 " au filetype c ino <c-h> <left>
 " au filetype c ino <c-l> <right>
 " au filetype c ino <c-j> <down>
 " au filetype c ino <c-k> <up>
-au filetype c ino <CR>  <ESC>o
-au filetype c ino \\ /*    */<esc>4<left>a
-" # au filetype c nno <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
-au filetype c nno <leader>r :w!<CR>:vert ter<CR>
-au filetype c nno <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
+au filetype c,cpp ino \\ /*    */<esc>4<left>a
+" # au filetype c,cpp nno <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
+au filetype c,cpp nno <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 
 " ABBREVIATION
-au filetype c inorea  for for (<++>; <++>; <++>) {}<left><CR><esc>O<++><esc>/<++><CR>ca<
+au filetype c,cpp inorea  for for (<++>; <++>; <++>) {}<left><CR><esc>O<++><esc>/<++><CR>ca<
 
-au filetype c ino if if ()<left>
-au filetype c inorea fuck abcd
+au filetype c,cpp inorea if if ( )<left><left>
+au filetype c,cpp inorea fuck abcd
 
 
 
 
 "  <tab> and <space> visualised
-au filetype c setl list
-au filetype c setl listchars=tab:>-,trail:-
-au filetype c setl cindent
+au filetype c,cpp setl list
+au filetype c,cpp setl cindent
 aug end
 
 
@@ -167,8 +167,6 @@ au filetype python nn <buffer> <leader>[ <esc>viwA]<esc>bi[<esc>el
 au filetype python nn <buffer> <leader>{ <esc>viwA}<esc>bi{<esc>el
 au filetype python nn <buffer> <leader>< <esc>viwA><esc>bi<<esc>el
 
-" to run the python script by type tr
-au filetype python nn <buffer> <leader>r  :w<CR>:vertical term<CR><C-w>L
 
 
 " Comment the line
@@ -189,8 +187,6 @@ au filetype python ia <buffer> pirnt print
 
 
 "  <tab> and <space> visualised
-au filetype python set list
-au filetype python set listchars=tab:>-,trail:-
 aug end
 
 
@@ -217,16 +213,25 @@ colorscheme onedark
 " color scheme | font
 set guifont:Consolas:h13
 
-" ┌──────────────────────────────────────────┐
-" │                                          │
-" │ mm   m                             ""#   │
-" │ #"m  #  mmm    m mm  mmmmm   mmm     #   │
-" │ # #m # #" "#   #"  " # # #  "   #    #   │
-" │ #  # # #   #   #     # # #  m"""#    #   │
-" │ #   ## "#m#"   #     # # #  "mm"#    "mm │
-" │                                          │
-" │                                          │
-" └──────────────────────────────────────────┘
+"  _                      _             _ 
+" | |_ ___ _ __ _ __ ___ (_)_ __   __ _| |
+" | __/ _ \ '__| '_ ` _ \| | '_ \ / _` | |
+" | ||  __/ |  | | | | | | | | | | (_| | |
+"  \__\___|_|  |_| |_| |_|_|_| |_|\__,_|_|
+"<++>
+aug terminal
+autocmd!
+au TerminalOpen * tno jk <c-w>N
+au TerminalOpen * setl nornu nonu
+aug end
+
+
+"  _   _                            _ 
+" | \ | | ___  _ __ _ __ ___   __ _| |
+" |  \| |/ _ \| '__| '_ ` _ \ / _` | |
+" | |\  | (_) | |  | | | | | | (_| | |
+" |_| \_|\___/|_|  |_| |_| |_|\__,_|_|
+"                                     
 " <++>
 aug normal
 autocmd!
@@ -234,91 +239,93 @@ autocmd!
 " au BufWinEnter * if argc() == 0 && !exists('s:std_in') |tt|endif
 
 " " number in front of lines
-au BufWinEnter * ino <c-@> <Nop>
+au VimEnter * ino <c-@> <Nop>
 
 " replace  { [
-au BufWinEnter * nn [ {
-au BufWinEnter * nn ] }
+au VimEnter * nn [ {
+au VimEnter * nn ] }
 
 " fold method
-au BufWinEnter * nn s <Nop>
-au BufWinEnter * nn ff za
-au BufWinEnter * nn fk zm
-au BufWinEnter * nn fj zr
+au VimEnter * nn s <Nop>
+au VimEnter * nn ff zA
+au Vimenter * nn fk zM
+au VimEnter * nn fj zR
 
 " edit $myvimrc
-au BufWinEnter * nn <leader>ev :vsplit $MYVIMRC<CR>
-au BufWinEnter * nm <leader>sv :w<CR>:source $MYVIMRC<CR>\|\|
+au VimEnter * nn <leader>ev :vsplit $MYVIMRC<CR>
+au VimEnter * nm <leader>sv :w<CR>:source $MYVIMRC<CR>\|\|
 
 " tab site
-au BufWinEnter * nn TT :tabnew<CR>
-au BufWinEnter * nn th :-tabnext<CR>
-au BufWinEnter * nn tl :+tabnext<CR>
+au VimEnter * nn TT :tabnew<CR>
+au VimEnter * nn th :-tabnext<CR>
+au VimEnter * nn tl :+tabnext<CR>
 
 " screen create
-au BufWinEnter * nn <c-s><c-h> :set splitright<CR>:vsplit<CR>
-au BufWinEnter * nn <c-s><c-l> :set nosplitright<CR>:vsplit<CR>
-au BufWinEnter * nn <c-s><c-k> :set splitbelow<CR>:split<CR>
-au BufWinEnter * nn <c-s><c-j> :set nosplitbelow<CR>:split<CR>
+au VimEnter * nn <c-s><c-h> :set splitright<CR>:vsplit<CR>
+au VimEnter * nn <c-s><c-l> :set nosplitright<CR>:vsplit<CR>
+au VimEnter * nn <c-s><c-k> :set splitbelow<CR>:split<CR>
+au VimEnter * nn <c-s><c-j> :set nosplitbelow<CR>:split<CR>
 
 " screen switch
-au BufWinEnter * nn wk <c-w>k
-au BufWinEnter * nn wj <c-w>j
-au BufWinEnter * nn wh <c-w>h
-au BufWinEnter * nn wl <c-w>l
+au VimEnter * nn wk <c-w>k
+au VimEnter * nn wj <c-w>j
+au VimEnter * nn wh <c-w>h
+au VimEnter * nn wl <c-w>l
 
 " screen switch
-au BufWinEnter * nn <s-K> <c-w>K
-au BufWinEnter * nn <s-J> <c-w>J
-au BufWinEnter * nn <s-H> <c-w>H
-au BufWinEnter * nn <s-L> <c-w>L
+au VimEnter * nn <s-K> <c-w>K
+au VimEnter * nn <s-J> <c-w>J
+au VimEnter * nn <s-H> <c-w>H
+au VimEnter * nn <s-L> <c-w>L
 
 " screen size
-au BufWinEnter * nn _ :resize -10<CR>
-au BufWinEnter * nn + :resize +10<CR>
-au BufWinEnter * nn - :vertical resize -10<CR>
-au BufWinEnter * nn = :vertical resize +10<CR>
+au VimEnter * nn _ :resize -10<CR>
+au VimEnter * nn + :resize +10<CR>
+au VimEnter * nn - :vertical resize -10<CR>
+au VimEnter * nn = :vertical resize +10<CR>
 
 "cmap 1 !
-au BufWinEnter * nn w <c-w>
-" au BufWinEnter * nn 7 5j
-" au BufWinEnter * nn 8 5k
+au VimEnter * nn w <c-w>
 
 " terminal
-au BufWinEnter * nn <leader>r :w<CR>:vert terminal<CR><c-w>L
+au VimEnter * nn <leader>r <CR>:horizontal bo terminal++close<CR>
+au VimEnter * nn <leader>i <CR>:horizontal bo terminal++close python3<CR>
 
 " save the file in the buffer 
-au BufWinEnter * nn S :w<CR>
+au VimEnter * nn S :w<CR>
 
 " shortcuts
-au BufWinEnter * ino jk <esc>
-au BufWinEnter * ino <c-f> <right>
-au BufWinEnter * ino <c-b> <left>
-au BufWinEnter * ino <c-a> <Esc>^i
-au BufWinEnter * ino <c-e> <Esc>g_a
+au VimEnter * ino jk <esc>
+au VimEnter * ino <c-f> <right>
+au VimEnter * ino <c-b> <left>
+au VimEnter * ino <c-a> <Esc>^i
+au VimEnter * ino <c-e> <Esc>g_a
 
 " Turn the ; into <CR> 
-" au BufWinEnter * cno ; <CR>
-" au BufWinEnter * nn  ; <CR>
-" au BufWinEnter * ino ; <esc>o
+" au VimEnter * cno ; <CR>
+" au VimEnter * nn  ; <CR>
+" au VimEnter * ino ; <esc>o
 
 " spell check
-au BufWinEnter * nn  sc :setl spell!<CR>
-au BufWinEnter * ino <s-s><s-c> <c-x>s
+au VimEnter * nn  sc :setl spell!<CR>
+au VimEnter * ino <s-s><s-c> <c-x>s
 
 " shortcuts switched
-au BufWinEnter * nn  <space> :
+au VimEnter * nn  <space> :
 
 " move easily by <c-h><c-l>
-au BufWinEnter * cno <c-a> 100<left>
-au BufWinEnter * cno <c-f> <right>
-au BufWinEnter * cno <c-b> <left>
+" au VimEnter * cno <c-a> <left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left>
+au VimEnter * cno <c-f> <right>
+au VimEnter * cno <c-b> <left>
+au VimEnter * cno <c-i> <c-f>i
 
 " Anchor Point
-au BufWinEnter * ino <leader>f <esc>/<++><CR>ca<
-au BufWinEnter * nn  <leader>f /<++><CR>
+au VimEnter * ino <leader>f <esc>/<++><CR>ca<
+au VimEnter * nn  <leader>f /<++><CR>
 
-au BufWinEnter * nn <leader>t :set termguicolors!<CR>
+au VimEnter * vno o :!
+au VimEnter * vno s :s/
+au VimEnter * nn <leader>t :set termguicolors!<CR>
 
 aug END
 
@@ -424,8 +431,20 @@ call plug#end()
 
 " " shut down the error warning
 setl vb t_vb=
-setl nocp
 aug md 
 autocmd!
 au filetype markdown nnoremap <C-p> <Plug>MarkdownPreviewToggle
 aug end
+
+"                _       _       
+"  ___  ___ _ __(_)_ __ | |_ ___ 
+" / __|/ __| '__| | '_ \| __/ __|
+" \__ \ (__| |  | | |_) | |_\__ \
+" |___/\___|_|  |_| .__/ \__|___/
+"                 |_|            
+" INSERT mode
+let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;blue\x7"
+" REPLACE mode
+let &t_SR = "\<Esc>[3 q" . "\<Esc>]12;black\x7"
+" NORMAL mode
+let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;green\x7"

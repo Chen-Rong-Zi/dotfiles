@@ -21,15 +21,13 @@ syntax match Preproc /\s\/\s/
 syntax match Preproc /\s%\s/
 syntax match Preproc /\s\++=\s\+/
 syntax match Identifier /\s\+=\s\+/
+match Comment /^ \+\ze./
 
 syntax match LineNr /^\s*{$/
 syntax match LineNr /^\s*}$/
-syntax match LineNr /\s*{\s*/
-syntax match LineNr /\s*}\s*/
-syntax match LineNr /^};$/
+syntax match LineNr /\s*{$/
+syntax match LineNr /^\s\+};$/
 syntax match LineNr /{$/
-
-
 
 " syntax match Preproc /\s\+\-\s\+/
 " syntax match Preproc /\v\s\+\s+/

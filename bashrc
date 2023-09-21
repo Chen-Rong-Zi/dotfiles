@@ -9,7 +9,7 @@ export OSH='/home/rongzi/.oh-my-bash'
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-bash is loaded.
-OSH_THEME="axin"
+OSH_THEME=""
 
 # Uncomment the following line to use case-sensitive completion.
 # OMB_CASE_SENSITIVE="true"
@@ -143,9 +143,10 @@ export image_path="/home/rongzi/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S")
 
 alias chrome="google-chrome-stable"
 alias vi=vim
-alias la="exa -alh --color=auto --icons"
+alias v=vim
+alias la="exa --icons -alh --color=auto "
 alias ls="exa  --color=auto --icons"
-alias l="exa -lh"
+alias l="exa -lh --icons"
 alias please="sudo"
 alias ra="ranger "
 alias sudo="sudo -E"
