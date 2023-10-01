@@ -41,7 +41,7 @@ bindsym $mod+Shift+p       exec --no-startup-id killall polybar
 bindsym $mod+p exec --no-startup-id killall polybar;exec --no-startup-id ~/.config/polybar/launch.sh --pwidgets
 bindsym $mod+Shift+b exec --no-startup-id blueman-manager
 bindsym $mod+t       exec --no-startup-id pcmanfm
-bindsym $mod+c       exec --no-startup-id google-chrome-stable
+bindsym $mod+c       exec --no-startup-id google-chrome-stable 
 bindsym $mod+Shift+v exec --no-startup-id pavucontrol
 # bindsym $mod+Shift+w exec --no-startup-id rofi -show window
 bindsym $mod+Shift+x exec --no-startup-id sh ~/.config/scripts/lock
@@ -113,7 +113,7 @@ default_floating_border none
 
 # for_window [title="悬浮窗口"] floating enable
 # for_window [title="悬浮窗口"] border pixel 5
-for_window [title="btop"] floating enable, resize set 900 212, move up 250 px, move left 50
+for_window [title="btop"] floating enable, resize set 900 220, move up 250 px, move left 50
 
 # for_window [title="mouse"]floating enable, resize set 1 1, move workspace 10
 for_window [class="Pavucontrol"] floating enable, border pixel 5
@@ -122,7 +122,7 @@ for_window [title="EmojiFloatWnd"] floating enable
 
 for_window [title="quick_ranger"] floating enable, resize set 1400 700,  move left 250 px, move up 100 px
 
-for_window [title="quick_terminal"] floating enable, resize set 1400 500,  move left 250 px, move up 258 px , sticky enable
+for_window [title="quick_terminal"] floating enable, resize set 1400 500,  move left 250 px, move up 256 px , sticky enable
 
 for_window [class="Pcmanfm"] floating enable, border pixel 3, gaps inner plus 10
 
@@ -164,7 +164,7 @@ bindsym $mod+Shift+q kill
 # .desktop file. It is a wrapper around dmenu, so you need that installed.
 # bindcode $mod+40 exec --no-startup-id i3-dmenu-desktop
 
-gaps inner 10
+gaps inner 9
 gaps outer 0
 # # Examples
 # gaps inner all set 20
@@ -313,7 +313,7 @@ client.urgent           #2E3440 #FF5555 #F8F8F2 #FF5555   #FF5555
 client.placeholder      #2E3440 #2E3440 #F8F8F2 #2E3440   #2E3440
 client.background       #F8F8F2
 
-workspace_auto_back_and_forth yes
+# workspace_auto_back_and_forth yes
 
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +10%
 bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -10%
@@ -328,7 +328,7 @@ exec        --no-startup-id killall picom; sleep 0.5; picom -b
 exec        --no-startup-id sleep 1  ; cfw
 exec        --no-startup-id sleep 1.5; xfce4-power-manager
 # exec        --no-startup-id sleep 2  ; blueman-applet
-# exec        --no-startup-id sleep 2; /usr/lib/kdeconnectd &
+exec        --no-startup-id sleep 2; /usr/lib/kdeconnectd &
 exec        --no-startup-id sleep 2.5; fcitx5
 exec_always --no-startup-id sleep 3.0; gpaste-client start
 exec        --no-startup-id sleep 3.5;notify-send -t 3000 -i manjaro "rongzi, welcome back!" 
@@ -341,6 +341,7 @@ exec        --no-startup-id dunst -config ~/.config/dunst/dunstrc
 # exec_always --no-startup-id 
 # exec_always --no-startup-id 
 bindsym $mod+d exec --no-startup-id rofi -modi "drun" -show drun -config ~/.config/rofi/main_menu.rasi
+bindsym $mod+shift+d exec --no-startup-id rofi -modi "drun" -show run -config ~/.config/rofi/main_menu.rasi
 bindsym $mod+Shift+w exec --no-startup-id rofi -modi "window" -show window -config ~/.config/rofi/windows_tasks.rasi
 bindsym $mod+i exec --no-startup-id dunstctl close
 bindsym $mod+Shift+i exec --no-startup-id dunstctl history-pop

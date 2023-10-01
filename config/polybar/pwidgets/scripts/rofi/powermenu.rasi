@@ -8,46 +8,46 @@
  */
 
 configuration {
-	font:							"Iosevka Nerd Font 18";
-    show-icons:                     true;
-	icon-theme: 					"Papirus";
-    display-drun: 					"";
-    drun-display-format:            "{name}";
+    font:          "Iosevka Nerd Font 18";
+    show-icons:                      true;
+    icon-theme:                 "Papirus";
+    display-drun:                     "";
+    drun-display-format:         "{name}";
     disable-history:                false;
     fullscreen:                     false;
-	hide-scrollbar: 				true;
-	sidebar-mode: 					false;
+    hide-scrollbar:                  true;
+    sidebar-mode:                   false;
 }
 
 @import "colors.rasi"
 
 window {
-    transparency:                   "real";
+    transparency:                "real";
     background-color:               @bg;
     text-color:                     @fg;
-	border:							0px;
-	border-color:					@ac;
-    border-radius:                  20px;
-	width:							520;
-    location:                       center;
+    border:                         0px;
+    border-color:                   @ac;
+    border-radius:                 20px;
+    width:                          600;
+    location:                    center;
     x-offset:                       0px;
     y-offset:                       0px;
 }
 
 prompt {
-    enabled: 						true;
-	padding: 						10px;
-	background-color: 				@al;
-	text-color: 					@fg;
+    enabled:                       true;
+    padding:                       10px;
+    background-color:               @al;
+    text-color:                     @fg;
 }
 
 textbox-prompt-colon {
-	padding: 						10px 5px 10px 15px;
-	font:							"Iosevka Nerd Font 15";
-	background-color: 				@al;
-	text-color: 					@ac;
-	expand: false;
-	str: "";
+    padding:                        10px 5px 10px 15px;
+    font:                           "Iosevka Nerd Font 15";
+    background-color:               @al;
+    text-color:                     @ac;
+    expand: false;
+    str: "";
 }
 
 entry {
@@ -63,13 +63,13 @@ entry {
 }
 
 inputbar {
-	children: 						[ textbox-prompt-colon, prompt ];
+    children:                       [ textbox-prompt-colon, prompt ];
     background-color:               @al;
     text-color:                     @fg;
     expand:                         false;
-	border:							0px 0px 1px 0px;
+    border:                         0px 0px 1px 0px;
     border-radius:                  12px;
-	border-color:					@ac;
+    border-color:                   @ac;
     spacing:                        0px;
 }
 
@@ -86,11 +86,11 @@ listview {
 
 mainbox {
     background-color:               @al;
-	border:							0px;
+    border:                         0px;
     border-radius:                  0px;
-	border-color:					@ac;
+    border-color:                   @ac;
     children:                       [ inputbar, listview ];
-    spacing:                       	10px;
+    spacing:                        10px;
     padding:                        2px 10px 10px 10px;
 }
 
@@ -104,14 +104,14 @@ element {
 
 element-icon {
     background-color:               transparent;
-    text-color:               		inherit;
+    text-color:                     inherit;
     size:                           24px;
     border:                         0px;
 }
 
 element-text {
     background-color:               transparent;
-    text-color:               		inherit;
+    text-color:                     inherit;
     expand:                         true;
     horizontal-align:               0;
     vertical-align:                 0.5;
@@ -121,7 +121,7 @@ element-text {
 element selected {
     background-color:               @ac;
     text-color:                     @bg;
-	border:							0px 0px 0px 0px;
+    border:                         0px 0px 0px 0px;
     border-radius:                  12px;
-    border-color:                  	@ac;
+    border-color:                   @ac;
 }

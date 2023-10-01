@@ -22,7 +22,7 @@ env:
 window:
   # Window dimensions (changes require restart)
   #
-  opacity: 0.86
+  opacity: 0.99
   # Specified in number of columns/lines, not pixels.
   # If both are `0`, this setting is ignored.
   dimensions:
@@ -135,7 +135,7 @@ font:
     style: Italic
 
   # Point size
-  size: 15
+  size: 14
 
   # Offset is the extra space around each character. `offset.y` can be thought of
   # as modifying the line spacing, and `offset.x` as modifying the letter spacing.

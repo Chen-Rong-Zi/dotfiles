@@ -13,10 +13,11 @@
 "      ╚═╝     ╚═╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝
 " Leader map
 let mapleader = ","
+set nowrap
 set nocp
 set showcmd
 set list
-set listchars=leadmultispace:⏐\ \ \ ,trail:-
+set listchars=leadmultispace:⏐\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
 set ruler
 set nowrap
 set wildmenu
@@ -25,8 +26,9 @@ set rnu
 set ignorecase
 set encoding=utf-8
 set scrolloff=5
-set termwinsize=10x0
+" set termwinsize=10x0
 set fillchars=vert:┃
+set confirm
 
 " highlight setting
 set nohlsearch
@@ -45,7 +47,6 @@ set smarttab
 set autoindent
 set smartindent
 set foldmethod=indent
-
 " Better scrolling
 set lz
 " Comment the line in visual mode
@@ -59,8 +60,10 @@ vn rp !python3<CR>
 "In case that keyborad is sensitive
 " vn <s-k> <Nop>
 " Transform the word to UPPER-CASE
+ino <BS> <Nop>
 ino <c-u> <esc>viwUviwA
 ino <c-j> <esc>A<CR>
+ino : :
 
 " swich to the head or the end
 nno <c-h> ^
@@ -87,7 +90,7 @@ au filetype c,cpp ino " ""<left>
 au filetype c,cpp ino ' ''<left>
 " au filetype c ino { <esc>o{}<left><CR><esc>O
 au filetype c,cpp ino { <esc>A{<CR>}<ESC>O
-au filetype c,cpp ino ] {}<left>
+au filetype c,cpp ino } {}<left>
 au filetype c,cpp ino [ []<left>
 au filetype c,cpp ino <buffer> # #<space><left><right>
 
@@ -104,6 +107,7 @@ au filetype c,cpp nno <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 
 " ABBREVIATION
 au filetype c,cpp inorea  for for (<++>; <++>; <++>) {}<left><CR><esc>O<++><esc>/<++><CR>ca<
+au filetype c,cpp inorea  while while ( )<left><left>
 
 au filetype c,cpp inorea if if ( )<left><left>
 au filetype c,cpp inorea fuck abcd
@@ -138,6 +142,7 @@ autocmd!
 " au filetype python ino <buffer> / <space>/<space><left><right>
 " au filetype python ino <buffer> % <space>%<space><left><right>
 " au filetype python ino <buffer> = <space>=<space><left><right>
+au filetype python :match Comment /^ \+\ze/
 au filetype python ino <buffer> # #<space><left><right>
 " au filetype python ino <buffer> , ,<space><left><right>
 
@@ -223,6 +228,8 @@ aug terminal
 autocmd!
 au TerminalOpen * tno jk <c-w>N
 au TerminalOpen * setl nornu nonu
+au TerminalOpen * setl laststatus=2
+au TerminalOpen * :resize -7
 aug end
 
 
@@ -253,7 +260,7 @@ au VimEnter * nn fj zR
 
 " edit $myvimrc
 au VimEnter * nn <leader>ev :vsplit $MYVIMRC<CR>
-au VimEnter * nm <leader>sv :w<CR>:source $MYVIMRC<CR>\|\|
+au VimEnter * nm <leader>sv :w<CR>:source $MYVIMRC<CR>
 
 " tab site
 au VimEnter * nn TT :tabnew<CR>
@@ -286,10 +293,11 @@ au VimEnter * nn = :vertical resize +10<CR>
 
 "cmap 1 !
 au VimEnter * nn w <c-w>
+au VimEnter * nn <BS> :set hlsearch!\|set hlsearch?<CR>
 
 " terminal
-au VimEnter * nn <leader>r <CR>:horizontal bo terminal++close<CR>
-au VimEnter * nn <leader>i <CR>:horizontal bo terminal++close python3<CR>
+au VimEnter * nn <leader>r :horizontal bo terminal++close<CR>
+au VimEnter * nn <leader>i :horizontal bo terminal++close python3<CR>
 
 " save the file in the buffer 
 au VimEnter * nn S :w<CR>
@@ -298,8 +306,8 @@ au VimEnter * nn S :w<CR>
 au VimEnter * ino jk <esc>
 au VimEnter * ino <c-f> <right>
 au VimEnter * ino <c-b> <left>
-au VimEnter * ino <c-a> <Esc>^i
-au VimEnter * ino <c-e> <Esc>g_a
+au VimEnter * ino <c-a> <Esc>I
+au VimEnter * ino <c-e> <Esc>A
 
 " Turn the ; into <CR> 
 " au VimEnter * cno ; <CR>
@@ -315,6 +323,7 @@ au VimEnter * nn  <space> :
 
 " move easily by <c-h><c-l>
 " au VimEnter * cno <c-a> <left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left>
+au VimEnter * cno <BS><Nop>
 au VimEnter * cno <c-f> <right>
 au VimEnter * cno <c-b> <left>
 au VimEnter * cno <c-i> <c-f>i
@@ -323,7 +332,7 @@ au VimEnter * cno <c-i> <c-f>i
 au VimEnter * ino <leader>f <esc>/<++><CR>ca<
 au VimEnter * nn  <leader>f /<++><CR>
 
-au VimEnter * vno o :!
+au VimEnter * vno \| :!
 au VimEnter * vno s :s/
 au VimEnter * nn <leader>t :set termguicolors!<CR>
 
@@ -436,12 +445,12 @@ autocmd!
 au filetype markdown nnoremap <C-p> <Plug>MarkdownPreviewToggle
 aug end
 
-"                _       _       
-"  ___  ___ _ __(_)_ __ | |_ ___ 
+"                _       _
+"  ___  ___ _ __(_)_ __ | |_ ___
 " / __|/ __| '__| | '_ \| __/ __|
 " \__ \ (__| |  | | |_) | |_\__ \
 " |___/\___|_|  |_| .__/ \__|___/
-"                 |_|            
+"                 |_|
 " INSERT mode
 let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;blue\x7"
 " REPLACE mode

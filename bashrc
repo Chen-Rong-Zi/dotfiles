@@ -9,7 +9,7 @@ export OSH='/home/rongzi/.oh-my-bash'
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-bash is loaded.
-OSH_THEME=""
+OSH_THEME="rr"
 
 # Uncomment the following line to use case-sensitive completion.
 # OMB_CASE_SENSITIVE="true"
@@ -142,9 +142,10 @@ source "$OSH"/oh-my-bash.sh
 export image_path="/home/rongzi/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S").jpg"
 
 alias chrome="google-chrome-stable"
-alias vi=vim
-alias v=vim
+alias vi="vim -o"
+alias vim="vim -o"
 alias la="exa --icons -alh --color=auto "
+alias ll="exa --icons -alg --color=auto"
 alias ls="exa  --color=auto --icons"
 alias l="exa -lh --icons"
 alias please="sudo"
@@ -175,7 +176,8 @@ alias cc="gcc -Wall -Werror -O2"
 alias git-log="git log --all --graph --decorate --oneline"
 alias py="python3"
 alias open="pcmanfm"
-alias ll="exa"
+alias copy="gpaste-client add"
+eval "$(thefuck --alias fuck)"
 
 export token="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"
 export EDITOR=/usr/bin/vim

@@ -25,9 +25,11 @@ syntax match Identifier /\s\+=\s\+/
 syntax match Preproc /\s\+\-\s\+/
 syntax match Preproc /\v\s\+\s+/
 syntax match keyword  /,\s/
+syntax match LineNr /^\s\?};$/
 
 " class method
 syntax match Constant /\.\w\+\./
 " syntax match Identifier /\.\w\+(\w*)\./
 " syntax match Identifier /\.\w\+\s/
 " syntax match Identifier /\.\w\+,/
+syntax match Constant /^\ \+\ze./

@@ -4,7 +4,7 @@ shot_path="/home/rongzi/Pictures/screenshot/$time.jpg"
 maim -m 10   $shot_path 
 if [ -f "$shot_path" ]
 then
-    dunstify -i com.deepin.ScreenShot "saved as $time.jpg" -t 2000
+    dunstify -i com.deepin.ScreenShot "Saved As $time.jpg" -t 2000
 else
     dunstify -i error "ERROR!!!" -t 2000
 fi

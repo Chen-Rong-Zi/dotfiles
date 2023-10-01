@@ -26,8 +26,8 @@ match Comment /^ \+\ze./
 syntax match LineNr /^\s*{$/
 syntax match LineNr /^\s*}$/
 syntax match LineNr /\s*{$/
-syntax match LineNr /^\s\+};$/
 syntax match LineNr /{$/
+syntax match LineNr /^};$/
 
 " syntax match Preproc /\s\+\-\s\+/
 " syntax match Preproc /\v\s\+\s+/
