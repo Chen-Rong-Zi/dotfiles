@@ -1,4 +1,4 @@
-# Enable the subsequent settings only in interactive sessions
+# enable the subsequent settings only in interactive sessions
 case $- in
   *i*) ;;
     *) return;;
@@ -9,7 +9,7 @@ export OSH='/home/rongzi/.oh-my-bash'
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-bash is loaded.
-OSH_THEME="rr"
+OSH_THEME="powerline"
 
 # Uncomment the following line to use case-sensitive completion.
 # OMB_CASE_SENSITIVE="true"
@@ -73,7 +73,7 @@ OSH_THEME="rr"
 OMB_USE_SUDO=true
 
 # To enable/disable display of Python virtualenv and condaenv
-# OMB_PROMPT_SHOW_PYTHON_VENV=true  # enable
+OMB_PROMPT_SHOW_PYTHON_VENV=true  # enable
 # OMB_PROMPT_SHOW_PYTHON_VENV=false # disable
 
 # Which completions would you like to load? (completions can be found in ~/.oh-my-bash/completions/*)
@@ -168,7 +168,7 @@ alias setproxy="export https_proxy=http://127.0.0.1:7890;export http_proxy=http:
 alias unsetproxy="unset ALL_PROXY; echo 'UNSET PROXY SUCCESS!!!'"
 alias shot="import $image_path"
 alias rm="rm -i"
-alias tm="if [ -z "$TMUX" ] && [ -n "$DISPLAY" ];then
+alias tm="if [ -z "$TMUX" ];then
               tmux
           fi"
 alias restore="io ~/cProgram/fulfill.c"
@@ -177,6 +177,8 @@ alias git-log="git log --all --graph --decorate --oneline"
 alias py="python3"
 alias open="pcmanfm"
 alias copy="gpaste-client add"
+alias nmtui="rfkill unblock wlan && nmtui"
+alias jo="joshuto"
 eval "$(thefuck --alias fuck)"
 
 export token="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"
@@ -204,3 +206,5 @@ fi
 
 # If not running interactively, do not do anything
 export img=/run/media/rongzi/9022EA7A22EA64A6/Users/Administrator/Desktop/科大讯飞X1Pro-远程服务破解系统/system.img
+
+# PS1="MYTestPrompt> "

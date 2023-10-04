@@ -113,34 +113,16 @@ default_floating_border none
 
 # for_window [title="悬浮窗口"] floating enable
 # for_window [title="悬浮窗口"] border pixel 5
-for_window [title="btop"] floating enable, resize set 900 220, move up 250 px, move left 50
-
-# for_window [title="mouse"]floating enable, resize set 1 1, move workspace 10
-for_window [class="Pavucontrol"] floating enable, border pixel 5
-
-for_window [title="EmojiFloatWnd"] floating enable
-
-for_window [title="quick_ranger"] floating enable, resize set 1400 700,  move left 250 px, move up 100 px
-
-for_window [title="quick_terminal"] floating enable, resize set 1400 500,  move left 250 px, move up 256 px , sticky enable
-
-for_window [class="Pcmanfm"] floating enable, border pixel 3, gaps inner plus 10
-
-for_window [class="Viewnior"] floating enable
-
-# for_window [class="Thunar"] floating enable, border pixel 5
-
-for_window [class="Blueman-manager"] floating enable, border pixel 5
-
-# for_window [class="copyq"] floating enable, border pixel 5
-
-for_window [class="Gcolor3"] floating enable, border pixel 5
-
-# for_window [title="Friends List"] floating enable, border pixel 5
-
-for_window [title="*器"] floating enable, border pixel 5
-# for_window [title="图片查看器"] floating enable, border pixel 5
-# for_window [title="视频播放器"] floating enable, border pixel 5
+for_window [title="^btop"] floating enable, resize set 900 220, move up 250 px, move left 50
+for_window [class="^Pavucontrol"]floating enable, border 4;
+for_window [title="^EmojiFloatWnd"] floating enable, border 4;
+for_window [title="^quick_ranger"] floating enable, resize set 1300 700, move left 250 px, move up 100 px
+for_window [title="^quick_terminal"] floating enable, resize set 1400 450, move left 250 px, move up 256 px
+for_window [class="^Pcmanfm"] floating enable, border 4 px;
+for_window [class="^Viewnior"] floating enable, border 4;
+for_window [class="^Blueman-manager"] floating enable, border 4;
+for_window [class="^Gcolor3"] floating enable, border 4;
+for_window [title="^图片查看器"] floating enable, border 4;
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod

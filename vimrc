@@ -17,7 +17,8 @@ set nowrap
 set nocp
 set showcmd
 set list
-set listchars=leadmultispace:⏐\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
+set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
+" set listchars=leadmultispace:⏐\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
 set ruler
 set nowrap
 set wildmenu
@@ -27,7 +28,7 @@ set ignorecase
 set encoding=utf-8
 set scrolloff=5
 " set termwinsize=10x0
-set fillchars=vert:┃
+set fillchars=vert:\|
 set confirm
 
 " highlight setting
@@ -251,6 +252,8 @@ au VimEnter * ino <c-@> <Nop>
 " replace  { [
 au VimEnter * nn [ {
 au VimEnter * nn ] }
+au VimEnter * nn / :set hlsearch<CR>/
+au VimEnter * nn * :set hlsearch<CR>*N
 
 " fold method
 au VimEnter * nn s <Nop>
@@ -291,6 +294,12 @@ au VimEnter * nn + :resize +10<CR>
 au VimEnter * nn - :vertical resize -10<CR>
 au VimEnter * nn = :vertical resize +10<CR>
 
+" cd to other directory quickly
+au VimEnter * nn <leader>gh :cd ~<CR>
+au VimEnter * nn <leader>gd :cd ~/Downloads<CR>
+au VimEnter * nn <leader>gc :cd ~/.config<CR>
+au VimEnter * nn <leader>gl :cd ~/.Lectures<CR>
+
 "cmap 1 !
 au VimEnter * nn w <c-w>
 au VimEnter * nn <BS> :set hlsearch!\|set hlsearch?<CR>
@@ -326,7 +335,7 @@ au VimEnter * nn  <space> :
 au VimEnter * cno <BS><Nop>
 au VimEnter * cno <c-f> <right>
 au VimEnter * cno <c-b> <left>
-au VimEnter * cno <c-i> <c-f>i
+au VimEnter * cno <c-i> <c-f>i<c-x><c-i>
 
 " Anchor Point
 au VimEnter * ino <leader>f <esc>/<++><CR>ca<
@@ -440,7 +449,7 @@ call plug#end()
 
 " " shut down the error warning
 setl vb t_vb=
-aug md 
+aug md
 autocmd!
 au filetype markdown nnoremap <C-p> <Plug>MarkdownPreviewToggle
 aug end
