@@ -72,7 +72,7 @@ case $chosen in
             sh ~/.config/scripts/lock
             dunstify -i gnome-session-suspend suspending...
             sleep 0.5
-			systemctl suspend
+			sudo systemctl suspend
 		elif [[ $ans == "no" || $ans == "NO" || $ans == "n" || $ans == "N" ]]; then
 			exit 0
         else

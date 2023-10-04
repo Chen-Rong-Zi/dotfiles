@@ -67,9 +67,9 @@ ino <c-j> <esc>A<CR>
 ino : :
 
 " swich to the head or the end
-nno <c-h> ^
-nno <c-l> g_
-nno <c-j> <CR>
+nn <c-h> ^
+nn <c-l> g_
+nn <c-j> <CR>
 " " <Backspace> in insert mode
 " ino <c-o> <BS>
 " cno <c-o> <BS>
@@ -103,8 +103,8 @@ au filetype c,cpp ino <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 " au filetype c ino <c-j> <down>
 " au filetype c ino <c-k> <up>
 au filetype c,cpp ino \\ /*    */<esc>4<left>a
-" # au filetype c,cpp nno <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
-au filetype c,cpp nno <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
+" # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
+au filetype c,cpp nn <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 
 " ABBREVIATION
 au filetype c,cpp inorea  for for (<++>; <++>; <++>) {}<left><CR><esc>O<++><esc>/<++><CR>ca<
