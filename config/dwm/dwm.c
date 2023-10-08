@@ -1899,9 +1899,10 @@ spawn(const Arg *arg)
 void
 spawnbar()
 {
-    if (*altbarcmd)
-        system(echo start successfully ! >> ~/start);
+    if (*altbarcmd){
+        system("echo start successfully ! >> ~/start");
         system(altbarcmd);
+    }
 }
 
 void

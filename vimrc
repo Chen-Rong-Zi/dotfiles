@@ -17,8 +17,8 @@ set nowrap
 set nocp
 set showcmd
 set list
-set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
-" set listchars=leadmultispace:⏐\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
+set listchars=leadmultispace:⏐\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
+" set listchars=leadmultispace:\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
 set ruler
 set nowrap
 set wildmenu
@@ -28,7 +28,7 @@ set ignorecase
 set encoding=utf-8
 set scrolloff=5
 " set termwinsize=10x0
-set fillchars=vert:\|
+set fillchars=vert:┃
 set confirm
 
 " highlight setting
@@ -59,7 +59,7 @@ vn / <C-v>0I// <esc>
 vn rp !python3<CR>
 
 "In case that keyborad is sensitive
-" vn <s-k> <Nop>
+vn <s-k> <Nop>
 " Transform the word to UPPER-CASE
 ino <BS> <Nop>
 ino <c-u> <esc>viwUviwA
@@ -341,8 +341,11 @@ au VimEnter * cno <c-i> <c-f>i<c-x><c-i>
 au VimEnter * ino <leader>f <esc>/<++><CR>ca<
 au VimEnter * nn  <leader>f /<++><CR>
 
-au VimEnter * vno \| :!
-au VimEnter * vno s :s/
+au VimEnter * vn \| :!
+au VimEnter * vn s :s/
+au VimEnter * vn <c-h> ^
+au VimEnter * vn <c-l> g_
+au VimEnter * vn * y/\V<C-R>=escape(@",'/\')<CR><CR>:set hlsearch<CR>N
 au VimEnter * nn <leader>t :set termguicolors!<CR>
 
 aug END
@@ -466,3 +469,19 @@ let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;blue\x7"
 let &t_SR = "\<Esc>[3 q" . "\<Esc>]12;black\x7"
 " NORMAL mode
 let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;green\x7"
+
+function! SelectFile()
+    let tmp = tempname()
+    silent execute '!sudo find ~ | fzf -m >'.tmp
+    for fname in readfile(tmp)
+        if @% == ''
+            silent execute 'e '.fname
+        else
+            silent execute 'vsplit '.fname
+        endif
+    endfor
+    silent execute '!rm '.tmp
+    silent execute 'redraw!'
+endfunction
+
+nn <leader><c-f> :call SelectFile()<CR>
