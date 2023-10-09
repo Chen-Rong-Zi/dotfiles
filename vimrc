@@ -67,7 +67,7 @@ ino <c-j> <esc>A<CR>
 " swich to the head or the end
 nn <c-h> ^
 nn <c-l> g_
-nn <c-j> <CR>
+nn <c-j> zz
 " " <Backspace> in insert mode
 " ino <c-o> <BS>
 " cno <c-o> <BS>
