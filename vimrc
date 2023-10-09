@@ -91,7 +91,7 @@ au filetype c,cpp ino <buffer> ' ''<left>
 au filetype c,cpp ino <buffer> { <esc>A{<CR>}<ESC>O
 au filetype c,cpp ino <buffer> } {}<left>
 au filetype c,cpp ino <buffer> [ []<left>
-au filetype c,cpp ino <buffer> <buffer> # #<space><left><right>
+au filetype c,cpp ino <buffer> # #<space><left><right>
 
 au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 
@@ -107,7 +107,6 @@ au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 " ABBREVIATION
 au filetype c,cpp inorea <buffer> for for (<++>; <++>; <++>) {}<left><CR><esc>O<++><esc>/<++><CR>ca<
 au filetype c,cpp inorea <buffer> while while ( )<left><left>
-                         <buffer>
 au filetype c,cpp inorea <buffer> if if ( )<left><left>
 au filetype c,cpp inorea <buffer> fuck abcd
 
@@ -281,10 +280,10 @@ au VimEnter * nn wh <c-w>h
 au VimEnter * nn wl <c-w>l
 
 " screen switch
-au VimEnter * nn <s-K> <c-w>K
-au VimEnter * nn <s-J> <c-w>J
-au VimEnter * nn <s-H> <c-w>H
-au VimEnter * nn <s-L> <c-w>L
+au VimEnter * nn <leader><s-K> <c-w>K
+au VimEnter * nn <leader><s-J> <c-w>J
+au VimEnter * nn <leader><s-H> <c-w>H
+au VimEnter * nn <leader><s-L> <c-w>L
 
 " screen size
 au VimEnter * nn _ :resize -10<CR>
