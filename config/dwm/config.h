@@ -9,7 +9,7 @@ static const int topbar             = 1;        /* 0 means bottom bar */
 static const int usealtbar          = 1;        /* 1 means use non-dwm status bar */
 static const char *altbarclass      = "Polybar"; /* Alternate bar class name */
 static const char *alttrayname      = "tray";    /* Polybar tray instance name */
-static const char *altbarcmd        = "/home/rongzi/.config/polybar/pwidgets/launch"; /* Alternate bar launch command */
+static const char *altbarcmd        = "/home/rongzi/.config/polybar/pwidgets/launch dwm"; /* Alternate bar launch command */
 static const char *fonts[]          = { "Source Han Sans CN:size=10" };
 static const char dmenufont[]       = "monospace:size=12";
 static const char col_gray1[]       = "#222222";
@@ -32,12 +32,14 @@ static const Rule rules[] = {
      *  WM_CLASS(STRING) = instance, class
      *  WM_NAME(STRING) = title
      */
-    /* class          instance    title       tags mask     isfloating   monitor */
-    { "Gimp",         NULL,       NULL,       0,            1,           -1 },
-    { "Firefox",      NULL,       NULL,       1 << 8,       0,           -1 },
-    { NULL,           NULL,       "joshuto",  0,            1,           1  },
-    { NULL,           NULL,       "EmojiFloatWnd",  0,            1,           1  },
-    {"xfce4-notifyd", NULL,       NULL,       0,            1,           1  }
+    /* class          instance         title       tags mask     isfloating    isfullscreen  monitor */
+    { "Gimp",         NULL,            NULL,       0,            1,            0,            -1 },
+    { "Firefox",      NULL,            NULL,       1 << 8,       0,            0,            -1 },
+    { NULL,           NULL,            "joshuto",  0,            1,            0,             1 },
+    { NULL,           NULL,            "joshuto",  0,            0,            1,             1 },
+    { NULL,           NULL,      "EmojiFloatWnd",  0,            1,            0,             1 },
+    {"kdeconnectd",   NULL,            NULL,       1,            0,            1,             1 },
+    {"xfce4-notifyd", NULL,            NULL,       0,            1,            0,             1 }
 };
 
 /* layout(s) */
@@ -82,11 +84,21 @@ static const char *btop[]       = {"/home/rongzi/.config/scripts/btop", NULL};
 static const char *joshuto[]    = {"/home/rongzi/.config/scripts/joshuto", NULL};
 static const char *clipboard[]  = {"/home/rongzi/.config/scripts/clipboard", NULL};
 static const char *pcmanfm[]    = {"pcmanfm", NULL};
+static const char *lightup[]    = {"/home/rongzi/.config/scripts/backlight","10",  NULL};
+static const char *lightdown[]    = {"/home/rongzi/.config/scripts/backlight","-10",  NULL};
+static const char *volumeup[]    = {"pactl", "set-sink-volume","@DEFAULT_SINK@", "+10%", NULL};
+static const char *volumedown[]    = {"pactl", "set-sink-volume","@DEFAULT_SINK@", "-10%", NULL};
+static const char *volumemute[]    = {"pactl", "set-sink-mute","@DEFAULT_SINK@", "toggle", NULL};
 
 
 static const Key keys[] = {
     /* modifier                     key        function        argument */
     { MODKEY,                       XK_Return, spawn,          {.v = termcmd } },
+    { 0,             XF86XK_MonBrightnessUp,   spawn,          {.v = lightup } },
+    { 0,             XF86XK_MonBrightnessDown, spawn,          {.v = lightdown } },
+    { 0,             XF86XK_AudioRaiseVolume,     spawn,          {.v = volumeup } },
+    { 0,             XF86XK_AudioLowerVolume,     spawn,          {.v = volumedown } },
+    { 0,             XF86XK_AudioMute,            spawn,          {.v = volumemute } },
     { MODKEY,                       XK_d,      spawn,          {.v = drun } },
     { MODKEY,                       XK_o,      spawn,          {.v = clipboard } },
     { MODKEY,                       XK_t,      spawn,          {.v = pcmanfm } },

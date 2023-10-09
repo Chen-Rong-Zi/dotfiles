@@ -168,9 +168,6 @@ alias setproxy="export https_proxy=http://127.0.0.1:7890;export http_proxy=http:
 alias unsetproxy="unset ALL_PROXY; echo 'UNSET PROXY SUCCESS!!!'"
 alias shot="import $image_path"
 alias rm="rm -i"
-alias tm="if [ -z "$TMUX" ];then
-              tmux
-          fi"
 alias restore="io ~/cProgram/fulfill.c"
 alias cc="gcc -Wall -Werror -O2"
 alias git-log="git log --all --graph --decorate --oneline"
@@ -197,14 +194,15 @@ export LC_CTYPE=zh_CN.UTF-8
 export RANGER_LOAD_DEFAULT_RC=FALSE
 export RANGER_DEVICONS_SEPARATOR="  "
 export LogoutCommand="i3-msg exit"
-setproxy
 export CM_DIR=/run/user/1000
+export FZF_DEFAULT_COMMAND="sudo find ."
+export FZF_DEFAULT_OPTS="--bind ctrl-j:accept"
+setproxy
 
 if [ -z "$DISPLAY" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
     setfont ter-228b.psf.gz
 fi
 
 # If not running interactively, do not do anything
-export img=/run/media/rongzi/9022EA7A22EA64A6/Users/Administrator/Desktop/科大讯飞X1Pro-远程服务破解系统/system.img
 
 # PS1="MYTestPrompt> "

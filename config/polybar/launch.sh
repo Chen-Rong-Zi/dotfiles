@@ -21,61 +21,11 @@ launch_bar() {
 	fi
 }
 
-if [[ "$1" == "--material" ]]; then
-	style="material"
-	launch_bar
-
-elif [[ "$1" == "--shades" ]]; then
-	style="shades"
-	launch_bar
-
-elif [[ "$1" == "--hack" ]]; then
-	style="hack"
-	launch_bar
-
-elif [[ "$1" == "--docky" ]]; then
-	style="docky"
-	launch_bar
-
-elif [[ "$1" == "--cuts" ]]; then
-	style="cuts"
-	launch_bar
-
-elif [[ "$1" == "--shapes" ]]; then
-	style="shapes"
-	launch_bar
-
-elif [[ "$1" == "--grayblocks" ]]; then
-	style="grayblocks"
-	launch_bar
-
-elif [[ "$1" == "--blocks" ]]; then
-	style="blocks"
-	launch_bar
-
-elif [[ "$1" == "--colorblocks" ]]; then
-	style="colorblocks"
-	launch_bar
-
-elif [[ "$1" == "--forest" ]]; then
-	style="forest"
-	launch_bar
-
-elif [[ "$1" == "--pwidgets" ]]; then
-	style="pwidgets"
-	launch_bar
-
-elif [[ "$1" == "--panels" ]]; then
-	style="panels"
-	launch_bar
-
+if [[ "$1" == "dwm" ]]; then
+    killall polybar
+    /usr/local/bin/polybar -q secondary -c $DIR/main.ini &
 else
-	cat <<- EOF
-	Usage : launch.sh --theme
-		
-	Available Themes :
-	--blocks    --colorblocks    --cuts      --docky
-	--forest    --grayblocks     --hack      --material
-	--panels    --pwidgets       --shades    --shapes
-	EOF
+    killall polybar
+    ~/.config/polybar/pwidgets/launch.sh --main_for_i3
+
 fi

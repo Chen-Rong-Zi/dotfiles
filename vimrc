@@ -17,8 +17,8 @@ set nowrap
 set nocp
 set showcmd
 set list
+set fillchars=vert:┃
 set listchars=leadmultispace:⏐\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
-" set listchars=leadmultispace:\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
 set ruler
 set nowrap
 set wildmenu
@@ -28,7 +28,6 @@ set ignorecase
 set encoding=utf-8
 set scrolloff=5
 " set termwinsize=10x0
-set fillchars=vert:┃
 set confirm
 
 " highlight setting
@@ -64,7 +63,6 @@ vn <s-k> <Nop>
 ino <BS> <Nop>
 ino <c-u> <esc>viwUviwA
 ino <c-j> <esc>A<CR>
-ino : :
 
 " swich to the head or the end
 nn <c-h> ^
@@ -85,33 +83,33 @@ nn <c-j> <CR>
 "<++>
 aug C
 autocmd!
-au filetype c,cpp ino ; <ESC>A;
-au filetype c,cpp ino ( ()<left>
-au filetype c,cpp ino " ""<left>
-au filetype c,cpp ino ' ''<left>
+au filetype c,cpp ino <buffer> ; <ESC>A;
+au filetype c,cpp ino <buffer> ( ()<left>
+au filetype c,cpp ino <buffer> " ""<left>
+au filetype c,cpp ino <buffer> ' ''<left>
 " au filetype c ino { <esc>o{}<left><CR><esc>O
-au filetype c,cpp ino { <esc>A{<CR>}<ESC>O
-au filetype c,cpp ino } {}<left>
-au filetype c,cpp ino [ []<left>
-au filetype c,cpp ino <buffer> # #<space><left><right>
+au filetype c,cpp ino <buffer> { <esc>A{<CR>}<ESC>O
+au filetype c,cpp ino <buffer> } {}<left>
+au filetype c,cpp ino <buffer> [ []<left>
+au filetype c,cpp ino <buffer> <buffer> # #<space><left><right>
 
-au filetype c,cpp ino <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 
 " au filetype c ino <cr> <esc>o
 " au filetype c ino <c-h> <left>
 " au filetype c ino <c-l> <right>
 " au filetype c ino <c-j> <down>
 " au filetype c ino <c-k> <up>
-au filetype c,cpp ino \\ /*    */<esc>4<left>a
+au filetype c,cpp ino <buffer> \\ /*    */<esc>4<left>a
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
-au filetype c,cpp nn <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
+au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 
 " ABBREVIATION
-au filetype c,cpp inorea  for for (<++>; <++>; <++>) {}<left><CR><esc>O<++><esc>/<++><CR>ca<
-au filetype c,cpp inorea  while while ( )<left><left>
-
-au filetype c,cpp inorea if if ( )<left><left>
-au filetype c,cpp inorea fuck abcd
+au filetype c,cpp inorea <buffer> for for (<++>; <++>; <++>) {}<left><CR><esc>O<++><esc>/<++><CR>ca<
+au filetype c,cpp inorea <buffer> while while ( )<left><left>
+                         <buffer>
+au filetype c,cpp inorea <buffer> if if ( )<left><left>
+au filetype c,cpp inorea <buffer> fuck abcd
 
 
 
@@ -332,10 +330,8 @@ au VimEnter * nn  <space> :
 
 " move easily by <c-h><c-l>
 " au VimEnter * cno <c-a> <left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left>
-au VimEnter * cno <BS><Nop>
 au VimEnter * cno <c-f> <right>
 au VimEnter * cno <c-b> <left>
-au VimEnter * cno <c-i> <c-f>i<c-x><c-i>
 
 " Anchor Point
 au VimEnter * ino <leader>f <esc>/<++><CR>ca<
@@ -485,3 +481,10 @@ function! SelectFile()
 endfunction
 
 nn <leader><c-f> :call SelectFile()<CR>
+
+if &term =~'linux'
+    set notermguicolors
+    set fillchars=vert:\|
+    set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
+    color zellner
+endif

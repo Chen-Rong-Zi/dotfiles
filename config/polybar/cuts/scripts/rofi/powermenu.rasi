@@ -23,7 +23,7 @@ configuration {
 
 window {
     transparency:                   "real";
-    background-color:               @bg;
+    background-color:               transparent;
     text-color:                     @fg;
 	border:							0px;
 	border-color:					@ac;
@@ -37,13 +37,13 @@ window {
 prompt {
     enabled: 						true;
 	padding: 						0px 0px 0px 5px;
-	background-color: 				@al;
+	background-color: 				transparent;
 	text-color: 					@fg;
 }
 
 textbox-prompt-colon {
 	padding: 						0px 0px 0px 2px;
-	background-color: 				@al;
+	background-color: 				transparent;
 	text-color: 					@ac;
 	expand: false;
 	str: "";
@@ -51,7 +51,7 @@ textbox-prompt-colon {
 }
 
 entry {
-    background-color:               @al;
+    background-color:               transparent;
     text-color:                     @fg;
     placeholder-color:              @fg;
     expand:                         true;
@@ -63,7 +63,7 @@ entry {
 
 inputbar {
 	children: 						[ textbox-prompt-colon, prompt ];
-    background-color:               @bga;
+    background-color:               transparent;
     text-color:                     @fg;
     expand:                         false;
 	border:							0px 0px 0px 0px;
@@ -74,7 +74,7 @@ inputbar {
 }
 
 listview {
-    background-color:               @al;
+    background-color:               transparent;
     padding:                        0px;
     columns:                        1;
     lines:                          5;
@@ -85,7 +85,7 @@ listview {
 }
 
 mainbox {
-    background-color:               @al;
+    background-color:               transparent;
 	border:							0px;
     border-radius:                  0px;
 	border-color:					@ac;
@@ -95,7 +95,7 @@ mainbox {
 }
 
 element {
-    background-color:               @al;
+    background-color:               transparent;
     text-color:                     @fg;
     orientation:                    horizontal;
     border-radius:                  0px;
@@ -119,7 +119,7 @@ element-text {
 }
 
 element selected {
-    background-color:               @se;
+    background-color:               transparent;
     text-color:                     @fg;
 	border:							0px 0px 0px 2px;
     border-radius:                  0px;

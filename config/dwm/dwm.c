@@ -20,6 +20,7 @@
  *
  * To understand everything else, start reading main().
  */
+#include <X11/XF86keysym.h>
 #include <errno.h>
 #include <locale.h>
 #include <signal.h>
@@ -160,6 +161,7 @@ typedef struct {
     const char *title;
     unsigned int tags;
     int isfloating;
+    int isfullscreen;
     int monitor;
 } Rule;
 
@@ -342,6 +344,7 @@ applyrules(Client *c)
         && (!r->instance || strstr(instance, r->instance)))
         {
             c->isfloating = r->isfloating;
+            c->isfullscreen = r->isfullscreen;
             c->tags |= r->tags;
             for (m = mons; m && m->num != r->monitor; m = m->next);
             if (m)
@@ -1900,7 +1903,6 @@ void
 spawnbar()
 {
     if (*altbarcmd){
-        system("echo start successfully ! >> ~/start");
         system(altbarcmd);
     }
 }
@@ -2325,7 +2327,7 @@ updatewindowtype(Client *c)
     Atom wtype = getatomprop(c, netatom[NetWMWindowType]);
 
     if (state == netatom[NetWMFullscreen])
-        setfullscreen(c, 1);
+        setfullscreen(c, 0);
     if (wtype == netatom[NetWMWindowTypeDialog])
         c->isfloating = 1;
 }

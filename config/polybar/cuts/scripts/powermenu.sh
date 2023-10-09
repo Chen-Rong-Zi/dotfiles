@@ -81,6 +81,8 @@ case $chosen in
 		if [[ $ans == "yes" || $ans == "YES" || $ans == "y" || $ans == "Y" ]]; then
 			if [[ "$DESKTOP_SESSION" == "Openbox" ]]; then
 				openbox --exit
+			elif [[ "$DESKTOP_SESSION" == "" ]]; then
+				killall dwm
 			elif [[ "$DESKTOP_SESSION" == "bspwm" ]]; then
 				bspc quit
 			elif [[ "$DESKTOP_SESSION" == "i3" ]]; then
