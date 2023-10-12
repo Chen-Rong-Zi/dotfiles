@@ -38,7 +38,8 @@ static const Rule rules[] = {
     { NULL,           NULL,            "joshuto",  0,            1,            0,             1 },
     { NULL,           NULL,            "joshuto",  0,            0,            1,             1 },
     { NULL,           NULL,      "EmojiFloatWnd",  0,            1,            0,             1 },
-    {"kdeconnectd",   NULL,            NULL,       1,            0,            1,             1 },
+    {"kdeconnectd",   NULL,            NULL,       0,            0,            1,             1 },
+    {"gcolor3",       NULL,            NULL,       0,            1,            0,             1 },
     {"xfce4-notifyd", NULL,            NULL,       0,            1,            0,             1 }
 };
 
@@ -84,8 +85,8 @@ static const char *btop[]       = {"/home/rongzi/.config/scripts/btop", NULL};
 static const char *joshuto[]    = {"/home/rongzi/.config/scripts/joshuto", NULL};
 static const char *clipboard[]  = {"/home/rongzi/.config/scripts/clipboard", NULL};
 static const char *pcmanfm[]    = {"pcmanfm", NULL};
-static const char *lightup[]    = {"/home/rongzi/.config/scripts/backlight","10",  NULL};
-static const char *lightdown[]    = {"/home/rongzi/.config/scripts/backlight","-10",  NULL};
+static const char *lightup[]    = {"/home/rongzi/.config/scripts/backlight", "+10%",  NULL};
+static const char *lightdown[]    = {"/home/rongzi/.config/scripts/backlight","10%-",  NULL};
 static const char *volumeup[]    = {"pactl", "set-sink-volume","@DEFAULT_SINK@", "+10%", NULL};
 static const char *volumedown[]    = {"pactl", "set-sink-volume","@DEFAULT_SINK@", "-10%", NULL};
 static const char *volumemute[]    = {"pactl", "set-sink-mute","@DEFAULT_SINK@", "toggle", NULL};

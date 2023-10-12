@@ -29,6 +29,8 @@ set encoding=utf-8
 set scrolloff=5
 " set termwinsize=10x0
 set confirm
+set conceallevel=2
+set concealcursor=ni
 
 " highlight setting
 set nohlsearch
@@ -53,6 +55,7 @@ set lz
 vn # <c-v>0I# <esc>
 vn " <c-v>0I" <esc> 
 vn / <C-v>0I// <esc>
+nn * *N:set hlsearch<CR>
 
 " use python3 socket
 vn rp !python3<CR>
@@ -73,13 +76,11 @@ nn <c-j> zz
 " cno <c-o> <BS>
 
 
-       
 "   ____ 
 "  / ___|
 " | |    
 " | |___ 
 "  \____|
-"        
 "<++>
 aug C
 autocmd!
@@ -103,9 +104,10 @@ au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 au filetype c,cpp ino <buffer> \\ /*    */<esc>4<left>a
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
+au filetype c,cpp nn <buffer> <F1> :source ~/.vim/syntax/c.vim<CR>
 
 " ABBREVIATION
-au filetype c,cpp inorea <buffer> for for (<++>; <++>; <++>) {}<left><CR><esc>O<++><esc>/<++><CR>ca<
+au filetype c,cpp inorea <buffer> for for (<++>; <++>; <++>){}<left><CR><esc>O<++><esc>/<++><CR>ca<
 au filetype c,cpp inorea <buffer> while while ( )<left><left>
 au filetype c,cpp inorea <buffer> if if ( )<left><left>
 au filetype c,cpp inorea <buffer> fuck abcd
@@ -224,9 +226,8 @@ set guifont:Consolas:h13
 "<++>
 aug terminal
 autocmd!
-au TerminalOpen * tno jk <c-w>N
+au TerminalOpen * tno <leader>jk <c-w>N
 au TerminalOpen * setl nornu nonu
-au TerminalOpen * setl laststatus=2
 au TerminalOpen * :resize -7
 aug end
 
@@ -244,13 +245,14 @@ autocmd!
 " au BufWinEnter * if argc() == 0 && !exists('s:std_in') |tt|endif
 
 " " number in front of lines
-au VimEnter * ino <c-@> <Nop>
+" au VimEnter * ino <c-@> <Nop>
 
 " replace  { [
+au BufWinEnter * call ChangeDirectory()
 au VimEnter * nn [ {
 au VimEnter * nn ] }
 au VimEnter * nn / :set hlsearch<CR>/
-au VimEnter * nn * :set hlsearch<CR>*N
+au BufEnter * match Comment /^ \+\ze./
 
 " fold method
 au VimEnter * nn s <Nop>
@@ -487,3 +489,17 @@ if &term =~'linux'
     set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
     color zellner
 endif
+
+function! ShowLastStatus()
+    if @% == '/bin/bash'
+        set laststatus=0
+    else
+        set laststatus=2
+    endif
+endfunction
+
+function! ChangeDirectory()
+    if @% != ''
+        cd %:h
+    endif
+endfunction
