@@ -33,5 +33,9 @@ syntax match Constant /\.\w\+\./
 " syntax match Identifier /\.\w\+\s/
 " syntax match Identifier /\.\w\+,/
 syntax match Constant /^\ \+\ze./
-syntax match Type '\v<int(\(|[^\s)\],:])@!' conceal cchar=ℤ
-syntax keyword Constant lambda conceal cchar=λ
+syntax keyword keyword lambda conceal cchar=λ
+syntax keyword kyword  None   conceal cchar=∅
+" syntax keyword Keyword return conceal cchar=𐅙
+" syntax keyword Keyword return conceal cchar=⇶⇰
+syntax keyword Keyword return conceal cchar=▶
+hi link conceal keyword

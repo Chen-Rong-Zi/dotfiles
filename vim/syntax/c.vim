@@ -38,12 +38,13 @@ syntax match Constant /\.\w\+\./
 " syntax match Identifier /\.\w\+(\w*)\./
 " syntax match Identifier /\.\w\+\s/
 " syntax match Identifier /\.\w\+,/
-syntax keyword Type int     conceal cchar=𝗜
-syntax keyword Type float   conceal cchar=𝔽
-syntax keyword Type double  conceal cchar=𝔻
-syntax keyword Type char    conceal cchar=ℂ
-syntax keyword Type str     conceal cchar=𝐒
-syntax keyword Type bool    conceal cchar=𝔹
-syntax keyword Type void    conceal cchar=∅
-syntax keyword Type long    conceal cchar=𝕃
+syntax keyword Type int      conceal cchar=𝗜
+syntax keyword Type float    conceal cchar=𝔽
+syntax keyword Type double   conceal cchar=𝔻
+syntax keyword Type char     conceal cchar=ℂ
+syntax keyword Type str      conceal cchar=𝐒
+syntax keyword Type bool     conceal cchar=𝔹
+syntax keyword Type void     conceal cchar=∅
+syntax keyword Type long     conceal cchar=𝕃
+syntax keyword Type unsigned conceal cchar=𝕌
 hi link Conceal Type

@@ -91,7 +91,7 @@ au filetype c,cpp ino <buffer> ' ''<left>
 " au filetype c ino { <esc>o{}<left><CR><esc>O
 au filetype c,cpp ino <buffer> { <esc>A{<CR>}<ESC>O
 au filetype c,cpp ino <buffer> } {}<left>
-au filetype c,cpp ino <buffer> [ []<left>
+au filetype c,cpp ino <buffer> [ [] <left><left>
 au filetype c,cpp ino <buffer> # #<space><left><right>
 
 au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
@@ -143,6 +143,7 @@ autocmd!
 " au filetype python ino <buffer> % <space>%<space><left><right>
 " au filetype python ino <buffer> = <space>=<space><left><right>
 au filetype python :match Comment /^ \+\ze/
+au filetype python ino <buffer> ; <Esc>A:
 au filetype python ino <buffer> # #<space><left><right>
 " au filetype python ino <buffer> , ,<space><left><right>
 
@@ -171,6 +172,7 @@ au filetype python nn <buffer> <leader>( <esc>viwA)<esc>bi(<esc>el
 au filetype python nn <buffer> <leader>[ <esc>viwA]<esc>bi[<esc>el
 au filetype python nn <buffer> <leader>{ <esc>viwA}<esc>bi{<esc>el
 au filetype python nn <buffer> <leader>< <esc>viwA><esc>bi<<esc>el
+au filetype python nn <buffer> <F1> :source ~/.vim/syntax/python.vim<CR>
 
 
 
@@ -208,7 +210,7 @@ aug end
 " <++>
 aug vim 
 autocmd!
-au filetype vim  nn <leader>c I" <esc>
+au filetype vim  nn <buffer> <leader>c I" <esc>
 au filetype vim let maplocalleader = "1"
 aug end
 
@@ -252,6 +254,7 @@ au BufWinEnter * call ChangeDirectory()
 au VimEnter * nn [ {
 au VimEnter * nn ] }
 au VimEnter * nn / :set hlsearch<CR>/
+au VimEnter * nn <CR> :call ChangeDirectory()<CR>
 au BufEnter * match Comment /^ \+\ze./
 
 " fold method
@@ -301,6 +304,8 @@ au VimEnter * nn <leader>gl :cd ~/.Lectures<CR>
 
 "cmap 1 !
 au VimEnter * nn w <c-w>
+au VimEnter * nn <c-w>c <Nop>
+au VimEnter * nn <leader>c :close<CR>
 au VimEnter * nn <BS> :set hlsearch!\|set hlsearch?<CR>
 
 " terminal
@@ -331,8 +336,6 @@ au VimEnter * nn  <space> :
 
 " move easily by <c-h><c-l>
 " au VimEnter * cno <c-a> <left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left><left>
-au VimEnter * cno <c-f> <right>
-au VimEnter * cno <c-b> <left>
 
 " Anchor Point
 au VimEnter * ino <leader>f <esc>/<++><CR>ca<
