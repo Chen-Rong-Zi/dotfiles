@@ -29,7 +29,7 @@ set encoding=utf-8
 set scrolloff=5
 " set termwinsize=10x0
 set confirm
-set conceallevel=2
+set conceallevel=1
 set concealcursor=ni
 
 " highlight setting
@@ -110,14 +110,15 @@ au filetype c,cpp nn <buffer> <F1> :source ~/.vim/syntax/c.vim<CR>
 au filetype c,cpp inorea <buffer> for for (<++>; <++>; <++>){}<left><CR><esc>O<++><esc>/<++><CR>ca<
 au filetype c,cpp inorea <buffer> while while ( )<left><left>
 au filetype c,cpp inorea <buffer> if if ( )<left><left>
-au filetype c,cpp inorea <buffer> fuck abcd
-
+au filetype c,cpp inorea <buffer> fuck Are you alright?
 
 
 
 "  <tab> and <space> visualised
 au filetype c,cpp setl list
 au filetype c,cpp setl cindent
+au filetype *.c source ~/.vim/syntax/c.vim
+au BufEnter *.c source ~/.vim/syntax/c.vim
 aug end
 
 
@@ -148,7 +149,7 @@ au filetype python ino <buffer> # #<space><left><right>
 " au filetype python ino <buffer> , ,<space><left><right>
 
 " auto complete the () <> [] {}
-" au filetype python ino <buffer> < <><left>
+au filetype python ino <buffer> < <><left>
 au filetype python ino <buffer> ( ()<left>
 au filetype python ino <buffer> [ []<left>
 au filetype python ino <buffer> { {}<left>
@@ -188,12 +189,14 @@ au filetype python ia <buffer> for for:<left>
 au filetype python ia <buffer> while while:<left>
 au filetype python ia <buffer> def def:<left>
 au filetype python ia <buffer> class class:<left>
+au filetype python ia <buffer> lambda lambda:<left>
 au filetype python ia <buffer> ret return
 au filetype python ia <buffer> @@ 1398881912@qq.com
 au filetype python ia <buffer> pirnt print
 
 
-"  <tab> and <space> visualised
+au filetype *.py source ~/.vim/syntax/python.vim
+au BufEnter *.py source ~/.vim/syntax/python.vim
 aug end
 
 
@@ -231,6 +234,7 @@ autocmd!
 au TerminalOpen * tno <leader>jk <c-w>N
 au TerminalOpen * setl nornu nonu
 au TerminalOpen * :resize -7
+au TerminalOpen * :vertical resize -7
 aug end
 
 
@@ -305,6 +309,7 @@ au VimEnter * nn <leader>gl :cd ~/.Lectures<CR>
 "cmap 1 !
 au VimEnter * nn w <c-w>
 au VimEnter * nn <c-w>c <Nop>
+au VimEnter * nn <c-f> <Nop>
 au VimEnter * nn <leader>c :close<CR>
 au VimEnter * nn <BS> :set hlsearch!\|set hlsearch?<CR>
 
@@ -319,6 +324,7 @@ au VimEnter * nn S :w<CR>
 au VimEnter * ino jk <esc>
 au VimEnter * ino <c-f> <right>
 au VimEnter * ino <c-b> <left>
+au VimEnter * cno <c-b> <left>
 au VimEnter * ino <c-a> <Esc>I
 au VimEnter * ino <c-e> <Esc>A
 
@@ -387,7 +393,7 @@ nn tt :NERDTreeToggle<CR>
 map <leader>s <plug>(easymotion-prefix)
 nm f ,ss
 
-filetype plugin on
+" filetype plugin on
 
 call plug#begin()
 " The default plugin directory will be as follows:
@@ -470,39 +476,5 @@ let &t_SR = "\<Esc>[3 q" . "\<Esc>]12;black\x7"
 " NORMAL mode
 let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;green\x7"
 
-function! SelectFile()
-    let tmp = tempname()
-    silent execute '!sudo find ~ | fzf -m >'.tmp
-    for fname in readfile(tmp)
-        if @% == ''
-            silent execute 'e '.fname
-        else
-            silent execute 'vsplit '.fname
-        endif
-    endfor
-    silent execute '!rm '.tmp
-    silent execute 'redraw!'
-endfunction
 
-nn <leader><c-f> :call SelectFile()<CR>
-
-if &term =~'linux'
-    set notermguicolors
-    set fillchars=vert:\|
-    set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
-    color zellner
-endif
-
-function! ShowLastStatus()
-    if @% == '/bin/bash'
-        set laststatus=0
-    else
-        set laststatus=2
-    endif
-endfunction
-
-function! ChangeDirectory()
-    if @% != ''
-        cd %:h
-    endif
-endfunction
+source ~/.vim/functions/useful.vim
