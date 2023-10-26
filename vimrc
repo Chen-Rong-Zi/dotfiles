@@ -13,47 +13,42 @@
 "      ╚═╝     ╚═╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝
 " Leader map
 let mapleader = ","
-set nowrap
-set nocp
-set showcmd
-set list
-set fillchars=vert:┃
-set listchars=leadmultispace:⏐\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
-set ruler
-set nowrap
-set wildmenu
-set cursorline
-set rnu
-set ignorecase
-set encoding=utf-8
-set scrolloff=5
-" set termwinsize=10x0
-set confirm
-set conceallevel=1
-set concealcursor=ni
-
-" highlight setting
-set nohlsearch
-set incsearch
-
-" " share the clipboard
-set clipboard=unnamed
-set laststatus=2
-
-" fold tab method
-set expandtab
-set tabstop=4
-set shiftwidth=4
-set softtabstop=4
-set smarttab
-set autoindent
-set smartindent
-set foldmethod=indent
 " Better scrolling
-set lz
+" fold tab method
+" highlight setting
+set nocp
+set concealcursor=ni
+set conceallevel=2
+set confirm
+set cursorline
+set encoding=utf-8
+set expandtab
+set fillchars=vert:┃
+set foldmethod=indent
+set ignorecase
+set incsearch
+set laststatus=2
+set list
+set listchars=leadmultispace:⏐\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
+set lazyredraw
+set nohlsearch
+set rnu nu
+set scrolloff=7
+set shiftwidth=4
+set showcmd
+" set smarttab
+set softtabstop=4
+set synmaxcol=200
+set termguicolors
+set tabstop=4
+set redrawtime=1000
+set ttyfast
+" set termwinsize=10x0
+" set nu ru ai si ts=4 sw=4
+
 " Comment the line in visual mode
 vn # <c-v>0I# <esc>
-vn " <c-v>0I" <esc> 
+vn " <c-v>0I" <esc>
 vn / <C-v>0I// <esc>
 nn * *N:set hlsearch<CR>
 
@@ -70,7 +65,10 @@ ino <c-j> <esc>A<CR>
 " swich to the head or the end
 nn <c-h> ^
 nn <c-l> g_
-nn <c-j> zz
+nn <c-j> ;
+nn <c-k> zz
+nn <s-j> <NOP>
+nn <s-j><s-j> <s-j>
 " " <Backspace> in insert mode
 " ino <c-o> <BS>
 " cno <c-o> <BS>
@@ -85,14 +83,6 @@ nn <c-j> zz
 aug C
 autocmd!
 au filetype c,cpp ino <buffer> ; <ESC>A;
-au filetype c,cpp ino <buffer> ( ()<left>
-au filetype c,cpp ino <buffer> " ""<left>
-au filetype c,cpp ino <buffer> ' ''<left>
-" au filetype c ino { <esc>o{}<left><CR><esc>O
-au filetype c,cpp ino <buffer> { <esc>A{<CR>}<ESC>O
-au filetype c,cpp ino <buffer> } {}<left>
-au filetype c,cpp ino <buffer> [ [] <left><left>
-au filetype c,cpp ino <buffer> # #<space><left><right>
 
 au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 
@@ -104,7 +94,7 @@ au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 au filetype c,cpp ino <buffer> \\ /*    */<esc>4<left>a
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
-au filetype c,cpp nn <buffer> <F1> :source ~/.vim/syntax/c.vim<CR>
+au filetype c,cpp nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
 
 " ABBREVIATION
 au filetype c,cpp inorea <buffer> for for (<++>; <++>; <++>){}<left><CR><esc>O<++><esc>/<++><CR>ca<
@@ -112,13 +102,8 @@ au filetype c,cpp inorea <buffer> while while ( )<left><left>
 au filetype c,cpp inorea <buffer> if if ( )<left><left>
 au filetype c,cpp inorea <buffer> fuck Are you alright?
 
-
-
 "  <tab> and <space> visualised
-au filetype c,cpp setl list
 au filetype c,cpp setl cindent
-au filetype *.c source ~/.vim/syntax/c.vim
-au BufEnter *.c source ~/.vim/syntax/c.vim
 aug end
 
 
@@ -136,55 +121,20 @@ autocmd!
 " au BufNewFile *.py i#coding=UTF-8<Enter>
 " au BufNewFile *.py i#time:<C-r>=strftime("%H:%m")
 
-" When typing ' =  -  +  /  *  % ', add spaces automatically
-" au filetype python ino <buffer> + <space>+<space><left><right>
-" au filetype python ino <buffer> - <space>-<space><left><right>
-" au filetype python ino <buffer> * <space>*<space><left><right>
-" au filetype python ino <buffer> / <space>/<space><left><right>
-" au filetype python ino <buffer> % <space>%<space><left><right>
-" au filetype python ino <buffer> = <space>=<space><left><right>
-au filetype python :match Comment /^ \+\ze/
 au filetype python ino <buffer> ; <Esc>A:
 au filetype python ino <buffer> # #<space><left><right>
 " au filetype python ino <buffer> , ,<space><left><right>
 
-" auto complete the () <> [] {}
-au filetype python ino <buffer> < <><left>
-au filetype python ino <buffer> ( ()<left>
-au filetype python ino <buffer> [ []<left>
-au filetype python ino <buffer> { {}<left>
-au filetype python ino <buffer> ' ''<left>
-au filetype python ino <buffer> " ""<left>
-au filetype python ino <buffer> __ ____<left><left>
 
-
-" surround the word in the insert mode
-au filetype python ino <buffer> <leader>' <esc>viwA'<esc>bi'<esc>ela
-au filetype python ino <buffer> <leader>" <esc>viwA"<esc>bi"<esc>ela
-au filetype python ino <buffer> <leader>( <esc>viwA)<esc>bi(<esc>ela
-au filetype python ino <buffer> <leader>[ <esc>viwA]<esc>bi[<esc>ela
-au filetype python ino <buffer> <leader>{ <esc>viwA}<esc>bi{<esc>ela
-au filetype python ino <buffer> <leader>< <esc>viwA><esc>bi<<esc>ela
-
-" surround the word in the normal mode
-au filetype python nn <buffer> <leader>' <esc>viwA'<esc>bi'<esc>el
-au filetype python nn <buffer> <leader>" <esc>viwA"<esc>bi"<esc>el
-au filetype python nn <buffer> <leader>( <esc>viwA)<esc>bi(<esc>el
-au filetype python nn <buffer> <leader>[ <esc>viwA]<esc>bi[<esc>el
-au filetype python nn <buffer> <leader>{ <esc>viwA}<esc>bi{<esc>el
-au filetype python nn <buffer> <leader>< <esc>viwA><esc>bi<<esc>el
-au filetype python nn <buffer> <F1> :source ~/.vim/syntax/python.vim<CR>
-
-
-
+au filetype python nn <F1> :syntax clear \|\| syntax on<CR>
 " Comment the line
 au filetype python vn <buffer> <leader>c <C-v>0I# <esc>
 au filetype python nn <buffer> <leader>c <C-v>0I# <esc>
 
 au filetype python ono <buffer> ( :<C-u>normal!t)lvi(<cr>
 
-au filetype python ia <buffer> if if:<left>
-au filetype python ia <buffer> for for:<left>
+" au filetype python ia <buffer> if if:<left>
+" au filetype python ia <buffer> for for:<left>
 " au filetype python ia <buffer> else else:<left>
 au filetype python ia <buffer> while while:<left>
 au filetype python ia <buffer> def def:<left>
@@ -194,9 +144,6 @@ au filetype python ia <buffer> ret return
 au filetype python ia <buffer> @@ 1398881912@qq.com
 au filetype python ia <buffer> pirnt print
 
-
-au filetype *.py source ~/.vim/syntax/python.vim
-au BufEnter *.py source ~/.vim/syntax/python.vim
 aug end
 
 
@@ -216,12 +163,10 @@ autocmd!
 au filetype vim  nn <buffer> <leader>c I" <esc>
 au filetype vim let maplocalleader = "1"
 aug end
-
-
 colorscheme onedark
 
 " color scheme | font
-set guifont:Consolas:h13
+" set guifont:Consolas:h13
 
 "  _                      _             _ 
 " | |_ ___ _ __ _ __ ___ (_)_ __   __ _| |
@@ -232,6 +177,7 @@ set guifont:Consolas:h13
 aug terminal
 autocmd!
 au TerminalOpen * tno <leader>jk <c-w>N
+au TerminalOpen * tno <leader>k <c-w>k
 au TerminalOpen * setl nornu nonu
 au TerminalOpen * :resize -7
 au TerminalOpen * :vertical resize -7
@@ -255,11 +201,32 @@ autocmd!
 
 " replace  { [
 au BufWinEnter * call ChangeDirectory()
-au VimEnter * nn [ {
-au VimEnter * nn ] }
 au VimEnter * nn / :set hlsearch<CR>/
 au VimEnter * nn <CR> :call ChangeDirectory()<CR>
-au BufEnter * match Comment /^ \+\ze./
+
+" auto complete the () <> [] {}
+au VimEnter * ino ( ()<left>
+au VimEnter * ino [ []<left>
+au VimEnter * ino { {}<left>
+au VimEnter * ino ' ''<left>
+au VimEnter * ino " ""<left>
+au VimEnter * ino __ ____<left><left>
+
+" surround the word in the insert mode
+au VimEnter * ino <leader>' <esc>viwA'<esc>bi'<esc>ela
+au VimEnter * ino <leader>" <esc>viwA"<esc>bi"<esc>ela
+au VimEnter * ino <leader>( <esc>viwA)<esc>bi(<esc>ela
+au VimEnter * ino <leader>[ <esc>viwA]<esc>bi[<esc>ela
+au VimEnter * ino <leader>{ <esc>viwA}<esc>bi{<esc>ela
+au VimEnter * ino <leader>< <esc>viwA><esc>bi<<esc>ela
+
+" surround the word in the normal mode
+au VimEnter * nn <leader>' <esc>viwA'<esc>bi'<esc>el
+au VimEnter * nn <leader>" <esc>viwA"<esc>bi"<esc>el
+au VimEnter * nn <leader>( <esc>viwA)<esc>bi(<esc>el
+au VimEnter * nn <leader>[ <esc>viwA]<esc>bi[<esc>el
+au VimEnter * nn <leader>{ <esc>viwA}<esc>bi{<esc>el
+au VimEnter * nn <leader>< <esc>viwA><esc>bi<<esc>el
 
 " fold method
 au VimEnter * nn s <Nop>
@@ -309,12 +276,11 @@ au VimEnter * nn <leader>gl :cd ~/.Lectures<CR>
 "cmap 1 !
 au VimEnter * nn w <c-w>
 au VimEnter * nn <c-w>c <Nop>
-au VimEnter * nn <c-f> <Nop>
 au VimEnter * nn <leader>c :close<CR>
 au VimEnter * nn <BS> :set hlsearch!\|set hlsearch?<CR>
 
 " terminal
-au VimEnter * nn <leader>r :horizontal bo terminal++close<CR>
+au VimEnter * nn <leader>r :horizontal bo terminal++close bash -rcfile ~/.my_bashrc<CR>
 au VimEnter * nn <leader>i :horizontal bo terminal++close python3<CR>
 
 " save the file in the buffer 
@@ -346,19 +312,18 @@ au VimEnter * nn  <space> :
 " Anchor Point
 au VimEnter * ino <leader>f <esc>/<++><CR>ca<
 au VimEnter * nn  <leader>f /<++><CR>
+au VimEnter * nn  <leader>s :%s/
 
 au VimEnter * vn \| :!
 au VimEnter * vn s :s/
 au VimEnter * vn <c-h> ^
 au VimEnter * vn <c-l> g_
 au VimEnter * vn * y/\V<C-R>=escape(@",'/\')<CR><CR>:set hlsearch<CR>N
-au VimEnter * nn <leader>t :set termguicolors!<CR>
 
 aug END
 
+syntax on
 " enable true color
-set termguicolors
-set nu ru ai si ts=4 sw=4
 
 " return to the file .vimrc
 nn <leader>v :e $MYVIMRC<CR>
@@ -380,7 +345,7 @@ nn <leader>e :e .<CR>
 " ╚═╝     ╚══════╝ ╚═════╝  ╚═════╝       ╚═╝╚═╝  ╚═══╝
 "<++>
 " NERDTree
-nn tt :NERDTreeToggle<CR>
+" nn <leader>t :NERDTreeToggle<CR>
 " 
 " " Full Screen Set
 " nn \| <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleFullscreen', 0)<CR>
@@ -390,8 +355,7 @@ nn tt :NERDTreeToggle<CR>
 " no <C-k>k <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleTransparency', "225,255")<CR>
 " 
 " easymotion
-map <leader>s <plug>(easymotion-prefix)
-nm f ,ss
+nno <c-f> <plug>(easymotion-prefix)s
 
 " filetype plugin on
 
@@ -457,7 +421,6 @@ call plug#end()
 "   syntax off            " Disable syntax highlighting
 
 " " shut down the error warning
-setl vb t_vb=
 aug md
 autocmd!
 au filetype markdown nnoremap <C-p> <Plug>MarkdownPreviewToggle

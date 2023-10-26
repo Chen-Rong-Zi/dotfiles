@@ -70,7 +70,7 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[]   = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
-static const char *termcmd[]    = { "alacrittyal", NULL };
+static const char *termcmd[]    = { "~/.config/scripts/alacritty", NULL };
 static const char *powerMenu[]  = { "/home/rongzi/.config/polybar/pwidgets/scripts/powermenu.sh", NULL };
 static const char *drun[]       = {"rofi", "-modi", "drun", "-show", "drun", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL};
 static const char *winMenu[]    = {"rofi", "-modi", "window", "-show", "window", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL};
@@ -86,10 +86,10 @@ static const char *joshuto[]    = {"/home/rongzi/.config/scripts/joshuto", NULL}
 static const char *clipboard[]  = {"/home/rongzi/.config/scripts/clipboard", NULL};
 static const char *pcmanfm[]    = {"pcmanfm", NULL};
 static const char *lightup[]    = {"/home/rongzi/.config/scripts/backlight", "+10%",  NULL};
-static const char *lightdown[]    = {"/home/rongzi/.config/scripts/backlight","10%-",  NULL};
-static const char *volumeup[]    = {"pactl", "set-sink-volume","@DEFAULT_SINK@", "+10%", NULL};
-static const char *volumedown[]    = {"pactl", "set-sink-volume","@DEFAULT_SINK@", "-10%", NULL};
-static const char *volumemute[]    = {"pactl", "set-sink-mute","@DEFAULT_SINK@", "toggle", NULL};
+static const char *lightdown[]  = {"/home/rongzi/.config/scripts/backlight","10%-",  NULL};
+static const char *volumeup[]   = {"pactl", "set-sink-volume","@DEFAULT_SINK@", "+10%", NULL};
+static const char *volumedown[] = {"pactl", "set-sink-volume","@DEFAULT_SINK@", "-10%", NULL};
+static const char *volumemute[] = {"pactl", "set-sink-mute","@DEFAULT_SINK@", "toggle", NULL};
 
 
 static const Key keys[] = {
@@ -166,7 +166,15 @@ static const Button buttons[] = {
     { ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
 };
 
-static const char *ipcsockpath = "/tmp/dwm.sock"; static IPCCommand ipccommands[] = { IPCCOMMAND(  view,                1,      {ARG_TYPE_UINT}   ), IPCCOMMAND(  toggleview,          1,      {ARG_TYPE_UINT}   ), IPCCOMMAND(  tag,                 1,      {ARG_TYPE_UINT}   ), IPCCOMMAND(  toggletag,           1,      {ARG_TYPE_UINT}   ), IPCCOMMAND(  tagmon,              1,      {ARG_TYPE_UINT}   ), IPCCOMMAND(  focusmon,            1,      {ARG_TYPE_SINT}   ), IPCCOMMAND(  focusstack,          1,      {ARG_TYPE_SINT}   ), IPCCOMMAND(  zoom,                1,      {ARG_TYPE_NONE}   ),
+static const char *ipcsockpath = "/tmp/dwm.sock"; static IPCCommand ipccommands[] = {
+  IPCCOMMAND(  view,                1,      {ARG_TYPE_UINT}   ),
+  IPCCOMMAND(  toggleview,          1,      {ARG_TYPE_UINT}   ),
+  IPCCOMMAND(  tag,                 1,      {ARG_TYPE_UINT}   ),
+  IPCCOMMAND(  toggletag,           1,      {ARG_TYPE_UINT}   ),
+  IPCCOMMAND(  tagmon,              1,      {ARG_TYPE_UINT}   ),
+  IPCCOMMAND(  focusmon,            1,      {ARG_TYPE_SINT}   ),
+  IPCCOMMAND(  focusstack,          1,      {ARG_TYPE_SINT}   ),
+  IPCCOMMAND(  zoom,                1,      {ARG_TYPE_NONE}   ),
   IPCCOMMAND(  incnmaster,          1,      {ARG_TYPE_SINT}   ),
   IPCCOMMAND(  killclient,          1,      {ARG_TYPE_SINT}   ),
   IPCCOMMAND(  togglefloating,      1,      {ARG_TYPE_NONE}   ),
