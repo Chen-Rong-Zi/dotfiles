@@ -73,7 +73,7 @@ OSH_THEME="powerline"
 OMB_USE_SUDO=true
 
 # To enable/disable display of Python virtualenv and condaenv
-OMB_PROMPT_SHOW_PYTHON_VENV=true  # enable
+OMb_PROMPT_SHOW_PYTHON_VENV=true  # enable
 # OMB_PROMPT_SHOW_PYTHON_VENV=false # disable
 
 # Which completions would you like to load? (completions can be found in ~/.oh-my-bash/completions/*)
@@ -139,14 +139,13 @@ source "$OSH"/oh-my-bash.sh
 # Example aliases
 # alias bashconfig="mate ~/.bashrc"
 # alias ohmybash="mate ~/.oh-my-bash"
-export image_path="/home/rongzi/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S").jpg"
 
 alias chrome="google-chrome-stable"
 alias vi="vim -o"
 alias vim="vim -o"
 alias la="exa --icons -alh --color=auto "
 alias ll="exa --icons -alg --color=auto"
-alias ls="exa  --color=auto --icons"
+alias ls="exa  --color=auto"
 alias l="exa -lh --icons"
 alias please="sudo"
 alias ra="ranger "
@@ -177,6 +176,8 @@ alias copy="gpaste-client add"
 alias nmtui="rfkill unblock wlan && nmtui"
 eval "$(thefuck --alias fuck)"
 
+export image_path="/home/rongzi/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S").jpg"
+# export MANPAGER="vim - -MR +'set filetype=man'"
 export token="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"
 export EDITOR=/usr/bin/vim
 export PATH=$PATH:/home/rongzi/cProgram
@@ -196,6 +197,9 @@ export LogoutCommand="i3-msg exit"
 export CM_DIR=/run/user/1000
 export FZF_DEFAULT_COMMAND="sudo find ."
 export FZF_DEFAULT_OPTS="--bind ctrl-j:accept"
+# junegunn/seoul256.vim (dark)
+# export FZF_DEFAULT_OPTS='--color=bg+:#3F3F3F,bg:#4B4B4B,border:#6B6B6B,spinner:#98BC99,hl:#719872,fg:#D9D9D9,header:#719872,info:#BDBB72,pointer:#E12672,marker:#E17899,fg+:#D9D9D9,preview-bg:#3F3F3F,prompt:#98BEDE,hl+:#98BC99'
+bind -x '"\C-r":source ~/.config/scripts/fzf_for_history.sh'
 setproxy
 
 if [ -z "$DISPLAY" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
@@ -205,3 +209,13 @@ fi
 # If not running interactively, do not do anything
 
 # PS1="MYTestPrompt> "
+vman() {
+#     export MANPAGER="col -b" # for FreeBSD/MacOS
+
+    # Make it read-only
+    eval 'man $@ | vim -MR +"set filetype=man" -'
+
+    unset MANPAGER
+}
+
+source /home/rongzi/.config/broot/launcher/bash/br

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+picom -b &
+clash &
+/usr/lib/kdeconnectd &
+variety &
+fcitx5 &
+# ~/.config/scripts/background &
+dunstify -t 3000 -i manjaro "rongzi, welcome back!" &

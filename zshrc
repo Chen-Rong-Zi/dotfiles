@@ -9,3 +9,5 @@ if [[ -e /usr/share/zsh/manjaro-zsh-prompt ]]; then
   source /usr/share/zsh/manjaro-zsh-prompt
 fi
 export EDITOR=/usr/bin/vim
+
+source /home/rongzi/.config/broot/launcher/bash/br

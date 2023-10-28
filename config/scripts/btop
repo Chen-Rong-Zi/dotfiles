@@ -1,0 +1,1 @@
+alacritty --config-file ~/.config/alacritty/for_btop.yml -T btop -e btop -p 4 

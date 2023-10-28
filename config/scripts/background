@@ -1,0 +1,38 @@
+#!/usr/bin/bash
+
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_4.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_5.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_6.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_7.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_8.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_9.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_10.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_11.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_120.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_13.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_14.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_15.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_16.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_17.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_18.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_19.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_20.jpg
+sleep 120
+feh --bg-scale /usr/share/backgrounds/wallpapers-polybar/bg_21.jpg
+

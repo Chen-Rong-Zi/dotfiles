@@ -38,10 +38,11 @@ set shiftwidth=4
 set showcmd
 " set smarttab
 set softtabstop=4
-set synmaxcol=200
+set synmaxcol=300
 set termguicolors
 set tabstop=4
 set redrawtime=1000
+set nowrap
 set ttyfast
 " set termwinsize=10x0
 " set nu ru ai si ts=4 sw=4
@@ -69,6 +70,7 @@ nn <c-j> ;
 nn <c-k> zz
 nn <s-j> <NOP>
 nn <s-j><s-j> <s-j>
+nn Y yg_
 " " <Backspace> in insert mode
 " ino <c-o> <BS>
 " cno <c-o> <BS>
@@ -83,6 +85,8 @@ nn <s-j><s-j> <s-j>
 aug C
 autocmd!
 au filetype c,cpp ino <buffer> ; <ESC>A;
+au filetype c,cpp ino <buffer> # # <left><right>
+au filetype c,cpp ino <buffer> } {}<left>
 
 au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 
@@ -91,10 +95,12 @@ au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 " au filetype c ino <c-l> <right>
 " au filetype c ino <c-j> <down>
 " au filetype c ino <c-k> <up>
+au filetype c,cpp ino <buffer> { <esc>A{<CR>}<ESC>O
 au filetype c,cpp ino <buffer> \\ /*    */<esc>4<left>a
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype c,cpp nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
+au filetype c,cpp vn <buffer> <leader>c <C-v>0I// <esc>
 
 " ABBREVIATION
 au filetype c,cpp inorea <buffer> for for (<++>; <++>; <++>){}<left><CR><esc>O<++><esc>/<++><CR>ca<
@@ -104,6 +110,9 @@ au filetype c,cpp inorea <buffer> fuck Are you alright?
 
 "  <tab> and <space> visualised
 au filetype c,cpp setl cindent
+" au BufEnter *.c set filetype=c
+" au BufEnter *.h set filetype=c
+au BufEnter *.c,*.h,*.cpp highlight link Conceal Type
 aug end
 
 
@@ -140,10 +149,12 @@ au filetype python ia <buffer> while while:<left>
 au filetype python ia <buffer> def def:<left>
 au filetype python ia <buffer> class class:<left>
 au filetype python ia <buffer> lambda lambda:<left>
+au filetype python ia <buffer> lamdba lambda:<left>
 au filetype python ia <buffer> ret return
 au filetype python ia <buffer> @@ 1398881912@qq.com
 au filetype python ia <buffer> pirnt print
 
+au BufEnter *.py highlight link Conceal Keyword
 aug end
 
 
@@ -201,6 +212,7 @@ autocmd!
 
 " replace  { [
 au BufWinEnter * call ChangeDirectory()
+" au BufEnter * match Comment / /
 au VimEnter * nn / :set hlsearch<CR>/
 au VimEnter * nn <CR> :call ChangeDirectory()<CR>
 
@@ -213,20 +225,20 @@ au VimEnter * ino " ""<left>
 au VimEnter * ino __ ____<left><left>
 
 " surround the word in the insert mode
-au VimEnter * ino <leader>' <esc>viwA'<esc>bi'<esc>ela
-au VimEnter * ino <leader>" <esc>viwA"<esc>bi"<esc>ela
-au VimEnter * ino <leader>( <esc>viwA)<esc>bi(<esc>ela
-au VimEnter * ino <leader>[ <esc>viwA]<esc>bi[<esc>ela
-au VimEnter * ino <leader>{ <esc>viwA}<esc>bi{<esc>ela
-au VimEnter * ino <leader>< <esc>viwA><esc>bi<<esc>ela
+au VimEnter * ino <leader>' <Esc>viWA'<esc>Bi'<esc>ela
+au VimEnter * ino <leader>" <Esc>viWA"<esc>Bi"<esc>ela
+au VimEnter * ino <leader>( <Esc>viWA)<esc>Bi(<esc>ela
+au VimEnter * ino <leader>[ <Esc>viWA]<esc>Bi[<esc>ela
+au VimEnter * ino <leader>{ <Esc>viWA}<esc>Bi{<esc>ela
+au VimEnter * ino <leader>< <Esc>viWA><esc>Bi<<esc>ela
 
 " surround the word in the normal mode
-au VimEnter * nn <leader>' <esc>viwA'<esc>bi'<esc>el
-au VimEnter * nn <leader>" <esc>viwA"<esc>bi"<esc>el
-au VimEnter * nn <leader>( <esc>viwA)<esc>bi(<esc>el
-au VimEnter * nn <leader>[ <esc>viwA]<esc>bi[<esc>el
-au VimEnter * nn <leader>{ <esc>viwA}<esc>bi{<esc>el
-au VimEnter * nn <leader>< <esc>viwA><esc>bi<<esc>el
+au VimEnter * nn <leader>' viWA'<esc>Bi'<esc>el
+au VimEnter * nn <leader>" viWA"<esc>Bi"<esc>el
+au VimEnter * nn <leader>( viWA)<esc>Bi(<esc>el
+au VimEnter * nn <leader>[ viWA]<esc>Bi[<esc>el
+au VimEnter * nn <leader>{ viWA}<esc>Bi{<esc>el
+au VimEnter * nn <leader>< viWA><esc>Bi<<esc>el
 
 " fold method
 au VimEnter * nn s <Nop>
@@ -276,7 +288,6 @@ au VimEnter * nn <leader>gl :cd ~/.Lectures<CR>
 "cmap 1 !
 au VimEnter * nn w <c-w>
 au VimEnter * nn <c-w>c <Nop>
-au VimEnter * nn <leader>c :close<CR>
 au VimEnter * nn <BS> :set hlsearch!\|set hlsearch?<CR>
 
 " terminal
@@ -290,10 +301,11 @@ au VimEnter * nn S :w<CR>
 au VimEnter * ino jk <esc>
 au VimEnter * ino <c-f> <right>
 au VimEnter * ino <c-b> <left>
-au VimEnter * cno <c-b> <left>
 au VimEnter * ino <c-a> <Esc>I
 au VimEnter * ino <c-e> <Esc>A
 
+au VimEnter * cno <c-b> <left>
+au VimEnter * cno <c-f> <right>
 " Turn the ; into <CR> 
 " au VimEnter * cno ; <CR>
 " au VimEnter * nn  ; <CR>
@@ -312,7 +324,7 @@ au VimEnter * nn  <space> :
 " Anchor Point
 au VimEnter * ino <leader>f <esc>/<++><CR>ca<
 au VimEnter * nn  <leader>f /<++><CR>
-au VimEnter * nn  <leader>s :%s/
+au VimEnter * nn  <leader>ss :%s/
 
 au VimEnter * vn \| :!
 au VimEnter * vn s :s/
@@ -320,9 +332,8 @@ au VimEnter * vn <c-h> ^
 au VimEnter * vn <c-l> g_
 au VimEnter * vn * y/\V<C-R>=escape(@",'/\')<CR><CR>:set hlsearch<CR>N
 
+au VimEnter * match Comment / /
 aug END
-
-syntax on
 " enable true color
 
 " return to the file .vimrc
@@ -345,7 +356,7 @@ nn <leader>e :e .<CR>
 " ╚═╝     ╚══════╝ ╚═════╝  ╚═════╝       ╚═╝╚═╝  ╚═══╝
 "<++>
 " NERDTree
-" nn <leader>t :NERDTreeToggle<CR>
+" noremap <leader>t :NERDTreeToggle<CR>
 " 
 " " Full Screen Set
 " nn \| <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleFullscreen', 0)<CR>
@@ -355,7 +366,7 @@ nn <leader>e :e .<CR>
 " no <C-k>k <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleTransparency', "225,255")<CR>
 " 
 " easymotion
-nno <c-f> <plug>(easymotion-prefix)s
+nn <c-f> <plug>(easymotion-prefix)s
 
 " filetype plugin on
 
@@ -426,6 +437,16 @@ autocmd!
 au filetype markdown nnoremap <C-p> <Plug>MarkdownPreviewToggle
 aug end
 
+aug man
+autocmd!
+au filetype man only
+au filetype man set nolist
+au filetype man set foldlevel=10
+au filetype man set laststatus=0
+au filetype man set scrolloff=15
+au filetype man nn d <c-d>
+au filetype man nn u <c-u>
+aug end
 "                _       _
 "  ___  ___ _ __(_)_ __ | |_ ___
 " / __|/ __| '__| | '_ \| __/ __|
@@ -440,4 +461,5 @@ let &t_SR = "\<Esc>[3 q" . "\<Esc>]12;black\x7"
 let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;green\x7"
 
 
+" runtime! ftplugin/man.vim
 source ~/.vim/functions/useful.vim

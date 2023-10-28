@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+
+exec bash &
+if [ $haveBash -eq 1 ] ;then
+    exec echo You Already Have a bash!
+fi
+export haveBash=1
+

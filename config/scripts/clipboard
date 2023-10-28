@@ -1,0 +1,1 @@
+gpaste-client --oneline | awk '{$1="";print}' | sed 's/^ //g'| rofi -dmenu -config ~/.config/rofi/windows_tasks.rasi | xsel -ib 

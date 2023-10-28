@@ -1,7 +1,9 @@
 " use fzf to select files quickly
 function! SelectFile()
     let tmp = tempname()
-    silent execute '!sudo find ~ | fzf -m >'.tmp
+"     silent execute '!sudo find ~ | fzf -m >'.tmp
+"     another way to use fzf in vim
+    silent execute '!/home/rongzi/.config/scripts/fzf_for_vim.sh >'.tmp
     for fname in readfile(tmp)
         if @% == ''
             silent execute 'e '.fname
@@ -49,3 +51,4 @@ function! ToggleConcealLevel()
 endfunction
 
 nnoremap <silent> <C-c><C-y> :call ToggleConcealLevel()<CR>
+

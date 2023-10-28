@@ -1,0 +1,6 @@
+#!/bin/bash
+# dunstify -h string:x-dunst-stack-tag:test Test -A 'tested,default'
+pactl set-sink-volume @DEFAULT_SINK@ +10%
+pactl set-sink-volume @DEFAULT_SINK@ -10%
+pactl set-sink-mute   @DEFAULT_SINK@ toggle
+pactl set-source-mute @DEFAULT_SOURCE@ toggle

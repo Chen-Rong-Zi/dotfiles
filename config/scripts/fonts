@@ -1,0 +1,444 @@
+ setfont ter-218b.psf.gz && echo ter-218b.psf.gz
+ sleep 1
+ setfont ter-218n.psf.gz && echo ter-218n.psf.gz
+ sleep 1
+ setfont ter-220b.psf.gz && echo ter-220b.psf.gz
+ sleep 1
+ setfont ter-220n.psf.gz && echo ter-220n.psf.gz
+ sleep 1
+ setfont ter-222b.psf.gz && echo ter-222b.psf.gz
+ sleep 1
+ setfont ter-222n.psf.gz && echo ter-222n.psf.gz
+ sleep 1
+ setfont ter-224b.psf.gz && echo ter-224b.psf.gz
+ sleep 1
+ setfont ter-224n.psf.gz && echo ter-224n.psf.gz
+ sleep 1
+ setfont ter-228b.psf.gz && echo ter-228b.psf.gz
+ sleep 1
+ setfont ter-228n.psf.gz && echo ter-228n.psf.gz
+ sleep 1
+ setfont ter-232b.psf.gz && echo ter-232b.psf.gz
+ sleep 1
+ setfont ter-232n.psf.gz && echo ter-232n.psf.gz
+ sleep 1
+ setfont ter-712n.psf.gz && echo ter-712n.psf.gz
+ sleep 1
+ setfont ter-714b.psf.gz && echo ter-714b.psf.gz
+ sleep 1
+ setfont ter-714n.psf.gz && echo ter-714n.psf.gz
+ sleep 1
+ setfont ter-716b.psf.gz && echo ter-716b.psf.gz
+ sleep 1
+ setfont ter-716n.psf.gz && echo ter-716n.psf.gz
+ sleep 1
+ setfont ter-718b.psf.gz && echo ter-718b.psf.gz
+ sleep 1
+ setfont ter-718n.psf.gz && echo ter-718n.psf.gz
+ sleep 1
+ setfont ter-720b.psf.gz && echo ter-720b.psf.gz
+ sleep 1
+ setfont ter-720n.psf.gz && echo ter-720n.psf.gz
+ sleep 1
+ setfont ter-722b.psf.gz && echo ter-722b.psf.gz
+ sleep 1
+ setfont ter-722n.psf.gz && echo ter-722n.psf.gz
+ sleep 1
+ setfont ter-724b.psf.gz && echo ter-724b.psf.gz
+ sleep 1
+ setfont ter-724n.psf.gz && echo ter-724n.psf.gz
+ sleep 1
+ setfont ter-728b.psf.gz && echo ter-728b.psf.gz
+ sleep 1
+ setfont ter-728n.psf.gz && echo ter-728n.psf.gz
+ sleep 1
+ setfont ter-732b.psf.gz && echo ter-732b.psf.gz
+ sleep 1
+ setfont ter-732n.psf.gz && echo ter-732n.psf.gz
+ sleep 1
+ setfont ter-912n.psf.gz && echo ter-912n.psf.gz
+ sleep 1
+ setfont ter-914b.psf.gz && echo ter-914b.psf.gz
+ sleep 1
+ setfont ter-914n.psf.gz && echo ter-914n.psf.gz
+ sleep 1
+ setfont ter-916b.psf.gz && echo ter-916b.psf.gz
+ sleep 1
+ setfont ter-916n.psf.gz && echo ter-916n.psf.gz
+ sleep 1
+ setfont ter-918b.psf.gz && echo ter-918b.psf.gz
+ sleep 1
+ setfont ter-918n.psf.gz && echo ter-918n.psf.gz
+ sleep 1
+ setfont ter-920b.psf.gz && echo ter-920b.psf.gz
+ sleep 1
+ setfont ter-920n.psf.gz && echo ter-920n.psf.gz
+ sleep 1
+ setfont ter-922b.psf.gz && echo ter-922b.psf.gz
+ sleep 1
+ setfont ter-922n.psf.gz && echo ter-922n.psf.gz
+ sleep 1
+ setfont ter-924b.psf.gz && echo ter-924b.psf.gz
+ sleep 1
+ setfont ter-924n.psf.gz && echo ter-924n.psf.gz
+ sleep 1
+ setfont ter-928b.psf.gz && echo ter-928b.psf.gz
+ sleep 1
+ setfont ter-928n.psf.gz && echo ter-928n.psf.gz
+ sleep 1
+ setfont ter-932b.psf.gz && echo ter-932b.psf.gz
+ sleep 1
+ setfont ter-932n.psf.gz && echo ter-932n.psf.gz
+ sleep 1
+ setfont ter-c12n.psf.gz && echo ter-c12n.psf.gz
+ sleep 1
+ setfont ter-c14b.psf.gz && echo ter-c14b.psf.gz
+ sleep 1
+ setfont ter-c14n.psf.gz && echo ter-c14n.psf.gz
+ sleep 1
+ setfont ter-c16b.psf.gz && echo ter-c16b.psf.gz
+ sleep 1
+ setfont ter-c16n.psf.gz && echo ter-c16n.psf.gz
+ sleep 1
+ setfont ter-c18b.psf.gz && echo ter-c18b.psf.gz
+ sleep 1
+ setfont ter-c18n.psf.gz && echo ter-c18n.psf.gz
+ sleep 1
+ setfont ter-c20b.psf.gz && echo ter-c20b.psf.gz
+ sleep 1
+ setfont ter-c20n.psf.gz && echo ter-c20n.psf.gz
+ sleep 1
+ setfont ter-c22b.psf.gz && echo ter-c22b.psf.gz
+ sleep 1
+ setfont ter-c22n.psf.gz && echo ter-c22n.psf.gz
+ sleep 1
+ setfont ter-c24b.psf.gz && echo ter-c24b.psf.gz
+ sleep 1
+ setfont ter-c24n.psf.gz && echo ter-c24n.psf.gz
+ sleep 1
+ setfont ter-c28b.psf.gz && echo ter-c28b.psf.gz
+ sleep 1
+ setfont ter-c28n.psf.gz && echo ter-c28n.psf.gz
+ sleep 1
+ setfont ter-c32b.psf.gz && echo ter-c32b.psf.gz
+ sleep 1
+ setfont ter-c32n.psf.gz && echo ter-c32n.psf.gz
+ sleep 1
+ setfont ter-d12n.psf.gz && echo ter-d12n.psf.gz
+ sleep 1
+ setfont ter-d14b.psf.gz && echo ter-d14b.psf.gz
+ sleep 1
+ setfont ter-d14n.psf.gz && echo ter-d14n.psf.gz
+ sleep 1
+ setfont ter-d16b.psf.gz && echo ter-d16b.psf.gz
+ sleep 1
+ setfont ter-d16n.psf.gz && echo ter-d16n.psf.gz
+ sleep 1
+ setfont ter-d18b.psf.gz && echo ter-d18b.psf.gz
+ sleep 1
+ setfont ter-d18n.psf.gz && echo ter-d18n.psf.gz
+ sleep 1
+ setfont ter-d20b.psf.gz && echo ter-d20b.psf.gz
+ sleep 1
+ setfont ter-d20n.psf.gz && echo ter-d20n.psf.gz
+ sleep 1
+ setfont ter-d22b.psf.gz && echo ter-d22b.psf.gz
+ sleep 1
+ setfont ter-d22n.psf.gz && echo ter-d22n.psf.gz
+ sleep 1
+ setfont ter-d24b.psf.gz && echo ter-d24b.psf.gz
+ sleep 1
+ setfont ter-d24n.psf.gz && echo ter-d24n.psf.gz
+ sleep 1
+ setfont ter-d28b.psf.gz && echo ter-d28b.psf.gz
+ sleep 1
+ setfont ter-d28n.psf.gz && echo ter-d28n.psf.gz
+ sleep 1
+ setfont ter-d32b.psf.gz && echo ter-d32b.psf.gz
+ sleep 1
+ setfont ter-d32n.psf.gz && echo ter-d32n.psf.gz
+ sleep 1
+ setfont ter-g12n.psf.gz && echo ter-g12n.psf.gz
+ sleep 1
+ setfont ter-g14b.psf.gz && echo ter-g14b.psf.gz
+ sleep 1
+ setfont ter-g14n.psf.gz && echo ter-g14n.psf.gz
+ sleep 1
+ setfont ter-g16b.psf.gz && echo ter-g16b.psf.gz
+ sleep 1
+ setfont ter-g16n.psf.gz && echo ter-g16n.psf.gz
+ sleep 1
+ setfont ter-g18b.psf.gz && echo ter-g18b.psf.gz
+ sleep 1
+ setfont ter-g18n.psf.gz && echo ter-g18n.psf.gz
+ sleep 1
+ setfont ter-g20b.psf.gz && echo ter-g20b.psf.gz
+ sleep 1
+ setfont ter-g20n.psf.gz && echo ter-g20n.psf.gz
+ sleep 1
+ setfont ter-g22b.psf.gz && echo ter-g22b.psf.gz
+ sleep 1
+ setfont ter-g22n.psf.gz && echo ter-g22n.psf.gz
+ sleep 1
+ setfont ter-g24b.psf.gz && echo ter-g24b.psf.gz
+ sleep 1
+ setfont ter-g24n.psf.gz && echo ter-g24n.psf.gz
+ sleep 1
+ setfont ter-g28b.psf.gz && echo ter-g28b.psf.gz
+ sleep 1
+ setfont ter-g28n.psf.gz && echo ter-g28n.psf.gz
+ sleep 1
+ setfont ter-g32b.psf.gz && echo ter-g32b.psf.gz
+ sleep 1
+ setfont ter-g32n.psf.gz && echo ter-g32n.psf.gz
+ sleep 1
+ setfont ter-h12n.psf.gz && echo ter-h12n.psf.gz
+ sleep 1
+ setfont ter-h14b.psf.gz && echo ter-h14b.psf.gz
+ sleep 1
+ setfont ter-h14n.psf.gz && echo ter-h14n.psf.gz
+ sleep 1
+ setfont ter-h16b.psf.gz && echo ter-h16b.psf.gz
+ sleep 1
+ setfont ter-h16n.psf.gz && echo ter-h16n.psf.gz
+ sleep 1
+ setfont ter-h18b.psf.gz && echo ter-h18b.psf.gz
+ sleep 1
+ setfont ter-h18n.psf.gz && echo ter-h18n.psf.gz
+ sleep 1
+ setfont ter-h20b.psf.gz && echo ter-h20b.psf.gz
+ sleep 1
+ setfont ter-h20n.psf.gz && echo ter-h20n.psf.gz
+ sleep 1
+ setfont ter-h22b.psf.gz && echo ter-h22b.psf.gz
+ sleep 1
+ setfont ter-h22n.psf.gz && echo ter-h22n.psf.gz
+ sleep 1
+ setfont ter-h24b.psf.gz && echo ter-h24b.psf.gz
+ sleep 1
+ setfont ter-h24n.psf.gz && echo ter-h24n.psf.gz
+ sleep 1
+ setfont ter-h28b.psf.gz && echo ter-h28b.psf.gz
+ sleep 1
+ setfont ter-h28n.psf.gz && echo ter-h28n.psf.gz
+ sleep 1
+ setfont ter-h32b.psf.gz && echo ter-h32b.psf.gz
+ sleep 1
+ setfont ter-h32n.psf.gz && echo ter-h32n.psf.gz
+ sleep 1
+ setfont ter-i12n.psf.gz && echo ter-i12n.psf.gz
+ sleep 1
+ setfont ter-i14b.psf.gz && echo ter-i14b.psf.gz
+ sleep 1
+ setfont ter-i14n.psf.gz && echo ter-i14n.psf.gz
+ sleep 1
+ setfont ter-i16b.psf.gz && echo ter-i16b.psf.gz
+ sleep 1
+ setfont ter-i16n.psf.gz && echo ter-i16n.psf.gz
+ sleep 1
+ setfont ter-i18b.psf.gz && echo ter-i18b.psf.gz
+ sleep 1
+ setfont ter-i18n.psf.gz && echo ter-i18n.psf.gz
+ sleep 1
+ setfont ter-i20b.psf.gz && echo ter-i20b.psf.gz
+ sleep 1
+ setfont ter-i20n.psf.gz && echo ter-i20n.psf.gz
+ sleep 1
+ setfont ter-i22b.psf.gz && echo ter-i22b.psf.gz
+ sleep 1
+ setfont ter-i22n.psf.gz && echo ter-i22n.psf.gz
+ sleep 1
+ setfont ter-i24b.psf.gz && echo ter-i24b.psf.gz
+ sleep 1
+ setfont ter-i24n.psf.gz && echo ter-i24n.psf.gz
+ sleep 1
+ setfont ter-i28b.psf.gz && echo ter-i28b.psf.gz
+ sleep 1
+ setfont ter-i28n.psf.gz && echo ter-i28n.psf.gz
+ sleep 1
+ setfont ter-i32b.psf.gz && echo ter-i32b.psf.gz
+ sleep 1
+ setfont ter-i32n.psf.gz && echo ter-i32n.psf.gz
+ sleep 1
+ setfont ter-k12n.psf.gz && echo ter-k12n.psf.gz
+ sleep 1
+ setfont ter-k14b.psf.gz && echo ter-k14b.psf.gz
+ sleep 1
+ setfont ter-k14n.psf.gz && echo ter-k14n.psf.gz
+ sleep 1
+ setfont ter-k16b.psf.gz && echo ter-k16b.psf.gz
+ sleep 1
+ setfont ter-k16n.psf.gz && echo ter-k16n.psf.gz
+ sleep 1
+ setfont ter-k18b.psf.gz && echo ter-k18b.psf.gz
+ sleep 1
+ setfont ter-k18n.psf.gz && echo ter-k18n.psf.gz
+ sleep 1
+ setfont ter-k20b.psf.gz && echo ter-k20b.psf.gz
+ sleep 1
+ setfont ter-k20n.psf.gz && echo ter-k20n.psf.gz
+ sleep 1
+ setfont ter-k22b.psf.gz && echo ter-k22b.psf.gz
+ sleep 1
+ setfont ter-k22n.psf.gz && echo ter-k22n.psf.gz
+ sleep 1
+ setfont ter-k24b.psf.gz && echo ter-k24b.psf.gz
+ sleep 1
+ setfont ter-k24n.psf.gz && echo ter-k24n.psf.gz
+ sleep 1
+ setfont ter-k28b.psf.gz && echo ter-k28b.psf.gz
+ sleep 1
+ setfont ter-k28n.psf.gz && echo ter-k28n.psf.gz
+ sleep 1
+ setfont ter-k32b.psf.gz && echo ter-k32b.psf.gz
+ sleep 1
+ setfont ter-k32n.psf.gz && echo ter-k32n.psf.gz
+ sleep 1
+ setfont ter-m12n.psf.gz && echo ter-m12n.psf.gz
+ sleep 1
+ setfont ter-m14b.psf.gz && echo ter-m14b.psf.gz
+ sleep 1
+ setfont ter-m14n.psf.gz && echo ter-m14n.psf.gz
+ sleep 1
+ setfont ter-m16b.psf.gz && echo ter-m16b.psf.gz
+ sleep 1
+ setfont ter-m16n.psf.gz && echo ter-m16n.psf.gz
+ sleep 1
+ setfont ter-m18b.psf.gz && echo ter-m18b.psf.gz
+ sleep 1
+ setfont ter-m18n.psf.gz && echo ter-m18n.psf.gz
+ sleep 1
+ setfont ter-m20b.psf.gz && echo ter-m20b.psf.gz
+ sleep 1
+ setfont ter-m20n.psf.gz && echo ter-m20n.psf.gz
+ sleep 1
+ setfont ter-m22b.psf.gz && echo ter-m22b.psf.gz
+ sleep 1
+ setfont ter-m22n.psf.gz && echo ter-m22n.psf.gz
+ sleep 1
+ setfont ter-m24b.psf.gz && echo ter-m24b.psf.gz
+ sleep 1
+ setfont ter-m24n.psf.gz && echo ter-m24n.psf.gz
+ sleep 1
+ setfont ter-m28b.psf.gz && echo ter-m28b.psf.gz
+ sleep 1
+ setfont ter-m28n.psf.gz && echo ter-m28n.psf.gz
+ sleep 1
+ setfont ter-m32b.psf.gz && echo ter-m32b.psf.gz
+ sleep 1
+ setfont ter-m32n.psf.gz && echo ter-m32n.psf.gz
+ sleep 1
+ setfont ter-p12n.psf.gz && echo ter-p12n.psf.gz
+ sleep 1
+ setfont ter-p14b.psf.gz && echo ter-p14b.psf.gz
+ sleep 1
+ setfont ter-p14n.psf.gz && echo ter-p14n.psf.gz
+ sleep 1
+ setfont ter-p16b.psf.gz && echo ter-p16b.psf.gz
+ sleep 1
+ setfont ter-p16n.psf.gz && echo ter-p16n.psf.gz
+ sleep 1
+ setfont ter-p18b.psf.gz && echo ter-p18b.psf.gz
+ sleep 1
+ setfont ter-p18n.psf.gz && echo ter-p18n.psf.gz
+ sleep 1
+ setfont ter-p20b.psf.gz && echo ter-p20b.psf.gz
+ sleep 1
+ setfont ter-p20n.psf.gz && echo ter-p20n.psf.gz
+ sleep 1
+ setfont ter-p22b.psf.gz && echo ter-p22b.psf.gz
+ sleep 1
+ setfont ter-p22n.psf.gz && echo ter-p22n.psf.gz
+ sleep 1
+ setfont ter-p24b.psf.gz && echo ter-p24b.psf.gz
+ sleep 1
+ setfont ter-p24n.psf.gz && echo ter-p24n.psf.gz
+ sleep 1
+ setfont ter-p28b.psf.gz && echo ter-p28b.psf.gz
+ sleep 1
+ setfont ter-p28n.psf.gz && echo ter-p28n.psf.gz
+ sleep 1
+ setfont ter-p32b.psf.gz && echo ter-p32b.psf.gz
+ sleep 1
+ setfont ter-p32n.psf.gz && echo ter-p32n.psf.gz
+ sleep 1
+ setfont ter-u12n.psf.gz && echo ter-u12n.psf.gz
+ sleep 1
+ setfont ter-u14b.psf.gz && echo ter-u14b.psf.gz
+ sleep 1
+ setfont ter-u14n.psf.gz && echo ter-u14n.psf.gz
+ sleep 1
+ setfont ter-u16b.psf.gz && echo ter-u16b.psf.gz
+ sleep 1
+ setfont ter-u16n.psf.gz && echo ter-u16n.psf.gz
+ sleep 1
+ setfont ter-u18b.psf.gz && echo ter-u18b.psf.gz
+ sleep 1
+ setfont ter-u18n.psf.gz && echo ter-u18n.psf.gz
+ sleep 1
+ setfont ter-u20b.psf.gz && echo ter-u20b.psf.gz
+ sleep 1
+ setfont ter-u20n.psf.gz && echo ter-u20n.psf.gz
+ sleep 1
+ setfont ter-u22b.psf.gz && echo ter-u22b.psf.gz
+ sleep 1
+ setfont ter-u22n.psf.gz && echo ter-u22n.psf.gz
+ sleep 1
+ setfont ter-u24b.psf.gz && echo ter-u24b.psf.gz
+ sleep 1
+ setfont ter-u24n.psf.gz && echo ter-u24n.psf.gz
+ sleep 1
+ setfont ter-u28b.psf.gz && echo ter-u28b.psf.gz
+ sleep 1
+ setfont ter-u28n.psf.gz && echo ter-u28n.psf.gz
+ sleep 1
+ setfont ter-u32b.psf.gz && echo ter-u32b.psf.gz
+ sleep 1
+ setfont ter-u32n.psf.gz && echo ter-u32n.psf.gz
+ sleep 1
+ setfont ter-v12n.psf.gz && echo ter-v12n.psf.gz
+ sleep 1
+ setfont ter-v14b.psf.gz && echo ter-v14b.psf.gz
+ sleep 1
+ setfont ter-v14n.psf.gz && echo ter-v14n.psf.gz
+ sleep 1
+ setfont ter-v16b.psf.gz && echo ter-v16b.psf.gz
+ sleep 1
+ setfont ter-v16n.psf.gz && echo ter-v16n.psf.gz
+ sleep 1
+ setfont ter-v18b.psf.gz && echo ter-v18b.psf.gz
+ sleep 1
+ setfont ter-v18n.psf.gz && echo ter-v18n.psf.gz
+ sleep 1
+ setfont ter-v20b.psf.gz && echo ter-v20b.psf.gz
+ sleep 1
+ setfont ter-v20n.psf.gz && echo ter-v20n.psf.gz
+ sleep 1
+ setfont ter-v22b.psf.gz && echo ter-v22b.psf.gz
+ sleep 1
+ setfont ter-v22n.psf.gz && echo ter-v22n.psf.gz
+ sleep 1
+ setfont ter-v24b.psf.gz && echo ter-v24b.psf.gz
+ sleep 1
+ setfont ter-v24n.psf.gz && echo ter-v24n.psf.gz
+ sleep 1
+ setfont ter-v28b.psf.gz && echo ter-v28b.psf.gz
+ sleep 1
+ setfont ter-v28n.psf.gz && echo ter-v28n.psf.gz
+ sleep 1
+ setfont ter-v32b.psf.gz && echo ter-v32b.psf.gz
+ sleep 1
+ setfont ter-v32n.psf.gz && echo ter-v32n.psf.gz
+ sleep 1
+ setfont t.fnt.gz && echo t.fnt.gz
+ sleep 1
+ setfont UniCyr_8x14.psf.gz && echo UniCyr_8x14.psf.gz
+ sleep 1
+ setfont UniCyr_8x16.psf.gz && echo UniCyr_8x16.psf.gz
+ sleep 1
+ setfont UniCyr_8x8.psf.gz && echo UniCyr_8x8.psf.gz
+ sleep 1
+ setfont UniCyrExt_8x16.psf.gz && echo UniCyrExt_8x16.psf.gz
+ sleep 1
+ setfont viscii10-8x16.psfu.gz && echo viscii10-8x16.psfu.gz
+ sleep 1

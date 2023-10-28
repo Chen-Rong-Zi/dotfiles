@@ -1,0 +1,3 @@
+#!/usr/bin/bash
+
+python3 -i ~/.config/scripts/LA/matrix.py

@@ -1,0 +1,3 @@
+killall picom
+sleep 0.01
+exec picom -b --config ~/.config/picom/picom.conf
