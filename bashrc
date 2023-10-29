@@ -1,3 +1,4 @@
+#!/bin/bash
 # enable the subsequent settings only in interactive sessions
 case $- in
   *i*) ;;
@@ -150,6 +151,7 @@ alias l="exa -lh --icons"
 alias please="sudo"
 alias ra="ranger "
 alias sudo="sudo -E"
+alias sduo="sudo -E"
 alias ef="neofetch"
 alias scrot="scrot ~/Pictures/screenshot/%y-%m-%d_%T.jpg"
 alias volume="pavucontrol"
@@ -195,11 +197,15 @@ export RANGER_LOAD_DEFAULT_RC=FALSE
 export RANGER_DEVICONS_SEPARATOR="  "
 export LogoutCommand="i3-msg exit"
 export CM_DIR=/run/user/1000
-export FZF_DEFAULT_COMMAND="sudo find ."
+export FZF_DEFAULT_COMMAND="sudo find ~"
 export FZF_DEFAULT_OPTS="--bind ctrl-j:accept"
+export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
+ --color=fg:#d0d0d0,hl:#5f87af
+ --color=fg+:#d0d0d0,hl+:#5fd7ff
+ --color=info:#afaf87,prompt:#d7005f,pointer:#af5fff
+ --color=marker:#87ff00,spinner:#af5fff,header:#87afaf'
 # junegunn/seoul256.vim (dark)
 # export FZF_DEFAULT_OPTS='--color=bg+:#3F3F3F,bg:#4B4B4B,border:#6B6B6B,spinner:#98BC99,hl:#719872,fg:#D9D9D9,header:#719872,info:#BDBB72,pointer:#E12672,marker:#E17899,fg+:#D9D9D9,preview-bg:#3F3F3F,prompt:#98BEDE,hl+:#98BC99'
-bind -x '"\C-r":source ~/.config/scripts/fzf_for_history.sh'
 setproxy
 
 if [ -z "$DISPLAY" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
@@ -213,9 +219,10 @@ vman() {
 #     export MANPAGER="col -b" # for FreeBSD/MacOS
 
     # Make it read-only
-    eval 'man $@ | vim -MR +"set filetype=man" -'
+    eval '[[ -n "$(man $@)" ]]  &&  man $@ | vim -MR +"set filetype=man" -'
 
     unset MANPAGER
 }
 
 source /home/rongzi/.config/broot/launcher/bash/br
+source /home/rongzi/.config/shell/key-bindings.bash

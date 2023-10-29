@@ -70,6 +70,7 @@ nn <c-j> ;
 nn <c-k> zz
 nn <s-j> <NOP>
 nn <s-j><s-j> <s-j>
+nn <s-k> <Nop>
 nn Y yg_
 " " <Backspace> in insert mode
 " ino <c-o> <BS>
@@ -332,7 +333,7 @@ au VimEnter * vn <c-h> ^
 au VimEnter * vn <c-l> g_
 au VimEnter * vn * y/\V<C-R>=escape(@",'/\')<CR><CR>:set hlsearch<CR>N
 
-au VimEnter * match Comment / /
+" au VimEnter * match Comment /^ \+/
 aug END
 " enable true color
 

@@ -70,7 +70,7 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[]   = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
-static const char *termcmd[]    = { "~/.config/scripts/alacritty", NULL };
+static const char *termcmd[]    = { "/home/rongzi/.config/scripts/alacritty", NULL };
 static const char *powerMenu[]  = { "/home/rongzi/.config/polybar/pwidgets/scripts/powermenu.sh", NULL };
 static const char *drun[]       = {"rofi", "-modi", "drun", "-show", "drun", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL};
 static const char *winMenu[]    = {"rofi", "-modi", "window", "-show", "window", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL};
@@ -80,7 +80,6 @@ static const char *shot[]       = {"/home/rongzi/.config/scripts/shot", NULL};
 static const char *mouseShot[]  = {"/home/rongzi/.config/scripts/mouse_shot", NULL};
 static const char *picom[]      = {"/home/rongzi/.config/scripts/picom", NULL};
 static const char *myPicom[]    = {"/home/rongzi/.config/scripts/my_picom", NULL};
-static const char *blueman[]    = {"blueman-manager", NULL};
 static const char *btop[]       = {"/home/rongzi/.config/scripts/btop", NULL};
 static const char *joshuto[]    = {"/home/rongzi/.config/scripts/joshuto", NULL};
 static const char *clipboard[]  = {"/home/rongzi/.config/scripts/clipboard", NULL};
@@ -112,7 +111,6 @@ static const Key keys[] = {
     { MODKEY|ShiftMask,             XK_a,      spawn,          {.v = mouseShot } },
     { MODKEY,                       XK_n,      spawn,          {.v = picom } },
     { MODKEY,                       XK_b,      spawn,          {.v = myPicom } },
-    { MODKEY|ShiftMask,             XK_b,      spawn,          {.v = blueman } },
     { ControlMask|ShiftMask,        XK_Return, spawn,          {.v = btop } },
     { ControlMask|ShiftMask,        XK_h,      spawn,          {.v = joshuto } },
     { MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
@@ -126,7 +124,6 @@ static const Key keys[] = {
     { MODKEY|ShiftMask,             XK_q,      killclient,     {0} },
     { MODKEY,                       XK_e,      setlayout,      {.v = &layouts[0]} },
     { MODKEY,                       XK_w,      setlayout,      {.v = &layouts[2]} },
-    { MODKEY,                       XK_space,  setlayout,      {0} },
     { MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
     { MODKEY,                       XK_0,      view,           {.ui = ~0 } },
     { MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
