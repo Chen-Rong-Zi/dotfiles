@@ -36,7 +36,7 @@ endfunction
 
 " quickly change to the directory the buffer lies in
 function! ChangeDirectory()
-    if @% != ''
+    if &buftype !=# 'terminal' && &buftype !=# 'help' && !empty(&buftype)
         cd %:h
     endif
 endfunction

@@ -3,7 +3,7 @@ preview() {
     if [[ -f $1 ]]; then
         head -n 50 $1
     else
-        ls $1
+        tree -L 2 $1
     fi
 }
 preview $1

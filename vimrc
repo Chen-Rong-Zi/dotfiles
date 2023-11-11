@@ -29,7 +29,7 @@ set ignorecase
 set incsearch
 set laststatus=2
 set list
-set listchars=leadmultispace:⏐\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
+set listchars=leadmultispace:⏐\ \ \ ,trail:-,precedes:>,extends:<,tab:⏐\ 
 set lazyredraw
 set nohlsearch
 set rnu nu
@@ -51,6 +51,7 @@ set ttyfast
 vn # <c-v>0I# <esc>
 vn " <c-v>0I" <esc>
 vn / <C-v>0I// <esc>
+vn ; <C-v>0I;<esc>
 nn * *N:set hlsearch<CR>
 
 " use python3 socket
@@ -58,6 +59,7 @@ vn rp !python3<CR>
 
 "In case that keyborad is sensitive
 vn <s-k> <Nop>
+vn <c-j> ;
 " Transform the word to UPPER-CASE
 ino <BS> <Nop>
 ino <c-u> <esc>viwUviwA
@@ -98,6 +100,7 @@ au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 " au filetype c ino <c-k> <up>
 au filetype c,cpp ino <buffer> { <esc>A{<CR>}<ESC>O
 au filetype c,cpp ino <buffer> \\ /*    */<esc>4<left>a
+au filetype c,cpp ino <buffer> <leader><leader> <space>= 0,<space>
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype c,cpp nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
@@ -113,7 +116,7 @@ au filetype c,cpp inorea <buffer> fuck Are you alright?
 au filetype c,cpp setl cindent
 " au BufEnter *.c set filetype=c
 " au BufEnter *.h set filetype=c
-au BufEnter *.c,*.h,*.cpp highlight link Conceal Type
+au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
 aug end
 
 
@@ -191,8 +194,9 @@ autocmd!
 au TerminalOpen * tno <leader>jk <c-w>N
 au TerminalOpen * tno <leader>k <c-w>k
 au TerminalOpen * setl nornu nonu
+au TerminalOpen * setl nolist
 au TerminalOpen * :resize -7
-au TerminalOpen * :vertical resize -7
+" au TerminalOpen * :vertical resize -7
 aug end
 
 
@@ -215,7 +219,7 @@ autocmd!
 au BufWinEnter * call ChangeDirectory()
 " au BufEnter * match Comment / /
 au VimEnter * nn / :set hlsearch<CR>/
-au VimEnter * nn <CR> :call ChangeDirectory()<CR>
+au VimEnter * nn <CR> :cd %:h<CR>
 
 " auto complete the () <> [] {}
 au VimEnter * ino ( ()<left>
@@ -291,8 +295,12 @@ au VimEnter * nn w <c-w>
 au VimEnter * nn <c-w>c <Nop>
 au VimEnter * nn <BS> :set hlsearch!\|set hlsearch?<CR>
 
+au VimEnter * nn <F2> :r!rn 0 10 1
+
 " terminal
-au VimEnter * nn <leader>r :horizontal bo terminal++close bash -rcfile ~/.my_bashrc<CR>
+" au VimEnter * nn <leader>r :horizontal bo terminal++close bash -rcfile ~/.my_bashrc<CR>
+au VimEnter * nn <leader>r :horizontal bo terminal++close<CR>
+au VimEnter * nn <leader>t :vertical terminal++close<CR>
 au VimEnter * nn <leader>i :horizontal bo terminal++close python3<CR>
 
 " save the file in the buffer 
@@ -432,7 +440,20 @@ call plug#end()
 "   filetype indent off   " Disable file-type-specific indentation
 "   syntax off            " Disable syntax highlighting
 
-" " shut down the error warning
+aug asm
+autocmd!
+au filetype asm set foldlevel=10
+au filetype asm set scrolloff=15
+au filetype asm set noexpandtab
+au filetype asm set shiftwidth=8
+au filetype asm set softtabstop=8
+au filetype asm set autoindent
+au filetype asm set autoindent
+au filetype asm set list
+au filetype asm set listchars=leadmultispace:⏐\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
+au filetype asm vn <buffer> <leader>c <C-v>0I; <esc>
+aug end
+
 aug md
 autocmd!
 au filetype markdown nnoremap <C-p> <Plug>MarkdownPreviewToggle

@@ -173,10 +173,14 @@ alias restore="io ~/cProgram/fulfill.c"
 alias cc="gcc -Wall -Werror -O2"
 alias git-log="git log --all --graph --decorate --oneline"
 alias py="python3"
+alias ipy="ipdb"
 alias open="pcmanfm"
 alias copy="gpaste-client add"
 alias nmtui="rfkill unblock wlan && nmtui"
-eval "$(thefuck --alias fuck)"
+alias gdb="gdb -q"
+alias tm="tmux"
+alias gs="git status"
+alias ta="tmux attach"
 
 export image_path="/home/rongzi/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S").jpg"
 # export MANPAGER="vim - -MR +'set filetype=man'"
@@ -206,6 +210,7 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
  --color=marker:#87ff00,spinner:#af5fff,header:#87afaf'
 # junegunn/seoul256.vim (dark)
 # export FZF_DEFAULT_OPTS='--color=bg+:#3F3F3F,bg:#4B4B4B,border:#6B6B6B,spinner:#98BC99,hl:#719872,fg:#D9D9D9,header:#719872,info:#BDBB72,pointer:#E12672,marker:#E17899,fg+:#D9D9D9,preview-bg:#3F3F3F,prompt:#98BEDE,hl+:#98BC99'
+export bin="/home/rongzi/cProgram/a.out"
 setproxy
 
 if [ -z "$DISPLAY" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
@@ -215,14 +220,69 @@ fi
 # If not running interactively, do not do anything
 
 # PS1="MYTestPrompt> "
+export core_pattern="$(cat /proc/sys/kernel/core_pattern)"
+export core_dir="/home/rongzi/Downloads/Coredump"
+debug() {
+    export core_name="$(/bin/ls -r $core_dir| head -n 1)"
+    export core_path="$core_dir/$core_name"
+    gdb $bin "$core_path"
+}
+
+jz() {
+    path=$(fzf)
+    if [[ $(file $path | awk  '{print $2}') == 'directory' ]];then
+        joshuto $path
+    else
+        joshuto $( echo $path | awk -F / -v OFS=/ '{$NF="";print}' ) 
+    fi
+}
+
+range() {
+    if [[ $# -eq 0 ]]; then
+        python3 -c "a=list(range(10));print(a)"
+    elif [[ $# -eq 1 ]]; then
+        python3 -c "a=list(range($1));print(a)"
+    elif [[ $# -eq 2 ]]; then
+        python3 -c "a=list(range($1, $2));print(a)"
+    elif [[ $# -eq 3 ]]; then
+        python3 -c "a=list(range($1, $2, $3));print(a)"
+    elif [[ $# -eq 4 ]]; then
+        python3 -c "a=set(list(range($1, $2, $3)));print(a)"
+    fi
+}
+
+# attach() {
+#     bg
+#     disown
+#     export pid=$(jobs -p | cut -d ' ' -f1)
+#     tmux
+#     sudo sysctl -w kernel.yama.ptrace_scope=0
+# #     reptyr $pid
+# }
+
 vman() {
 #     export MANPAGER="col -b" # for FreeBSD/MacOS
 
     # Make it read-only
     eval '[[ -n "$(man $@)" ]]  &&  man $@ | vim -MR +"set filetype=man" -'
-
-    unset MANPAGER
 }
 
-source /home/rongzi/.config/broot/launcher/bash/br
-source /home/rongzi/.config/shell/key-bindings.bash
+pp() {
+    local target_pid="$1"
+    local sleep_interval=5  # 休眠间隔，以避免浪费CPU性能
+
+    while true; do
+        if ! kill -0 "$target_pid" 2>/dev/null; then
+            echo "进程 $target_pid 已结束"
+            break
+        fi
+        sleep "$sleep_interval"
+        echo 'still alive'
+    done
+}
+
+
+
+source $HOME/.config/broot/launcher/bash/br
+source $HOME/.config/shell/key-bindings.bash
+source $HOME/.config/scripts/marco.sh
