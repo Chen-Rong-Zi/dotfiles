@@ -1,9 +1,8 @@
 #!/bin/bash
-# enable the subsequent settings only in interactive sessions
-case $- in
-  *i*) ;;
-    *) return;;
-esac
+# enable the subsequent settings only in interactive sessions case $- in
+#   *i*) ;;
+#     *) return;;
+# esac
 
 # Path to your oh-my-bash installation.
 export OSH='/home/rongzi/.oh-my-bash'
@@ -175,7 +174,6 @@ alias git-log="git log --all --graph --decorate --oneline"
 alias py="python3"
 alias ipy="ipdb"
 alias open="pcmanfm"
-alias copy="gpaste-client add"
 alias nmtui="rfkill unblock wlan && nmtui"
 alias gdb="gdb -q"
 alias tm="tmux"
@@ -192,9 +190,9 @@ export LC_CTYPE=zh_CN.UTF-8
 # export http_proxy="http://127.0.0.1:8090"
 # export https_proxy=http://127.0.0.1:8090;export http_proxy=http://127.0.0.1:8090;export all_proxy=socks5://127.0.0.1:8090
 
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS=@im=fcitx
+export GTK_IM_MODULE=fcitx5
+export QT_IM_MODULE=fcitx5
+export XMODIFIERS=@im=fcitx5
 
 export LC_CTYPE=zh_CN.UTF-8
 export RANGER_LOAD_DEFAULT_RC=FALSE
@@ -211,14 +209,13 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 # junegunn/seoul256.vim (dark)
 # export FZF_DEFAULT_OPTS='--color=bg+:#3F3F3F,bg:#4B4B4B,border:#6B6B6B,spinner:#98BC99,hl:#719872,fg:#D9D9D9,header:#719872,info:#BDBB72,pointer:#E12672,marker:#E17899,fg+:#D9D9D9,preview-bg:#3F3F3F,prompt:#98BEDE,hl+:#98BC99'
 export bin="/home/rongzi/cProgram/a.out"
+export BROWSER="google-chrome-stable"
 setproxy
-
-if [ -z "$DISPLAY" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
-    setfont ter-228b.psf.gz
-fi
 
 # If not running interactively, do not do anything
 
+# python-symengine: optimized backend, set USE_SYMENGINE=1 to use
+export USE_SYMENGINE=1
 # PS1="MYTestPrompt> "
 export core_pattern="$(cat /proc/sys/kernel/core_pattern)"
 export core_dir="/home/rongzi/Downloads/Coredump"
@@ -228,7 +225,7 @@ debug() {
     gdb $bin "$core_path"
 }
 
-jz() {
+fj() {
     path=$(fzf)
     if [[ $(file $path | awk  '{print $2}') == 'directory' ]];then
         joshuto $path
@@ -237,7 +234,7 @@ jz() {
     fi
 }
 
-range() {
+rn() {
     if [[ $# -eq 0 ]]; then
         python3 -c "a=list(range(10));print(a)"
     elif [[ $# -eq 1 ]]; then
@@ -268,11 +265,13 @@ vman() {
 }
 
 pp() {
-    local target_pid="$1"
-    local sleep_interval=5  # 休眠间隔，以避免浪费CPU性能
+    target_pid="$1"
+    sleep_interval=5  # 休眠间隔，以避免浪费CPU性能
 
     while true; do
-        if ! kill -0 "$target_pid" 2>/dev/null; then
+        kill -0 $target_pid 2>/dev/null
+        if  [[ $? -eq 1 ]]; then
+            echo $1
             echo "进程 $target_pid 已结束"
             break
         fi
@@ -281,7 +280,14 @@ pp() {
     done
 }
 
+if [[ -z "$TMUX" ]]; then
+  exec tmux
+fi
 
+
+if [ -z "$DISPLAY" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
+    setfont ter-228b.psf.gz
+fi
 
 source $HOME/.config/broot/launcher/bash/br
 source $HOME/.config/shell/key-bindings.bash

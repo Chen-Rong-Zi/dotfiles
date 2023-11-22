@@ -38,6 +38,7 @@ static const Rule rules[] = {
     { NULL,           NULL,            "joshuto",  0,            1,            0,             1 },
     { NULL,           NULL,            "joshuto",  0,            0,            1,             1 },
     { NULL,           NULL,      "EmojiFloatWnd",  0,            1,            0,             1 },
+    { "Viewnior",     NULL,             NULL,      0,            1,            0,             1 },
     {"kdeconnectd",   NULL,            NULL,       0,            0,            1,             1 },
     {"gcolor3",       NULL,            NULL,       0,            1,            0,             1 },
     {"xfce4-notifyd", NULL,            NULL,       0,            1,            0,             1 }

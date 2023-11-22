@@ -1,7 +1,8 @@
 #!/bin/bash
 preview() {
     if [[ -f $1 ]]; then
-        head -n 50 $1
+        # head -n 50 $2
+        bat $1
     else
         tree -L 2 $1
     fi

@@ -38,11 +38,13 @@ set shiftwidth=4
 set showcmd
 " set smarttab
 set softtabstop=4
-set synmaxcol=300
+set synmaxcol=175
 set termguicolors
 set tabstop=4
 set redrawtime=1000
 set nowrap
+set timeoutlen=280
+set ttimeoutlen=1000
 set ttyfast
 " set termwinsize=10x0
 " set nu ru ai si ts=4 sw=4
@@ -52,6 +54,7 @@ vn # <c-v>0I# <esc>
 vn " <c-v>0I" <esc>
 vn / <C-v>0I// <esc>
 vn ; <C-v>0I;<esc>
+vn <CR> !copy<CR>
 nn * *N:set hlsearch<CR>
 
 " use python3 socket
@@ -273,10 +276,10 @@ au VimEnter * nn wh <c-w>h
 au VimEnter * nn wl <c-w>l
 
 " screen switch
-au VimEnter * nn <leader><s-K> <c-w>K
-au VimEnter * nn <leader><s-J> <c-w>J
-au VimEnter * nn <leader><s-H> <c-w>H
-au VimEnter * nn <leader><s-L> <c-w>L
+au VimEnter * nn <leader>k <c-w>K
+au VimEnter * nn <leader>j <c-w>J
+au VimEnter * nn <leader>h <c-w>H
+au VimEnter * nn <leader>l <c-w>L
 
 " screen size
 au VimEnter * nn _ :resize -10<CR>
@@ -304,7 +307,9 @@ au VimEnter * nn <leader>t :vertical terminal++close<CR>
 au VimEnter * nn <leader>i :horizontal bo terminal++close python3<CR>
 
 " save the file in the buffer 
-au VimEnter * nn S :w<CR>
+" au VimEnter * nn S :w<CR>
+au VimEnter * nn S :s/
+au VimEnter * nn <C-s> :w<CR>
 
 " shortcuts
 au VimEnter * ino jk <esc>

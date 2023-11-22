@@ -3,15 +3,15 @@
 @import "colors.rasi"
 
 * {
-    background-color:       #00000099;
+    background-color:       rgba(0, 0, 0, 0.3);
     text-color:             @fg;
-	font:				 	"Iosevka Nerd Font 15";
+    font:                   "Iosevka Nerd Font 15";
 }
 
 window {
-    width:      			250px;
-    padding:    			20px;
-    border:					2px;
+    width:                  250px;
+    padding:                20px;
+    border:                 2px;
     border-radius:          20px;
     border-color:           @ac;
     location:               center;
@@ -20,7 +20,8 @@ window {
 }
 
 entry {
-    expand: 				true;
-    text-color:				@ac;
+    expand:                 true;
+    text-color:             @ac;
+    text-background:        rgba(2, 2, 2, 0.1);
 }
 
