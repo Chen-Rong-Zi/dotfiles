@@ -38,12 +38,12 @@ set shiftwidth=4
 set showcmd
 " set smarttab
 set softtabstop=4
-set synmaxcol=175
+set synmaxcol=240
 set termguicolors
 set tabstop=4
 set redrawtime=1000
 set nowrap
-set timeoutlen=280
+set timeoutlen=175
 set ttimeoutlen=1000
 set ttyfast
 " set termwinsize=10x0
@@ -110,7 +110,7 @@ au filetype c,cpp nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
 au filetype c,cpp vn <buffer> <leader>c <C-v>0I// <esc>
 
 " ABBREVIATION
-au filetype c,cpp inorea <buffer> for for (<++>; <++>; <++>){}<left><CR><esc>O<++><esc>/<++><CR>ca<
+au filetype c,cpp inorea <buffer> for for (<++>; <++>; <++> )<CR>{}<left><CR><esc>O<++><esc>/<++><CR>ca<
 au filetype c,cpp inorea <buffer> while while ( )<left><left>
 au filetype c,cpp inorea <buffer> if if ( )<left><left>
 au filetype c,cpp inorea <buffer> fuck Are you alright?

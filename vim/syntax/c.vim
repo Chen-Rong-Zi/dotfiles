@@ -2,7 +2,6 @@
 " Language:	C " Maintainer:	The Vim Project <https://github.com/vim/vim>
 " Last Change:	2023 Aug 10
 " Former Maintainer:	Bram Moolenaar <Bram@vim.org>
-
 " Quit when a (custom) syntax file was already loaded
 if exists("b:current_syntax")
     finish
@@ -28,8 +27,8 @@ endif
 syn keyword	cStatement	goto break return continue asm
 syn keyword	cLabel		case default
 " <++>
-syn keyword	cConditional	if else switch
-syn keyword	cRepeat		while for do
+" syn keyword	cConditional	if else switch
+" syn keyword	cRepeat		while for do
 syn keyword	cConditional	else switch
 syn keyword	cRepeat		    do
 
@@ -265,7 +264,8 @@ if !exists("c_no_ansi") || exists("c_ansi_typedefs")
   syn keyword   cType		mbstate_t wctrans_t wint_t wctype_t
 endif
 if !exists("c_no_c99") " ISO C99
-  syn keyword	cType		_Bool bool _Complex complex _Imaginary imaginary
+" <++>
+"   syn keyword	cType		_Bool bool _Complex complex _Imaginary imaginary
   syn keyword	cType		int8_t int16_t int32_t int64_t
   syn keyword	cType		uint8_t uint16_t uint32_t uint64_t
   if !exists("c_no_bsd")
@@ -553,30 +553,34 @@ syntax match Function "\w\+\ze("
 " syntax match LineNr /^};$/
 " 
 syntax match Preproc /\v\s([\+\-^\*\/%]|[>\=<!]\=?)\s/   contains=keyword,Identifier    " + - * / >= <= ==
-syntax match keyword /\v\&|\||!\ze[^\=]|, /                                   " | & !
+syntax match Preproc /\v<[A-Z]\w*\ze\s.*/   contains=keyword,Identifier,Constant    " + - * / >= <= ==
+syntax match keyword /\v\&|\||!\ze[^\=]|,\s*/                                   " | & !
 syntax match keyword /\v[\+\-<>\|&]{2}/                                    " ++ -- && || >> <<
 syntax match keyword /\v\s[\+\-\*\/]?\=\s/                                 " += -= *= /= =
-syntax match Identifier /\v\w+\[|\*+[a-zA-z]+|[\[\]:\?]|->/  contains=PreProc,cNumber                        " array[.*] and *pointers and dereference ->
-syntax match LineNr /\v[{}]$|;/                                            " { } ;
-1match LineNr /\v(for|while|if)\s+\zs\(/     " (  ) after if or while or for
-2match LineNr /\v(for|while|if).*\zs\)/     " (  ) after if or while or for
-syntax match Constant /\v<[A-Z]+>/          " Constant defined by #define or const
+syntax match Identifier /\v\w+\[|\*+\w*|[\[\]:\?]|->/  contains=PreProc,cNumber,keyword,Function                " array[.*] and *pointers and dereference ->
+syntax match LineNr /\v[{}]$|;|^\s*};?/                                            " { } ;
+syntax match LineNr /\v(for|while|if)\s+\zs\(/    " (  ) after if or while or for
+syntax match LineNr /\v[^\)]*\zs\)\{?$/     " (  ) after if or while or for
+match keyword /\v(<for>|<while>|<if>)/
+" syntax match Constant /\%(if\|while\|for\)\s*([^)]*)\s*{/          " Constant defined by #define or const
+syntax match Constant /\v<[_A-Z]+\d*>/    contains=Function      " Constant defined by #define or const
 
 " " class method
 " syntax match Constant /\.\w\+\./
 " syntax match Identifier /\.\w\+(\w*)\./
 " syntax match Identifier /\.\w\+\s/
 " syntax match Identifier /\.\w\+,/
-syntax keyword Type int      conceal cchar=𝗜
-syntax keyword Type float    conceal cchar=𝔽
-syntax keyword Type double   conceal cchar=𝔻
-syntax keyword Type char     conceal cchar=ℂ
-syntax keyword Type bool     conceal cchar=𝔹
-syntax keyword Type void     conceal cchar=∅
-syntax keyword Type long     conceal cchar=𝕃
-syntax keyword Type unsigned conceal cchar=𝕌
-syntax keyword Type return   conceal cchar=▶
-syntax keyword Type continue   conceal cchar=↺
+syntax keyword Keyword int      conceal cchar=𝗜
+syntax keyword Keyword float    conceal cchar=𝔽
+syntax keyword Keyword double   conceal cchar=𝔻
+syntax keyword Keyword char     conceal cchar=ℂ
+syntax keyword Keyword bool     conceal cchar=𝔹
+syntax keyword Keyword void     conceal cchar=∅
+syntax keyword Keyword long     conceal cchar=𝕃
+syntax keyword Keyword unsigned conceal cchar=𝕌
+syntax keyword Keyword return   conceal cchar=▶
+syntax keyword Keyword continue conceal cchar=↺
+syntax keyword Keyword break    conceal cchar=✖
 " syn region keyword  /password/ conceal cchar=*
 " syntax match Constant "return" conceal cchar= contains=return
 

@@ -1,5 +1,15 @@
 /* See LICENSE file for copyright and license details. */
 
+/* alt-tab configuration */
+static const unsigned int tabModKey         = 0x40; /* if this key is hold the alt-tab functionality stays acitve. This key must be the same as key that is used to active functin altTabStart `*/
+static const unsigned int tabCycleKey       = 0x17; /* if this key is hit the alt-tab program moves one position forward in clients stack. This key must be the same as key that is used to active functin altTabStart */
+static const unsigned int tabCycleKey2      = 0x31; /* grave key */
+static const unsigned int tabPosY           = 1;    /* tab position on Y axis, 0 = bottom, 1 = center, 2 = top */
+static const unsigned int tabPosX           = 1;    /* tab position on X axis, 0 = left, 1 = center, 2 = right */
+static const unsigned int maxWTab           = 600;  /* tab menu width */
+static const unsigned int maxHTab           = 200;  /* tab menu height */
+
+
 /* appearance */
 static const unsigned int borderpx  = 2;        /* border pixel of windows */
 static const unsigned int gappx     = 15;        /* gaps between windows */
@@ -10,8 +20,8 @@ static const int usealtbar          = 1;        /* 1 means use non-dwm status ba
 static const char *altbarclass      = "Polybar"; /* Alternate bar class name */
 static const char *alttrayname      = "tray";    /* Polybar tray instance name */
 static const char *altbarcmd        = "/home/rongzi/.config/polybar/pwidgets/launch dwm"; /* Alternate bar launch command */
-static const char *fonts[]          = { "Source Han Sans CN:size=10" };
-static const char dmenufont[]       = "monospace:size=12";
+static const char *fonts[]          = { "Source Han Sans CN:size=18" };
+static const char dmenufont[]       = "monospace:size=20";
 static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
@@ -40,7 +50,7 @@ static const Rule rules[] = {
     { NULL,           NULL,      "EmojiFloatWnd",  0,            1,            0,             1 },
     { "Viewnior",     NULL,             NULL,      0,            1,            0,             1 },
     {"kdeconnectd",   NULL,            NULL,       0,            0,            1,             1 },
-    {"gcolor3",       NULL,            NULL,       0,            1,            0,             1 },
+    {"Gcolor3",       NULL,            NULL,       0,            1,            0,             1 },
     {"xfce4-notifyd", NULL,            NULL,       0,            1,            0,             1 }
 };
 
@@ -121,7 +131,7 @@ static const Key keys[] = {
     { MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
     { MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
     { MODKEY|ShiftMask,             XK_Return, zoom,           {0} },
-    { MODKEY,                       XK_Tab,    view,           {0} },
+    { MODKEY,                       XK_q,      view,           {0} },
     { MODKEY|ShiftMask,             XK_q,      killclient,     {0} },
     { MODKEY,                       XK_e,      setlayout,      {.v = &layouts[0]} },
     { MODKEY,                       XK_w,      setlayout,      {.v = &layouts[2]} },
@@ -136,6 +146,8 @@ static const Key keys[] = {
     { MODKEY,                       XK_equal,  setgaps,        {.i = +1 } },
     { MODKEY|ShiftMask,             XK_equal,  setgaps,        {.i = 0  } },
     { MODKEY,                       XK_f,      togglefullscr,  {.i = 0  } },
+    { Mod1Mask,                     XK_Tab,    altTabStart,    {.i = 1} },
+    { Mod1Mask,                     XK_grave,  altTabStart,    {.i = 0} },
     TAGKEYS(                        XK_1,                      0)
     TAGKEYS(                        XK_2,                      1)
     TAGKEYS(                        XK_3,                      2)

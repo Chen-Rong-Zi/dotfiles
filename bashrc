@@ -190,9 +190,9 @@ export LC_CTYPE=zh_CN.UTF-8
 # export http_proxy="http://127.0.0.1:8090"
 # export https_proxy=http://127.0.0.1:8090;export http_proxy=http://127.0.0.1:8090;export all_proxy=socks5://127.0.0.1:8090
 
-export GTK_IM_MODULE=fcitx5
-export QT_IM_MODULE=fcitx5
-export XMODIFIERS=@im=fcitx5
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
 
 export LC_CTYPE=zh_CN.UTF-8
 export RANGER_LOAD_DEFAULT_RC=FALSE
@@ -280,8 +280,8 @@ pp() {
     done
 }
 
-if [[ -z "$TMUX" ]]; then
-  exec tmux
+if [[ -z $TMUX ]]; then
+    tmux
 fi
 
 
@@ -292,3 +292,4 @@ fi
 source $HOME/.config/broot/launcher/bash/br
 source $HOME/.config/shell/key-bindings.bash
 source $HOME/.config/scripts/marco.sh
+# alias io="gcc -o /home/rongzi/cProgram/a.out hello_world.c  -lncurses;a.out"

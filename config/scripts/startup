@@ -2,7 +2,6 @@
 
 picom -b &
 clash &
-/usr/lib/kdeconnectd &
 variety &
 fcitx5 &
 # ~/.config/scripts/background &
