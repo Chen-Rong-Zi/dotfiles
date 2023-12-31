@@ -1,4 +1,4 @@
 killall picom
 sleep 0.01
-exec picom -b --config ~/.config/picom/other_picom.conf
+exec picom -b --config ~/.config/picom/other_picom.conf --blur-background-fixed
 # picom -b --animations --animation-window-mass 0.5 --animation-for-open-window zoom --animation-stiffness 350 &

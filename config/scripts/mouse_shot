@@ -1,10 +1,15 @@
 #!/usr/bin/bash
 time=$(date "+%y-%m-%d_%H:%M:%S")
-shot_path="/home/rongzi/Pictures/screenshot/$time.jpg"
-maim -s  $shot_path  -m 10
-if [ -f "$shot_path" ]
-then
-    dunstify -t 1500 -i com.deepin.ScreenShot "saved as $time .jpg"
+shot_path="/home/rongzi/Pictures/screenshot/$time.png"
+shot_icon="/usr/share/icons/Papirus/48x48/apps/deepin-screenshot.svg"
+error_icon="/usr/share/icons/Papirus/48x48/apps/script-error.svg"
+notification_id="1234"
+
+dunstify -r $notification_id -t 2000 -I $shot_icon "截图" "选择窗口或框出一个矩形"
+maim -m 10 -f png -s  $shot_path
+
+if [[ -f "$shot_path" ]];then
+    dunstify -r $notification_id -t 1800 -I $shot_icon "截图" "保存为 $time.png"
 else
-    dunstify -i error "ERROR!!!"
+    dunstify -r $notification_id -I $error_icon "选择无效！"
 fi

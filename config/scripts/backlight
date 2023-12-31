@@ -1,2 +1,2 @@
 #!/bin/bash
-brightnessctl set $1 >> /dev/null && dunstify -u low -t 400 -i mate-power-manager -r 100 BRIGHTNESS $(sudo xbacklight -get)% &
+brightnessctl set $1 >> /dev/null && dunstify -u low -t 600 -I /usr/share/icons/Papirus/48x48/apps/com.github.panosx2.brightness.svg -r 123 BRIGHTNESS $(sudo xbacklight -get)%

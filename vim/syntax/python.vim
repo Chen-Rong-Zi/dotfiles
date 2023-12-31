@@ -347,7 +347,7 @@ unlet s:cpo_save
 
 syn keyword Identifier reversed self
 syntax match Function "\w\+\ze("
-syntax match Preproc /\v\s([\+\-\*\/]|[>\=<!]\=?)\s/   contains=keyword    " + - * / >= <= ==
+syntax match Preproc /\v\s([%\+\-\*\/]|[>\=<!]\=?)\s/   contains=keyword    " + - * / >= <= ==
 syntax match keyword /\v\s[\+\-\*\/]?\=\s/                                  " += -= *= /= =
 syntax match keyword /, /                                  " ,
 syntax match Identifier /\v\.\w+\ze\(/       " instance methods

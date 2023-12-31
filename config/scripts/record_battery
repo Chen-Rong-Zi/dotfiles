@@ -1,0 +1,13 @@
+#!/bin/bash
+info=$(acpi)
+state=$(awk '{print $NF}' <(echo $info))
+
+if [[ $state = "100%" ]];then
+    echo ---------FULL------------ >> $HOME/.log/battery.log
+elif [[ $state = "charged" ]];then
+    echo $info >> $HOME/.log/battery.log
+elif [[ $state = "remaining" ]];then
+    echo $info >> $HOME/.log/battery.log
+    remaining=$(acpi | awk '{print $(NF-1), $NF}')
+    dunstify "battery" "$remaining"
+fi

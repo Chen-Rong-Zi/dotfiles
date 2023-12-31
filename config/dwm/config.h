@@ -20,7 +20,7 @@ static const int usealtbar          = 1;        /* 1 means use non-dwm status ba
 static const char *altbarclass      = "Polybar"; /* Alternate bar class name */
 static const char *alttrayname      = "tray";    /* Polybar tray instance name */
 static const char *altbarcmd        = "/home/rongzi/.config/polybar/pwidgets/launch dwm"; /* Alternate bar launch command */
-static const char *fonts[]          = { "Source Han Sans CN:size=18" };
+static const char *fonts[]          = { "Source Han Sans CN:size=18:style=regular" };
 static const char dmenufont[]       = "monospace:size=20";
 static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
@@ -46,8 +46,10 @@ static const Rule rules[] = {
     { "Gimp",         NULL,            NULL,       0,            1,            0,            -1 },
     { "Firefox",      NULL,            NULL,       1 << 8,       0,            0,            -1 },
     { NULL,           NULL,            "joshuto",  0,            1,            0,             1 },
-    { NULL,           NULL,            "joshuto",  0,            0,            1,             1 },
+    { NULL,           NULL,            "quick",    0,            1,            0,             1 },
     { NULL,           NULL,      "EmojiFloatWnd",  0,            1,            0,             1 },
+    { NULL,           NULL,               "成员",  0,            1,            0,             1 },
+    { NULL,           NULL,          "wemeetapp",  0,            1,            0,             1 },
     { "Viewnior",     NULL,             NULL,      0,            1,            0,             1 },
     {"kdeconnectd",   NULL,            NULL,       0,            0,            1,             1 },
     {"Gcolor3",       NULL,            NULL,       0,            1,            0,             1 },
@@ -69,6 +71,7 @@ static const Layout layouts[] = {
 
 /* key definitions */
 #define MODKEY Mod4Mask
+#define MODKEY_ALT Mod1Mask
 #define TAGKEYS(KEY,TAG) \
     { MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
     { MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
@@ -81,7 +84,8 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[]   = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
-static const char *termcmd[]    = { "/home/rongzi/.config/scripts/alacritty", NULL };
+static const char *termcmd[]    = { "alacritty", NULL };
+static const char *quick_term[] = { "alacritty", "-t", "quick", NULL };
 static const char *powerMenu[]  = { "/home/rongzi/.config/polybar/pwidgets/scripts/powermenu.sh", NULL };
 static const char *drun[]       = {"rofi", "-modi", "drun", "-show", "drun", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL};
 static const char *winMenu[]    = {"rofi", "-modi", "window", "-show", "window", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL};
@@ -123,6 +127,7 @@ static const Key keys[] = {
     { MODKEY,                       XK_n,      spawn,          {.v = picom } },
     { MODKEY,                       XK_b,      spawn,          {.v = myPicom } },
     { ControlMask|ShiftMask,        XK_Return, spawn,          {.v = btop } },
+    { MODKEY_ALT,                  XK_Return, spawn,          {.v = quick_term } },
     { ControlMask|ShiftMask,        XK_h,      spawn,          {.v = joshuto } },
     { MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
     { MODKEY,                       XK_k,      focusstack,     {.i = -1 } },

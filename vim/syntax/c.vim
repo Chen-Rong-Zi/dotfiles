@@ -11,7 +11,6 @@ let s:cpo_save = &cpo
 set cpo&vim
 
 let s:ft = matchstr(&ft, '^\%([^.]\)\+')
-
 " check if this was included from cpp.vim
 let s:in_cpp_family = exists("b:filetype_in_cpp_family")
 
@@ -28,8 +27,8 @@ syn keyword	cStatement	goto break return continue asm
 syn keyword	cLabel		case default
 " <++>
 " syn keyword	cConditional	if else switch
-" syn keyword	cRepeat		while for do
-syn keyword	cConditional	else switch
+syn keyword	cRepeat		while for do
+syn keyword	cConditional	if else switch
 syn keyword	cRepeat		    do
 
 syn keyword	ctodo		contained todo fixme xxx
@@ -534,7 +533,6 @@ unlet s:cpo_save
 " 高亮函数调用
 " syntax match Function "\<\w\+\>\s*(" contains=Function transparent 
 " syntax match Function "\<\w\+\>\ze\s*(" contains=Function
-syntax match Function "\w\+\ze("
 "
 " "+ , -  ,*  ,/  ,==  ,+=  ,%" 
 " syntax match Preproc /\s\/\s/
@@ -551,20 +549,28 @@ syntax match Function "\w\+\ze("
 " syntax match LineNr /\s*{$/
 " syntax match LineNr /[{;]$/
 " syntax match LineNr /^};$/
-" 
-syntax match Preproc /\v\s([\+\-^\*\/%]|[>\=<!]\=?)\s/   contains=keyword,Identifier    " + - * / >= <= ==
-syntax match Preproc /\v<[A-Z]\w*\ze\s.*/   contains=keyword,Identifier,Constant    " + - * / >= <= ==
-syntax match keyword /\v\&|\||!\ze[^\=]|,\s*/                                   " | & !
-syntax match keyword /\v[\+\-<>\|&]{2}/                                    " ++ -- && || >> <<
-syntax match keyword /\v\s[\+\-\*\/]?\=\s/                                 " += -= *= /= =
-syntax match Identifier /\v\w+\[|\*+\w*|[\[\]:\?]|->/  contains=PreProc,cNumber,keyword,Function                " array[.*] and *pointers and dereference ->
-syntax match LineNr /\v[{}]$|;|^\s*};?/                                            " { } ;
-syntax match LineNr /\v(for|while|if)\s+\zs\(/    " (  ) after if or while or for
-syntax match LineNr /\v[^\)]*\zs\)\{?$/     " (  ) after if or while or for
-match keyword /\v(<for>|<while>|<if>)/
-" syntax match Constant /\%(if\|while\|for\)\s*([^)]*)\s*{/          " Constant defined by #define or const
-syntax match Constant /\v<[_A-Z]+\d*>/    contains=Function      " Constant defined by #define or const
+hi Nothing gui=bold
 
+syntax match Function       /\v<\h+>\ze\(/
+syntax match Preproc        /\v\s([\+\-^\*\/%]|[>\=<!]\=?)\s/   contains=keyword,Identifier    " + - * / >= <= ==
+syntax match cType          /\v<\u\w*\l>/
+" syntax match Preproc        /\v<[A-Z]\w{-}\ze[ \)].*/   contains=keyword,Constant    " + - * / >= <= ==
+syntax match keyword        /&\||\|![^=]\@=\|,/                                          " | & !
+syntax match keyword        /\v[\+\-<>\|&]{2}/                                                " ++ -- && || >> <<
+syntax match keyword        /\v\s[\+\-\*\/]?\=\s/                                             " += -= *= /= =
+syntax match Identifier     /\v\*+( )@!(\w+)?|[\[\]:\?]|->/  contains=PreProc,cNumber,keyword,Function                " array[.*] and *pointers and dereference ->
+syntax match Nontext        /\v[{}]$|;|^\s*};=/                                            " { } ;
+
+syntax cluster hidden add=Preproc,Nontext,Identifier,Constant,cString,cNumbers,keyword,constants,cCharacter,cConstant,Function,Nothing,@cStringGroup
+syntax region Nothing matchgroup=Nontext start=/\v(<while>|<for>|<if>)@<= \(/ end=/\v\)[^)]{-}$/ oneline contains=@hidden
+syntax region Nothing matchgroup=Identifier start=/\v<\h{-}>\[/ end=/]/ oneline contains=@hidden
+" syntax match LineNr /\v((for|while|if).*)@60<=\)\s*\{=$/    " (  ) after if or while or for
+" syntax match LineNr /\v((for|while|if) )@<=\(/
+" match keyword /\v(<for>|<while>|<if>)/
+" syntax match Constant /\%(if\|while\|for\)\s*([^)]*)\s*{/          " Constant defined by #define or const
+syntax match Constant /\v<[_A-Z]+>/    contains=Function      " Constant defined by #define or const
+
+"syntax match Preproc /\v \* /    contains=Function      " Constant defined by #define or const
 " " class method
 " syntax match Constant /\.\w\+\./
 " syntax match Identifier /\.\w\+(\w*)\./

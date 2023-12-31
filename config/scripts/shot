@@ -1,10 +1,10 @@
-#!/usr/bin/bash
+#!/bin/bash
 time=$(date "+%y-%m-%d_%H:%M:%S")
-shot_path="/home/rongzi/Pictures/screenshot/$time.jpg"
-maim -m 10   $shot_path 
-if [ -f "$shot_path" ]
-then
-    dunstify -i com.deepin.ScreenShot "Saved As $time.jpg" -t 2000
+
+maim -m 10 $shot_path
+
+if [[ -f "$shot_path" ]];then
+    dunstify -r $notification_id -t 1800 -I $shot_icon "截图保存为" "$time.png"
 else
-    dunstify -i error "ERROR!!!" -t 2000
+    dunstify -r $notification_id -I $error_icon "截图无效！"
 fi

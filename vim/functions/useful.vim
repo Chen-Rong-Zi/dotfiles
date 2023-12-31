@@ -13,6 +13,7 @@ function! SelectFile()
     endfor
     silent execute '!rm '.tmp
     silent execute 'redraw!'
+    call system("dunstify -I /usr/share/icons/Papirus/48x48/apps/vim.svg fzf done")
 endfunction
 
 nn <leader><c-f> :call SelectFile()<CR>
@@ -52,3 +53,27 @@ endfunction
 
 nnoremap <silent> <C-c><C-y> :call ToggleConcealLevel()<CR>
 
+" switch to another buffer
+" <++>TODO
+function! SwitchBuffer()
+    bnext
+    silent execute '!notify-send -i vim another buffer'
+    silent execute 'redraw!'
+endfunction
+" nnoremap <silent> <c-p> :call SwitchBuffer()<CR>
+"
+function! Fcitx5pinyin()
+    silent execute '!fcitx5-remote -s pinyin'
+    redraw!
+endfunction
+
+function! Fcitx5keyboard()
+    silent execute '!fcitx5-remote -s keyboard'
+    redraw!
+endfunction
+
+func Eatchar(pat)
+let c = nr2char(getchar(0))
+return (c =~ a:pat) ? '' : c
+endfunc
+" iabbrev  if if ()<Left><C-R>=Eatchar('\s')<CR>

@@ -1,8 +1,7 @@
 #!/bin/bash
 
 picom -b &
-clash &
-variety &
 fcitx5 &
 # ~/.config/scripts/background &
-dunstify -t 3000 -i manjaro "rongzi, welcome back!" &
+dunstify -t 3000 -I $manjaro_icon "rongzi, welcome back!"
+clash -f ~/.config/clash/profiles/$(/bin/ls ~/.config/clash/profiles | grep -E "[0-9]+.yml" | sort | tail -n1) &

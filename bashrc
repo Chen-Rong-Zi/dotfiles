@@ -1,7 +1,5 @@
-#!/bin/bash
 # enable the subsequent settings only in interactive sessions case $- in
-#   *i*) ;;
-#     *) return;;
+#   *i*) ;; #     *) return;;
 # esac
 
 # Path to your oh-my-bash installation.
@@ -164,14 +162,14 @@ alias dtrans="trans en:zh-CH -show-prompt-message n -show-original-dictionary Y 
 alias ags="xargs"
 # alias cfw="~/.config/usr/'Clash for Windows-0.18.5-x64-linux'/cfw"
 # 打开终端自动开启代理
-alias setproxy="export https_proxy=http://127.0.0.1:7890;export http_proxy=http://127.0.0.1:7890;export all_proxy=socks5://127.0.0.1:7890"
-alias unsetproxy="unset ALL_PROXY; echo 'UNSET PROXY SUCCESS!!!'"
+alias setproxy="export https_proxy=http://127.0.0.1:7891;export http_proxy=http://127.0.0.1:7891;export all_proxy=socks5://127.0.0.1:7890"
+alias unsetproxy="unset all_proxy; unset https_proxy; unset http_proxy;echo 'UNSET PROXY SUCCESS!!!'"
 alias shot="import $image_path"
 alias rm="rm -i"
 alias restore="io ~/cProgram/fulfill.c"
 alias cc="gcc -Wall -Werror -O2"
 alias git-log="git log --all --graph --decorate --oneline"
-alias py="python3"
+alias py="python3 -q"
 alias ipy="ipdb"
 alias open="pcmanfm"
 alias nmtui="rfkill unblock wlan && nmtui"
@@ -179,27 +177,26 @@ alias gdb="gdb -q"
 alias tm="tmux"
 alias gs="git status"
 alias ta="tmux attach"
+alias 废话="bullshit"
+alias ipa="ip a | grep 'wlp1s0' | grep -oP '(?<=inet )([0-9\.]*)'"
 
+export ubuntu="rongzi@139.224.128.37"
 export image_path="/home/rongzi/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S").jpg"
 # export MANPAGER="vim - -MR +'set filetype=man'"
+export MANPAGER="bat"
 export token="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"
 export EDITOR=/usr/bin/vim
 export PATH=$PATH:/home/rongzi/cProgram
-export LC_CTYPE=zh_CN.UTF-8
+# export LC_CTYPE=zh_CN.UTF-8
 # export https_proxy="https://127.0.0.1:8090"
 # export http_proxy="http://127.0.0.1:8090"
 # export https_proxy=http://127.0.0.1:8090;export http_proxy=http://127.0.0.1:8090;export all_proxy=socks5://127.0.0.1:8090
 
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS=@im=fcitx
-
-export LC_CTYPE=zh_CN.UTF-8
 export RANGER_LOAD_DEFAULT_RC=FALSE
 export RANGER_DEVICONS_SEPARATOR="  "
 export LogoutCommand="i3-msg exit"
 export CM_DIR=/run/user/1000
-export FZF_DEFAULT_COMMAND="sudo find ~"
+export FZF_DEFAULT_COMMAND="sudo find /home /usr 2>/dev/null"
 export FZF_DEFAULT_OPTS="--bind ctrl-j:accept"
 export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
  --color=fg:#d0d0d0,hl:#5f87af
@@ -208,9 +205,12 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
  --color=marker:#87ff00,spinner:#af5fff,header:#87afaf'
 # junegunn/seoul256.vim (dark)
 # export FZF_DEFAULT_OPTS='--color=bg+:#3F3F3F,bg:#4B4B4B,border:#6B6B6B,spinner:#98BC99,hl:#719872,fg:#D9D9D9,header:#719872,info:#BDBB72,pointer:#E12672,marker:#E17899,fg+:#D9D9D9,preview-bg:#3F3F3F,prompt:#98BEDE,hl+:#98BC99'
+# export GTK_IM_MODULE=fcitx
+# export QT_IM_MODULE=fcitx
+# export XMODIFIERS=@im=fcitx
 export bin="/home/rongzi/cProgram/a.out"
 export BROWSER="google-chrome-stable"
-setproxy
+# setproxy
 
 # If not running interactively, do not do anything
 
@@ -219,34 +219,6 @@ export USE_SYMENGINE=1
 # PS1="MYTestPrompt> "
 export core_pattern="$(cat /proc/sys/kernel/core_pattern)"
 export core_dir="/home/rongzi/Downloads/Coredump"
-debug() {
-    export core_name="$(/bin/ls -r $core_dir| head -n 1)"
-    export core_path="$core_dir/$core_name"
-    gdb $bin "$core_path"
-}
-
-fj() {
-    path=$(fzf)
-    if [[ $(file $path | awk  '{print $2}') == 'directory' ]];then
-        joshuto $path
-    else
-        joshuto $( echo $path | awk -F / -v OFS=/ '{$NF="";print}' ) 
-    fi
-}
-
-rn() {
-    if [[ $# -eq 0 ]]; then
-        python3 -c "a=list(range(10));print(a)"
-    elif [[ $# -eq 1 ]]; then
-        python3 -c "a=list(range($1));print(a)"
-    elif [[ $# -eq 2 ]]; then
-        python3 -c "a=list(range($1, $2));print(a)"
-    elif [[ $# -eq 3 ]]; then
-        python3 -c "a=list(range($1, $2, $3));print(a)"
-    elif [[ $# -eq 4 ]]; then
-        python3 -c "a=set(list(range($1, $2, $3)));print(a)"
-    fi
-}
 
 # attach() {
 #     bg
@@ -257,39 +229,21 @@ rn() {
 # #     reptyr $pid
 # }
 
-vman() {
-#     export MANPAGER="col -b" # for FreeBSD/MacOS
+if [ -z "$DISPLAY" ] && [ -z "$TMUX" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
+    setfont ter-228b.psf.gz
+fi
 
-    # Make it read-only
-    eval '[[ -n "$(man $@)" ]]  &&  man $@ | vim -MR +"set filetype=man" -'
-}
-
-pp() {
-    target_pid="$1"
-    sleep_interval=5  # 休眠间隔，以避免浪费CPU性能
-
-    while true; do
-        kill -0 $target_pid 2>/dev/null
-        if  [[ $? -eq 1 ]]; then
-            echo $1
-            echo "进程 $target_pid 已结束"
-            break
-        fi
-        sleep "$sleep_interval"
-        echo 'still alive'
-    done
-}
-
-if [[ -z $TMUX ]]; then
+if [[ -n $DISPLAY ]] && [[ -z $TMUX ]]; then
     tmux
 fi
 
-
-if [ -z "$DISPLAY" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
-    setfont ter-228b.psf.gz
+if [[ $(pgrep v2ray) ]];then
+    setproxy
 fi
+
 
 source $HOME/.config/broot/launcher/bash/br
 source $HOME/.config/shell/key-bindings.bash
 source $HOME/.config/scripts/marco.sh
+source $HOME/.config/scripts/functions.sh
 # alias io="gcc -o /home/rongzi/cProgram/a.out hello_world.c  -lncurses;a.out"

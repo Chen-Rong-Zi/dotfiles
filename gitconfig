@@ -1,0 +1,7 @@
+[user]
+	email = 1398881912@qq.com
+	name = Chen-Rong-Zi
+[credential]
+	helper = store
+[alias]
+    l = log --all --graph --decorate --oneline
