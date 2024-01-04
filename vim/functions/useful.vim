@@ -19,7 +19,7 @@ endfunction
 nn <leader><c-f> :call SelectFile()<CR>
 
 " ues another way to show chars when in console
-if &term =~'linux'
+if $DISPLAY == ""
     set notermguicolors
     set fillchars=vert:\|
     set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
@@ -37,9 +37,7 @@ endfunction
 
 " quickly change to the directory the buffer lies in
 function! ChangeDirectory()
-    if &buftype !=# 'terminal' && &buftype !=# 'help' && !empty(&buftype)
-        cd %:h
-    endif
+    execute "cd" expand('%:p:h')
 endfunction
 
 " toggle conceal chars
@@ -63,17 +61,48 @@ endfunction
 " nnoremap <silent> <c-p> :call SwitchBuffer()<CR>
 "
 function! Fcitx5pinyin()
-    silent execute '!fcitx5-remote -s pinyin'
-    redraw!
+    call system('fcitx5-remote -s 拼音')
 endfunction
-
 function! Fcitx5keyboard()
-    silent execute '!fcitx5-remote -s keyboard'
-    redraw!
+    call system('fcitx5-remote -s keyboard')
 endfunction
 
 func Eatchar(pat)
-let c = nr2char(getchar(0))
-return (c =~ a:pat) ? '' : c
+    let c = nr2char(getchar(0))
+    return (c =~ a:pat) ? '' : c
 endfunc
 " iabbrev  if if ()<Left><C-R>=Eatchar('\s')<CR>
+
+" wrap the selected text with a:char
+function! Wrapper(left, ...)
+    let left = a:left
+    let right = (a:0 == 1) ? a:1 : left
+    if left == right
+        if left == "("
+            let right = ")"
+        elseif left == "["
+            let right = "]"
+        elseif left == "b"
+            let right = ")"
+        elseif left == "<"
+            let right = ">"
+        elseif left == "{"
+            let right = "}"
+        elseif left == "/*"
+            let right = "   */"
+        elseif left == "“"
+            let right = "”"
+        endif
+    endif
+    let @z = l:left . @z . l:right
+    execute ':normal!  "zgPx'
+endfunction
+
+vn i "zc <Esc>: call Wrapper("")<left><left>
+vn <silent> ( "zc <Esc>: call Wrapper('(',     ')')<CR>
+vn <silent> [ "zc <Esc>: call Wrapper('[',     ']')<CR>
+vn <silent> { "zc <Esc>: call Wrapper('{',     '}')<CR>
+vn <silent> <leader>< "zc <Esc>: call Wrapper('<', '>')<CR>
+vn <silent> " "zc <Esc>: call Wrapper('"',    '"')<CR>
+vn <silent> ' "zc <Esc>: call Wrapper(''',     ''')<CR>
+vn <silent> ` "zc <Esc>: call Wrapper('```\n', '\n```\n')<CR>

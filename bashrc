@@ -179,6 +179,7 @@ alias gs="git status"
 alias ta="tmux attach"
 alias 废话="bullshit"
 alias ipa="ip a | grep 'wlp1s0' | grep -oP '(?<=inet )([0-9\.]*)'"
+alias view="viewnior"
 
 export ubuntu="rongzi@139.224.128.37"
 export image_path="/home/rongzi/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S").jpg"

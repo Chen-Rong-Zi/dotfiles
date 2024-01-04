@@ -551,24 +551,23 @@ unlet s:cpo_save
 " syntax match LineNr /^};$/
 hi Nothing gui=bold
 
-syntax match Function       /\v<\h+>\ze\(/
+syntax match Function       /\v\h+\ze\(/
 syntax match Preproc        /\v\s([\+\-^\*\/%]|[>\=<!]\=?)\s/   contains=keyword,Identifier    " + - * / >= <= ==
-syntax match cType          /\v<\u\w*\l>/
-" syntax match Preproc        /\v<[A-Z]\w{-}\ze[ \)].*/   contains=keyword,Constant    " + - * / >= <= ==
-syntax match keyword        /&\||\|![^=]\@=\|,/                                          " | & !
-syntax match keyword        /\v[\+\-<>\|&]{2}/                                                " ++ -- && || >> <<
+syntax match cType          /\v<\u\w{-}\l>\(@!/
+syntax match keyword        /[,|&]\|!=\@!/                                          " | & !
+syntax match keyword        /\v[\+\-\|<>&]{2}/                                                " ++ -- && || >> <<
 syntax match keyword        /\v\s[\+\-\*\/]?\=\s/                                             " += -= *= /= =
-syntax match Identifier     /\v\*+( )@!(\w+)?|[\[\]:\?]|->/  contains=PreProc,cNumber,keyword,Function                " array[.*] and *pointers and dereference ->
-syntax match Nontext        /\v[{}]$|;|^\s*};=/                                            " { } ;
+syntax match Identifier     /\v\*+ @!<\w*>|[:?.]|->/  contains=PreProc,cNumber,keyword,Function                " array[.*] and *pointers and dereference ->
+syntax match Nontext        /\v[{}]$|;|^%( *)@>}/                                            " { } ;
 
 syntax cluster hidden add=Preproc,Nontext,Identifier,Constant,cString,cNumbers,keyword,constants,cCharacter,cConstant,Function,Nothing,@cStringGroup
-syntax region Nothing matchgroup=Nontext start=/\v(<while>|<for>|<if>)@<= \(/ end=/\v\)[^)]{-}$/ oneline contains=@hidden
-syntax region Nothing matchgroup=Identifier start=/\v<\h{-}>\[/ end=/]/ oneline contains=@hidden
+syntax region Nothing matchgroup=Nontext start=/\v%(<while>|<for>|<if>)@<= \(/ end=/\v\)[^)]{-}$/ oneline contains=@hidden
+syntax region Nothing matchgroup=Identifier start=/\v<\h*>\[/ end=/]/ oneline contains=@hidden
 " syntax match LineNr /\v((for|while|if).*)@60<=\)\s*\{=$/    " (  ) after if or while or for
 " syntax match LineNr /\v((for|while|if) )@<=\(/
 " match keyword /\v(<for>|<while>|<if>)/
 " syntax match Constant /\%(if\|while\|for\)\s*([^)]*)\s*{/          " Constant defined by #define or const
-syntax match Constant /\v<[_A-Z]+>/    contains=Function      " Constant defined by #define or const
+syntax match Constant /\v<[[:upper:]_]+>/    contains=Function      " Constant defined by #define or const
 
 "syntax match Preproc /\v \* /    contains=Function      " Constant defined by #define or const
 " " class method
@@ -591,3 +590,4 @@ syntax keyword Keyword break    conceal cchar=✖
 " syntax match Constant "return" conceal cchar= contains=return
 
 hi link Conceal Keyword
+

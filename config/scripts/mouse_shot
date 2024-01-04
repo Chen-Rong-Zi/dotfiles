@@ -1,15 +1,13 @@
 #!/usr/bin/bash
-time=$(date "+%y-%m-%d_%H:%M:%S")
-shot_path="/home/rongzi/Pictures/screenshot/$time.png"
-shot_icon="/usr/share/icons/Papirus/48x48/apps/deepin-screenshot.svg"
-error_icon="/usr/share/icons/Papirus/48x48/apps/script-error.svg"
-notification_id="1234"
+
+shot_name=$(get_shot_path)
+shot_path=$shot_dir/$shot_name
 
 dunstify -r $notification_id -t 2000 -I $shot_icon "截图" "选择窗口或框出一个矩形"
-maim -m 10 -f png -s  $shot_path
+maim -m 6 -f png -s $shot_path
 
 if [[ -f "$shot_path" ]];then
-    dunstify -r $notification_id -t 1800 -I $shot_icon "截图" "保存为 $time.png"
+    dunstify -r $notification_id -t 1800 -I $shot_icon  "保存为" "$shot_name"
 else
     dunstify -r $notification_id -I $error_icon "选择无效！"
 fi

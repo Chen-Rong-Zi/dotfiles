@@ -1,10 +1,12 @@
 #!/bin/bash
-time=$(date "+%y-%m-%d_%H:%M:%S")
 
-maim -m 10 $shot_path
+shot_name=$(get_shot_path)
+shot_path=$shot_dir/$shot_name
+
+maim -m 5 -f png $shot_path
 
 if [[ -f "$shot_path" ]];then
-    dunstify -r $notification_id -t 1800 -I $shot_icon "截图保存为" "$time.png"
+    dunstify -r $notification_id -t 1800 -I $shot_icon "截图保存为" "$shot_name"
 else
     dunstify -r $notification_id -I $error_icon "截图无效！"
 fi

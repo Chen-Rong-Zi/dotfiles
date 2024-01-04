@@ -1,0 +1,13 @@
+#!/bin/bash
+
+IFS=$'\n'
+
+read -r content
+content=$(echo $content | sed 's/\\/\\\\/g')
+spaces=$(echo $content | grep -o '^ *')
+
+while read -r line;do
+    content+="\n$(echo $line | sed 's/\\/\\\\/g')"
+done
+
+echo -e $content | column -L -t -o " " | sed "s/^/$spaces/g" | sed 's/ *$//g'

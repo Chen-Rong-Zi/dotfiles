@@ -1,6 +1,6 @@
 mpc -q pause
 amixer set Master mute
 sh ~/.config/scripts/lock
-dunstify -i gnome-session-suspend suspending...
+dunstify -I /usr/share/icons/Papirus/64x64/apps/system-suspend-hibernate.svg Suspending...
 sleep 0.5
 sudo systemctl suspend

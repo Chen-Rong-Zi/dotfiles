@@ -344,26 +344,26 @@ let b:current_syntax = "python"
 let &cpo = s:cpo_save
 unlet s:cpo_save
 
+hi Nothing gui=bold
 
 syn keyword Identifier reversed self
-syntax match Function "\w\+\ze("
-syntax match Preproc /\v\s([%\+\-\*\/]|[>\=<!]\=?)\s/   contains=keyword    " + - * / >= <= ==
-syntax match keyword /\v\s[\+\-\*\/]?\=\s/                                  " += -= *= /= =
-syntax match keyword /, /                                  " ,
-syntax match Identifier /\v\.\w+\ze\(/       " instance methods
-syntax match Identifier /\v[\[\]]/       " instance methods
-syntax match Identifier /\v\w+\[/       " instance methods
-syntax match Constant /\v\.\w+/             contains=Identifier
+syntax match   Function       /\v\h+\ze\(/
+syntax match   Preproc        /\v\s([%\+\-\*\/]|[>\=<!]\=?)\s/   contains=keyword    " + - * / >= <= ==
+syntax match   keyword        /\v [\+\-\*\/]?\= /                                  " += -= *= /= =
+syntax match   keyword        /, /                                  " ,
+syntax cluster hidden add=Preproc,Nontext,Identifier,Constant,keyword,constants,Function,Nothing
+syntax region  Nothing matchgroup=Identifier start=/\v<\h*>\[/ end=/]/ oneline contains=@hidden
+syntax match   Constant       /\v\.@1<=%(\w+)@>\(@!/             contains=Identifier,Nothing
 
 " vim:set sw=2 sts=2 ts=8 noet:
-syntax keyword keyword lambda conceal cchar=λ
-syntax keyword keyword  None   conceal cchar=∅
+syntax keyword keyword lambda   conceal cchar=λ
+syntax keyword keyword  None    conceal cchar=∅
 " syntax keyword Keyword return conceal cchar=𐅙
 " syntax keyword Keyword return conceal cchar=⇶⇰
-syntax keyword Keyword yield conceal cchar=⇇
-syntax keyword Keyword return conceal cchar=▶
+syntax keyword Keyword yield    conceal cchar=⇇
+syntax keyword Keyword return   conceal cchar=▶
 syntax keyword Keyword continue conceal cchar=↺
-syntax keyword Keyword assert conceal cchar=𝔸
-syntax keyword Keyword break conceal cchar=✖
+syntax keyword Keyword assert   conceal cchar=𝔸
+syntax keyword Keyword break    conceal cchar=✖
 
 hi! link conceal keyword
