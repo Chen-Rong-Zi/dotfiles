@@ -61,7 +61,7 @@
 #define TAGMASK                 ((1 << LENGTH(tags)) - 1)
 #define TEXTW(X)                (drw_fontset_getwidth(drw, (X)) + lrpad)
 
-/* enums */
+/* enumerate */
 enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel }; /* color schemes */
 enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
@@ -105,10 +105,10 @@ struct Client {
     char name[256];
     char class[256];
     float mina, maxa;
-    int x, y, w, h;
-    int oldx, oldy, oldw, oldh;
+    int x,     y,     w,    h;
+    int oldx,  oldy,  oldw, oldh;
     int basew, baseh, incw, inch, maxw, maxh, minw, minh, hintsvalid;
-    int bw, oldbw;
+    int bw,    oldbw;
     unsigned int tags;
     int isfixed, isfloating, isurgent, neverfocus, oldstate, isfullscreen;
     Client *next;
@@ -302,20 +302,20 @@ static int lrpad;            /* sum of left and right padding for text */
 static int (*xerrorxlib)(Display *, XErrorEvent *);
 static unsigned int numlockmask = 0;
 static void (*handler[LASTEvent]) (XEvent *) = {
-    [ButtonPress] = buttonpress,
-    [ClientMessage] = clientmessage,
-    [ConfigureRequest] = configurerequest,
-    [ConfigureNotify] = configurenotify,
-    [DestroyNotify] = destroynotify,
-    [EnterNotify] = enternotify,
-    [Expose] = expose,
-    [FocusIn] = focusin,
-    [KeyPress] = keypress,
-    [MappingNotify] = mappingnotify,
-    [MapRequest] = maprequest,
-    [MotionNotify] = motionnotify,
-    [PropertyNotify] = propertynotify,
-    [UnmapNotify] = unmapnotify
+    [ButtonPress      ] = buttonpress,
+    [ClientMessage    ] = clientmessage,
+    [ConfigureRequest ] = configurerequest,
+    [ConfigureNotify  ] = configurenotify,
+    [DestroyNotify    ] = destroynotify,
+    [EnterNotify      ] = enternotify,
+    [Expose           ] = expose,
+    [FocusIn          ] = focusin,
+    [KeyPress         ] = keypress,
+    [MappingNotify    ] = mappingnotify,
+    [MapRequest       ] = maprequest,
+    [MotionNotify     ] = motionnotify,
+    [PropertyNotify   ] = propertynotify,
+    [UnmapNotify      ] = unmapnotify
 };
 static Atom wmatom[WMLast], netatom[NetLast];
 static int epoll_fd;
@@ -613,16 +613,16 @@ configure(Client *c)
 {
     XConfigureEvent ce;
 
-    ce.type = ConfigureNotify;
-    ce.display = dpy;
-    ce.event = c->win;
-    ce.window = c->win;
-    ce.x = c->x;
-    ce.y = c->y;
-    ce.width = c->w;
-    ce.height = c->h;
-    ce.border_width = c->bw;
-    ce.above = None;
+    ce.type              = ConfigureNotify;
+    ce.display           = dpy;
+    ce.event             = c->win;
+    ce.window            = c->win;
+    ce.x                 = c->x;
+    ce.y                 = c->y;
+    ce.width             = c->w;
+    ce.height            = c->h;
+    ce.border_width      = c->bw;
+    ce.above             = None;
     ce.override_redirect = False;
     XSendEvent(dpy, c->win, False, StructureNotifyMask, (XEvent *)&ce);
 }
@@ -2935,5 +2935,4 @@ main(int argc, char *argv[])
     XCloseDisplay(dpy);
     return EXIT_SUCCESS;
 }
-
 

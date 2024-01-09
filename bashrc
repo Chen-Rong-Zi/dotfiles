@@ -162,7 +162,7 @@ alias dtrans="trans en:zh-CH -show-prompt-message n -show-original-dictionary Y 
 alias ags="xargs"
 # alias cfw="~/.config/usr/'Clash for Windows-0.18.5-x64-linux'/cfw"
 # 打开终端自动开启代理
-alias setproxy="export https_proxy=http://127.0.0.1:7891;export http_proxy=http://127.0.0.1:7891;export all_proxy=socks5://127.0.0.1:7890"
+alias setproxy="export https_proxy=http://127.0.0.1:7890;export http_proxy=http://127.0.0.1:7890;export all_proxy=socks5://127.0.0.1:7890"
 alias unsetproxy="unset all_proxy; unset https_proxy; unset http_proxy;echo 'UNSET PROXY SUCCESS!!!'"
 alias shot="import $image_path"
 alias rm="rm -i"
@@ -180,6 +180,7 @@ alias ta="tmux attach"
 alias 废话="bullshit"
 alias ipa="ip a | grep 'wlp1s0' | grep -oP '(?<=inet )([0-9\.]*)'"
 alias view="viewnior"
+alias figlet="figlet -f 'ANSI Shadow'"
 
 export ubuntu="rongzi@139.224.128.37"
 export image_path="/home/rongzi/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S").jpg"
@@ -220,15 +221,7 @@ export USE_SYMENGINE=1
 # PS1="MYTestPrompt> "
 export core_pattern="$(cat /proc/sys/kernel/core_pattern)"
 export core_dir="/home/rongzi/Downloads/Coredump"
-
-# attach() {
-#     bg
-#     disown
-#     export pid=$(jobs -p | cut -d ' ' -f1)
-#     tmux
-#     sudo sysctl -w kernel.yama.ptrace_scope=0
-# #     reptyr $pid
-# }
+export src="/home/rongzi/Downloads/Coredump"
 
 if [ -z "$DISPLAY" ] && [ -z "$TMUX" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
     setfont ter-228b.psf.gz
@@ -238,7 +231,7 @@ if [[ -n $DISPLAY ]] && [[ -z $TMUX ]]; then
     tmux
 fi
 
-if [[ $(pgrep v2ray) ]];then
+if [[ $(pgrep clash) ]];then
     setproxy
 fi
 
@@ -246,5 +239,4 @@ fi
 source $HOME/.config/broot/launcher/bash/br
 source $HOME/.config/shell/key-bindings.bash
 source $HOME/.config/scripts/marco.sh
-source $HOME/.config/scripts/functions.sh
-# alias io="gcc -o /home/rongzi/cProgram/a.out hello_world.c  -lncurses;a.out"
+# source $HOME/.config/scripts/functions.sh

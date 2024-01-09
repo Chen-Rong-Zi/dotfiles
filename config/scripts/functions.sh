@@ -60,3 +60,10 @@ vman() {
     [[ -n "$(man $@ 2>/dev/null)" ]]  &&  man $@ 2>/dev/null | vim -MR +"set filetype=man" -
 }
 
+export -f nopad
+export -f pad
+export -f debug
+export -f fj
+export -f jo
+export -f rn
+export -f vman

@@ -11,7 +11,7 @@ static const unsigned int maxHTab           = 200;  /* tab menu height */
 
 
 /* appearance */
-static const unsigned int borderpx  = 2;        /* border pixel of windows */
+static const unsigned int borderpx  = 1.5;        /* border pixel of windows */
 static const unsigned int gappx     = 15;        /* gaps between windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
@@ -42,25 +42,25 @@ static const Rule rules[] = {
      *  WM_CLASS(STRING) = instance, class
      *  WM_NAME(STRING) = title
      */
-    /* class          instance         title       tags mask     isfloating    isfullscreen  monitor */
-    { "Gimp",         NULL,            NULL,       0,            1,            0,            -1 },
-    { "Firefox",      NULL,            NULL,       1 << 8,       0,            0,            -1 },
-    { NULL,           NULL,            "joshuto",  0,            1,            0,             1 },
-    { NULL,           NULL,            "quick",    0,            1,            0,             1 },
-    { NULL,           NULL,      "EmojiFloatWnd",  0,            1,            0,             1 },
-    { NULL,           NULL,               "成员",  0,            1,            0,             1 },
-    { NULL,           NULL,          "wemeetapp",  0,            1,            0,             1 },
-    { "Viewnior",     NULL,             NULL,      0,            1,            0,             1 },
-    {"kdeconnectd",   NULL,            NULL,       0,            0,            1,             1 },
-    {"Gcolor3",       NULL,            NULL,       0,            1,            0,             1 },
-    {"xfce4-notifyd", NULL,            NULL,       0,            1,            0,             1 }
+    /* class            instance title            tags mask isfloating isfullscreen monitor */
+    {  "Gimp",          NULL,    NULL,            0,   1,   0,         -1           },
+    {  "Firefox",       NULL,    NULL,            1    <<   8,         0,           0,      -1 },
+    {  NULL,            NULL,    "joshuto",       0,   1,   0,         1            },
+    {  NULL,            NULL,    "quick",         0,   1,   0,         1            },
+    {  NULL,            NULL,    "EmojiFloatWnd", 0,   1,   0,         1            },
+    {  NULL,            NULL,    "成员",          0,   1,   0,         1            },
+    {  NULL,            NULL,    "wemeetapp",     0,   1,   0,         1            },
+    {  "Viewnior",      NULL,    NULL,            0,   1,   0,         1            },
+    {  "kdeconnectd",   NULL,    NULL,            0,   0,   1,         1            },
+    {  "Gcolor3",       NULL,    NULL,            0,   1,   0,         1            },
+    {  "xfce4-notifyd", NULL,    NULL,            0,   1,   0,         1            }
 };
 
 /* layout(s) */
-static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
-static const int nmaster     = 1;    /* number of clients in master area */
-static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
-static const int lockfullscreen = 1; /* 1 will force focus on the fullscreen window */
+static const float mfact          = 0.55; /* factor of    master  area  size   [0.05..0.95] */
+static const int   nmaster        = 1;    /* number of    clients in    master area         */
+static const int   resizehints    = 1;    /* 1      means respect size  hints  in           tiled      resizals */
+static const int   lockfullscreen = 1;    /* 1      will  force   focus on     the          fullscreen window   */
 
 static const Layout layouts[] = {
     /* symbol     arrange function */
@@ -73,37 +73,37 @@ static const Layout layouts[] = {
 #define MODKEY Mod4Mask
 #define MODKEY_ALT Mod1Mask
 #define TAGKEYS(KEY,TAG) \
-    { MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
-    { MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
-    { MODKEY|ShiftMask,             KEY,      tag,            {.ui = 1 << TAG} }, \
-    { MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
+    { MODKEY,                       KEY, view,       {.ui = 1 << TAG} }, \
+    { MODKEY|ControlMask,           KEY, toggleview, {.ui = 1 << TAG} }, \
+    { MODKEY|ShiftMask,             KEY, tag,        {.ui = 1 << TAG} }, \
+    { MODKEY|ControlMask|ShiftMask, KEY, toggletag,  {.ui = 1 << TAG} },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[]   = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL };
-static const char *termcmd[]    = { "alacritty", NULL };
-static const char *quick_term[] = { "alacritty", "-t", "quick", NULL };
-static const char *powerMenu[]  = { "/home/rongzi/.config/polybar/pwidgets/scripts/powermenu.sh", NULL };
-static const char *drun[]       = {"rofi", "-modi", "drun", "-show", "drun", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL};
-static const char *winMenu[]    = {"rofi", "-modi", "window", "-show", "window", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL};
-static const char *chrome[]     = {"google-chrome-stable", NULL};
-static const char *lock[]       = {"/home/rongzi/.config/scripts/lock", NULL};
-static const char *shot[]       = {"/home/rongzi/.config/scripts/shot", NULL};
-static const char *mouseShot[]  = {"/home/rongzi/.config/scripts/mouse_shot", NULL};
-static const char *picom[]      = {"/home/rongzi/.config/scripts/picom", NULL};
-static const char *myPicom[]    = {"/home/rongzi/.config/scripts/my_picom", NULL};
-static const char *btop[]       = {"/home/rongzi/.config/scripts/btop", NULL};
-static const char *joshuto[]    = {"/home/rongzi/.config/scripts/joshuto", NULL};
-static const char *clipboard[]  = {"/home/rongzi/.config/scripts/clipboard", NULL};
-static const char *pcmanfm[]    = {"pcmanfm", NULL};
-static const char *lightup[]    = {"/home/rongzi/.config/scripts/backlight", "+10%",  NULL};
-static const char *lightdown[]  = {"/home/rongzi/.config/scripts/backlight","10%-",  NULL};
-static const char *volumeup[]   = {"pactl", "set-sink-volume","@DEFAULT_SINK@", "+10%", NULL};
-static const char *volumedown[] = {"pactl", "set-sink-volume","@DEFAULT_SINK@", "-10%", NULL};
-static const char *volumemute[] = {"pactl", "set-sink-mute","@DEFAULT_SINK@", "toggle", NULL};
+static const char *dmenucmd[]   = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL  };
+static const char *termcmd[]    = { "alacritty", NULL  };
+static const char *quick_term[] = { "alacritty", "-t", "quick", NULL  };
+static const char *powerMenu[]  = { "/home/rongzi/.config/polybar/pwidgets/scripts/powermenu.sh", NULL  };
+static const char *drun[]       = { "rofi", "-modi", "drun", "-show", "drun", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL };
+static const char *winMenu[]    = { "rofi", "-modi", "window", "-show", "window", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL };
+static const char *chrome[]     = { "google-chrome-stable", NULL };
+static const char *lock[]       = { "/home/rongzi/.config/scripts/lock", NULL };
+static const char *shot[]       = { "/home/rongzi/.config/scripts/shot", NULL };
+static const char *mouseShot[]  = { "/home/rongzi/.config/scripts/mouse_shot", NULL };
+static const char *picom[]      = { "/home/rongzi/.config/scripts/picom", NULL };
+static const char *myPicom[]    = { "/home/rongzi/.config/scripts/my_picom", NULL };
+static const char *btop[]       = { "/home/rongzi/.config/scripts/btop", NULL };
+static const char *joshuto[]    = { "/home/rongzi/.config/scripts/joshuto", NULL };
+static const char *clipboard[]  = { "/home/rongzi/.config/scripts/clipboard", NULL };
+static const char *pcmanfm[]    = { "pcmanfm", NULL };
+static const char *lightup[]    = { "/home/rongzi/.config/scripts/backlight", "+10%",  NULL };
+static const char *lightdown[]  = { "/home/rongzi/.config/scripts/backlight","10%-",  NULL };
+static const char *volumeup[]   = { "pactl", "set-sink-volume","@DEFAULT_SINK@", "+10%", NULL };
+static const char *volumedown[] = { "pactl", "set-sink-volume","@DEFAULT_SINK@", "-10%", NULL };
+static const char *volumemute[] = { "pactl", "set-sink-mute","@DEFAULT_SINK@", "toggle", NULL };
 
 
 static const Key keys[] = {
@@ -167,18 +167,18 @@ static const Key keys[] = {
 /* button definitions */
 /* click can be ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle, ClkClientWin, or ClkRootWin */
 static const Button buttons[] = {
-    /* click                event mask      button          function        argument */
-    { ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
-    { ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
-    { ClkWinTitle,          0,              Button2,        zoom,           {0} },
-    { ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
-    { ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
-    { ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
-    { ClkClientWin,     MODKEY|ShiftMask,   Button1,        resizemouse,    {0} },
-    { ClkTagBar,            0,              Button1,        view,           {0} },
-    { ClkTagBar,            0,              Button3,        toggleview,     {0} },
-    { ClkTagBar,            MODKEY,         Button1,        tag,            {0} },
-    { ClkTagBar,            MODKEY,         Button3,        toggletag,      {0} },
+    /* click          event             mask     button          function argument */
+    {  ClkLtSymbol,   0,                Button1, setlayout,      {0}      },
+    {  ClkLtSymbol,   0,                Button3, setlayout,      {.v      =        &layouts[2]} },
+    {  ClkWinTitle,   0,                Button2, zoom,           {0}      },
+    {  ClkStatusText, 0,                Button2, spawn,          {.v      =        termcmd      }  },
+    {  ClkClientWin,  MODKEY,           Button1, movemouse,      {0}      },
+    {  ClkClientWin,  MODKEY,           Button2, togglefloating, {0}      },
+    {  ClkClientWin,  MODKEY|ShiftMask, Button1, resizemouse,    {0}      },
+    {  ClkTagBar,     0,                Button1, view,           {0}      },
+    {  ClkTagBar,     0,                Button3, toggleview,     {0}      },
+    {  ClkTagBar,     MODKEY,           Button1, tag,            {0}      },
+    {  ClkTagBar,     MODKEY,           Button3, toggletag,      {0}      },
 };
 
 static const char *ipcsockpath = "/tmp/dwm.sock"; static IPCCommand ipccommands[] = {
