@@ -129,7 +129,7 @@ endfunction
 
 "function! SearchSelectedText(){{{
 function! SearchSelectedText()
-    set hlsearch
+    setl hlsearch
     let @/ = substitute(@", '\', '\\\\', 'g')
     let @/ = substitute(@/, '\$', '\\$', 'g')
     let @/ = '\M' . substitute(@/, '\n', '\\n', 'g')
@@ -137,7 +137,7 @@ function! SearchSelectedText()
 endfunction
 
 function! SearchAugmentText(string)
-    set hlsearch
+    setl hlsearch
     let @/ = substitute(a:string, '\', '\\\\', 'g')
     let @/ = substitute(@/, '\$', '\\$', 'g')
     let @/ = '\M' . substitute(@/, '\n', '\\n', 'g')
@@ -198,12 +198,12 @@ au vimenter * vn <leader>w y<CMD>call SearchSelectedText()<CR><CMD>call VisualWr
 aug end
 "}}}ksdfh;
 
-"function! MakeWrapper(left = "(", right = ")"){{{
-function! MakeWrapper(left = "(", right = ")", stop = 1)
+"function! MakeWrapper(left = "(", right = ")")     {{{
+function! s:MakeWrapper(left = "(", right = ")", stop = 1)
     let s:left  = a:left
     let s:right = a:right
     let s:stop  = a:stop
-    function! OperatorWrapper(type)
+    function! s:OperatorWrapper(type)
         let start_pos =  getcharpos("'[")
         let end_pos   =  getcharpos("']")
         let start_col =  start_pos[2]
@@ -239,16 +239,16 @@ function! MakeWrapper(left = "(", right = ")", stop = 1)
 endfunction
 aug OperatorWrapper
 autocmd!
-au VimEnter * no  (  <cmd>call  MakeWrapper('(', ')', 2)<CR><CMD>set operatorfunc=OperatorWrapper<cr>g@
-au VimEnter * no  {  <cmd>call  MakeWrapper('{', '}', 1)<CR><CMD>set operatorfunc=OperatorWrapper<cr>g@
-au VimEnter * no  [  <cmd>call  MakeWrapper('[', ']', 2)<CR><CMD>set operatorfunc=OperatorWrapper<cr>g@
-au VimEnter * no  "  <cmd>call  MakeWrapper('"', '"', 2)<CR><CMD>set operatorfunc=OperatorWrapper<cr>g@
-au VimEnter * no  '  <Cmd>call  MakeWrapper("'", "'", 2)<CR><CMD>set operatorfunc=OperatorWrapper<CR>g@
+au VimEnter * no  (  <cmd>call  <SID>MakeWrapper('(', ')', 2)<CR><CMD>set operatorfunc=<SID>OperatorWrapper<CR>g@
+au VimEnter * no  {  <cmd>call  <SID>MakeWrapper('{', '}', 1)<CR><CMD>set operatorfunc=<SID>OperatorWrapper<CR>g@
+au VimEnter * no  [  <cmd>call  <SID>MakeWrapper('[', ']', 2)<CR><CMD>set operatorfunc=<SID>OperatorWrapper<CR>g@
+au VimEnter * no  "  <cmd>call  <SID>MakeWrapper('"', '"', 2)<CR><CMD>set operatorfunc=<SID>OperatorWrapper<CR>g@
+au VimEnter * no  '  <Cmd>call  <SID>MakeWrapper("'", "'", 2)<CR><CMD>set operatorfunc=<SID>OperatorWrapper<CR>g@
 
-au VimEnter * nno (( 0<cmd>call MakeWrapper('(', ')', 1)<CR><CMD>set operatorfunc=OperatorWrapper<cr>g@$
-au VimEnter * nno {{ 0<cmd>call MakeWrapper('{', '}', 1)<CR><CMD>set operatorfunc=OperatorWrapper<cr>g@$
-au VimEnter * nno "" 0<cmd>call MakeWrapper('"', '"', 1)<CR><CMD>set operatorfunc=OperatorWrapper<cr>g@$
-au VimEnter * nno '' 0<Cmd>call MakeWrapper("'", "'", 1)<CR><CMD>set operatorfunc=OperatorWrapper<CR>g@$
+au VimEnter * nno (( 0<cmd>call <SID>MakeWrapper('(', ')', 1)<CR><CMD>set operatorfunc=<SID>OperatorWrapper<CR>g@$
+au VimEnter * nno {{ 0<cmd>call <SID>MakeWrapper('{', '}', 1)<CR><CMD>set operatorfunc=<SID>OperatorWrapper<CR>g@$
+au VimEnter * nno "" 0<cmd>call <SID>MakeWrapper('"', '"', 1)<CR><CMD>set operatorfunc=<SID>OperatorWrapper<CR>g@$
+au VimEnter * nno '' 0<Cmd>call <SID>MakeWrapper("'", "'", 1)<CR><CMD>set operatorfunc=<SID>OperatorWrapper<CR>g@$
 au BufEnter * nno <buffer> [[ 0<cmd>call MakeWrapper('[', ']', 1)<cr><cmd>set operatorfunc=OperatorWrapper<cr>g@$
 aug end
 "}}}}}}
@@ -320,51 +320,69 @@ function! ExitMode()
     return 1
 endfunction
 
-"function! CopenMode(){{{
-function! GrepMode()
-    function! Copen()
-        copen
-        setlocal nolist nonu nornu
-        redraw!
+function! s:GrepOperator(type)
+    function! SaveReg()
+       let s:save_reg = @@
     endfunction
-    function! ExitGrepMode()
-        call ExitMode()
-        silent! cclose
+    function! RestoreReg()
+       let @@ = s:save_reg
     endfunction
-
-    " init the mode
-    call ModeInit()
-    let result = expand("<cword>")
-    silent! execute "grep -Ri " . shellescape(expand("<cword>")) . " .. 2>/dev/null"
-    call SearchAugmentText(result)
-    call Copen()
-
-    " set the exit of the mode
-    nn <leader>qq <CMD>call ExitGrepMode() <CR>
-endfunction
-
-function! GrepOperator(type)
-    function! Copen()
+    function! Copen(text)
+        call SearchAugmentText(a:text)
         copen
         redraw!
         setlocal nolist nonu nornu
+        exe "normal! \<c-w>k"
+    endfunction
+    function! Cnext()
+        if !exists("s:last_buffer_number")
+            let s:last_buffer_number = bufnr()
+"             call Print($"did not find s:last_buffer_number", "Error")
+            silent! cnext
+            return
+        endif
+        let curr_buffer_number = bufnr()
+        if curr_buffer_number != s:last_buffer_number
+            silent! exe "bdelete " .  s:last_buffer_number
+"             call Print("delete buffer!", "Error")
+        endif
+        let s:last_buffer_number = curr_buffer_number
+        silent! cnext
+    endfunction
+    function! Cprev()
+        if !exists("s:last_buffer_number")
+            let s:last_buffer_number = bufnr()
+"             call Print($"did not find s:last_buffer_number", "Error")
+            silent! cnext
+            return
+        endif
+        let curr_buffer_number = bufnr()
+        if curr_buffer_number != s:last_buffer_number
+            silent! exe "bdelete " .  s:last_buffer_number
+"             call Print("delete buffer!", "Error")
+        endif
+        let s:last_buffer_number = curr_buffer_number
+        silent! cprev
+    endfunction
+    function! GrepOperatorInit()
+        call SaveReg()
+        call ModeInit()
+        nn <c-n> <CMD>call Cnext()<CR>
+        nn <c-p> <CMD>call Cprev()<CR>
     endfunction
     function! ExitOperatorMode()
         silent! cclose
+        call RestoreReg()
         call ExitMode()
     endfunction
 
     " init the mode
-    call ModeInit()
-    let start_pos    = getcharpos("'[")
-    let end_pos      = getcharpos("']")
-    let line         = getline(start_pos[1])->split('\zs')[(start_pos[2] - 1):(end_pos[2] - 1)]->join('')
-    let grep_cmd_arg = shellescape(line)
+    call GrepOperatorInit()
+    silent! normal! `[v`]y
 
-    call Print(grep_cmd_arg, "Error")
-    silent! exe  'grep -Ri ' . grep_cmd_arg . " .. 2>/dev/null"
-    call SearchAugmentText(line)
-    call Copen()
+    call Print("正在查找：" . @@, "Error")
+    silent! exe  'grep -Ri ' . shellescape(@@) . " .. 2>/dev/null"
+    call Copen(@@)
 
     " set the exit of the mode
     nn <leader>qq <CMD>call ExitOperatorMode() <CR>
@@ -401,7 +419,9 @@ function! DebugMode()
     call Copen()
     nn <leader>qq <CMD>call ExitCompileMode() <CR>
 endfunction
+" }}}
 
+"function! RunMode(){{{
 function! RunMode()
     function! Copen()
         silent! copen
@@ -429,21 +449,76 @@ function! RunMode()
         silent! exe 'bo term ' . $bin
         redraw!
     else
-        call Copen()
+        call DebugMode()
     endif
 
     nn <leader>qq <CMD>call ExitMode() <CR>
     return 1
 endfunction
-
-au VimEnter * nn <leader>g <CMD>set  operatorfunc=GrepOperator<CR>g@
+"}}}
+au VimEnter * no <leader>g <CMD>set  operatorfunc=<SID>GrepOperator<CR>g@
 " au VimEnter * nn <leader>g <CMD>call GrepMode()    <CR>
 au VimEnter * nn <leader>d <CMD>call DebugMode() <CR>
 au VimEnter * nn <leader>r <CMD>call RunMode()   <CR>
 "}}}}}}
 
+"function! FoldColumnToggle(){{{
+function! FoldColumnToggle()
+    if &foldcolumn
+        let &foldcolumn = 0
+    else
+        let &foldcolumn = 4
+    endif
+    return Print("foldcolumn = " . &foldcolumn, "Preproc")
+endfunction
 
-"quickfix-window-function {{{
+nn <leader>f <CMD>call FoldColumnToggle()<CR>
+"}}}
+
+"function! CommentToggle()  {{{
+function! CommentToggleMaker(comment)
+    let s:comment = a:comment
+    function! CommentToggle(type)
+        let [min_number, max_number] = [getcharpos("'[")[1],    getcharpos("']")[1]]
+        let content                  =  getline(min_number, max_number)
+        if content ==# []
+            return Print('这俩居然相等还都等于零', "Error")
+        endif
+
+        for line_number in range(min_number, max_number)
+            let line = content[line_number - min_number]->split('\zs')
+            if line ==# []
+                continue
+            endif
+            if (line->join('')) =~# ('^\s*' . s:comment)
+                call Print("删除注释", "String")
+                let index = -1
+                for char in line
+                    let index += 1
+                    if char != s:comment
+                        continue
+                    endif
+                    call remove(line, index)
+                    if line[index] ==# ' '
+                        call remove(line, index)
+                    endif
+                    break
+                endfor
+            else
+                call Print("添加注释", "Preproc")
+                call insert(line, ' ')
+                call insert(line, s:comment)
+            endif
+            call setline(line_number, line->join(''))
+        endfor
+        call MoveCursor(getcharpos("'[")[1], getcharpos("'[")[2])
+    endfunction
+endfunction
+
+no m  <CMD>call CommentToggleMaker('"')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
+nn mm <CMD>call CommentToggleMaker('"')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
+"}}}
+""quickfix-window-function {{{
 " " 从 v:oldfiles 来建立快速修复列表
 " call setqflist([], ' ', {'lines' : v:oldfiles, 'efm' : '%f', 'quickfixtextfunc' : 'QfOldFiles'})
 " func QfOldFiles(info)

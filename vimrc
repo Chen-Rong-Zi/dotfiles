@@ -9,7 +9,7 @@
 let mapleader = ","
 if !exists("g:colorscheme")
     colorscheme onedark
-    syntax      on
+    syntax on
     let g:colorscheme   = 'onedark'
     let g:airline_theme = 'onedark'
     call system("dunstify -I /usr/share/icons/Papirus/48x48/apps/vim.svg rongzi  welcome to vim")
@@ -56,6 +56,7 @@ set virtualedit=NONE
 set textwidth=256
 set helplang=cn
 set termwinsize=13*0
+set foldcolumn=1
 " set nu ru ai si ts=4 sw=4
 " vim buffer tab open-tab
 "     <c-[np]> <c-[ey]> <c-t>
@@ -98,11 +99,11 @@ au filetype c,cpp inorea <silent> <buffer> itn      int
 au filetype c,cpp inorea <silent> <buffer> retrun   return
 au filetype c,cpp inorea <silent> <buffer> retunr   return
 au filetype c,cpp inorea <silent> <buffer> reutrn   return
-au filetype c,cpp inorea <silent> <buffer> for    for ( <++>; <++>; <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<cf>
+au filetype c,cpp inorea <silent> <buffer> for      for ( <++>; <++>; <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<cf>
 au filetype c,cpp inorea <silent> <silent> <buffer> while  while ( )<left><left>
 au filetype c,cpp inorea <silent> <silent> <buffer> if     if ( )<left><left>
-au filetype c,cpp inorea <silent> <buffer> #i     # include <><left><C-R>=Eatchar('\s')<CR>
-au filetype c,cpp inorea <silent> <buffer> #I     # include <><left><C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> #i       # include <><left><C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> #I       # include <><left><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> mm       main(int arg_number, char **arg_value)
 au filetype c,cpp inorea <silent> <buffer> pp       printf("", <++>);<c-o>F"<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> ss       scanf("",  <++>);<c-o>F"<C-R>=Eatchar('\s')<CR>
@@ -117,7 +118,7 @@ au filetype c,cpp inorea <silent> <buffer> kllf     %llf
 au filetype c,cpp inorea <silent> <buffer> fuck     Are you alright?
 
 "  <tab> and <space> visualised
-au filetype c,cpp         setl    cindent
+au filetype c,cpp setl cindent
 au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
 aug end
 " }}}
@@ -456,6 +457,12 @@ aug end
 " }}}
 
 
+" ███╗   ███╗ █████╗ ███╗   ██╗██████╗  ██████╗  ██████╗
+" ████╗ ████║██╔══██╗████╗  ██║██╔══██╗██╔═══██╗██╔════╝
+" ██╔████╔██║███████║██╔██╗ ██║██║  ██║██║   ██║██║
+" ██║╚██╔╝██║██╔══██║██║╚██╗██║██║  ██║██║   ██║██║
+" ██║ ╚═╝ ██║██║  ██║██║ ╚████║██████╔╝╚██████╔╝╚██████╗
+" ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝  ╚═════╝  ╚═════╝
 "man doc settings--------<++>------------{{{
 aug man
 autocmd!
@@ -472,6 +479,12 @@ aug end
 " }}}
 
 
+" ██╗  ██╗███████╗██╗     ██████╗ ██████╗  ██████╗  ██████╗
+" ██║  ██║██╔════╝██║     ██╔══██╗██╔══██╗██╔═══██╗██╔════╝
+" ███████║█████╗  ██║     ██████╔╝██║  ██║██║   ██║██║
+" ██╔══██║██╔══╝  ██║     ██╔═══╝ ██║  ██║██║   ██║██║
+" ██║  ██║███████╗███████╗██║     ██████╔╝╚██████╔╝╚██████╗
+" ╚═╝  ╚═╝╚══════╝╚══════╝╚═╝     ╚═════╝  ╚═════╝  ╚═════╝
 "help doc settings--------<++>------------{{{
 aug help
 autocmd!
@@ -483,6 +496,12 @@ aug end
 " }}}
 
 
+" ███╗   ███╗ █████╗ ██████╗ ██╗  ██╗██████╗  ██████╗ ██╗    ██╗███╗   ██╗
+" ████╗ ████║██╔══██╗██╔══██╗██║ ██╔╝██╔══██╗██╔═══██╗██║    ██║████╗  ██║
+" ██╔████╔██║███████║██████╔╝█████╔╝ ██║  ██║██║   ██║██║ █╗ ██║██╔██╗ ██║
+" ██║╚██╔╝██║██╔══██║██╔══██╗██╔═██╗ ██║  ██║██║   ██║██║███╗██║██║╚██╗██║
+" ██║ ╚═╝ ██║██║  ██║██║  ██║██║  ██╗██████╔╝╚██████╔╝╚███╔███╔╝██║ ╚████║
+" ╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝  ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
 "markdown scripts settings--------<++>------------{{{
 aug markdown
 autocmd!
@@ -499,6 +518,12 @@ aug end
 " }}}
 
 
+" ██████╗  █████╗ ███████╗██╗  ██╗
+" ██╔══██╗██╔══██╗██╔════╝██║  ██║
+" ██████╔╝███████║███████╗███████║
+" ██╔══██╗██╔══██║╚════██║██╔══██║
+" ██████╔╝██║  ██║███████║██║  ██║
+" ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
 "bash scripts settings--------<++>------------{{{
 aug bash
 autocmd!
@@ -599,3 +624,4 @@ aug end
 source /home/rongzi/.vim/functions/useful.vim
 " }}}
 
+"source ~/.vim/plugin/grep-operator.vim

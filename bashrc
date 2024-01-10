@@ -162,7 +162,7 @@ alias dtrans="trans en:zh-CH -show-prompt-message n -show-original-dictionary Y 
 alias ags="xargs"
 # alias cfw="~/.config/usr/'Clash for Windows-0.18.5-x64-linux'/cfw"
 # 打开终端自动开启代理
-alias setproxy="export https_proxy=http://127.0.0.1:7890;export http_proxy=http://127.0.0.1:7890;export all_proxy=socks5://127.0.0.1:7890"
+alias setproxy="export https_proxy=http://127.0.0.1:7890;export http_proxy=http://127.0.0.1:7890;export all_proxy=socks5://127.0.0.1:7890;echo 'SET PROXY SUCCESS'"
 alias unsetproxy="unset all_proxy; unset https_proxy; unset http_proxy;echo 'UNSET PROXY SUCCESS!!!'"
 alias shot="import $image_path"
 alias rm="rm -i"
@@ -232,7 +232,7 @@ if [[ -n $DISPLAY ]] && [[ -z $TMUX ]]; then
 fi
 
 if [[ $(pgrep clash) ]];then
-    setproxy
+    setproxy >/dev/null
 fi
 
 

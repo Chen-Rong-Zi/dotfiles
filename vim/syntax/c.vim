@@ -28,7 +28,7 @@ syn keyword cLabel      case default
 " <++>
 " syn keyword   cConditional    if else switch
 syn keyword cRepeat     while for do
-syn keyword cConditional    if else switch
+"syn keyword cConditional    if else switch
 syn keyword cRepeat         do
 
 syn keyword ctodo       contained todo fixme xxx
@@ -569,6 +569,9 @@ syntax region Nothing matchgroup=Identifier start=/\v\h*\[/ end=/]/ oneline cont
 " syntax match Constant /\%(if\|while\|for\)\s*([^)]*)\s*{/          " Constant defined by #define or const
 syntax match Constant /\v<[[:upper:]_]+>/    contains=Function      " Constant defined by #define or const
 
+syntax match   Keyword /\v^ {-}\zs<else if/       conceal cchar=ℰ
+syntax match   Keyword /\v^ {-}\zs<else%( if)@!/  conceal cchar=𝘌
+syntax keyword Keyword if       conceal cchar=𝘐
 syntax keyword Keyword int      conceal cchar=𝗜
 syntax keyword Keyword typedef  conceal cchar=𝕋
 syntax keyword Keyword float    conceal cchar=𝔽
