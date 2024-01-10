@@ -432,7 +432,7 @@ function! RunMode()
     function! RunModeInit()
         silent! normal! `M
         if !(expand("%") =~# '.*\.c')
-            call Print("只有C文件可以make", "Error")
+            call Print("错误：只有C文件可以make", "Error")
             return 0
         endif
         return ModeInit()
@@ -481,33 +481,34 @@ function! CommentToggleMaker(comment)
     function! CommentToggle(type)
         let [min_number, max_number] = [getcharpos("'[")[1],    getcharpos("']")[1]]
         let content                  =  getline(min_number, max_number)
-        if content ==# []
-            return Print('这俩居然相等还都等于零', "Error")
-        endif
 
         for line_number in range(min_number, max_number)
             let line = content[line_number - min_number]->split('\zs')
             if line ==# []
                 continue
             endif
-            if (line->join('')) =~# ('^\s*' . s:comment)
-                call Print("删除注释", "String")
-                let index = -1
-                for char in line
-                    let index += 1
-                    if char != s:comment
-                        continue
-                    endif
-                    call remove(line, index)
+            for index in range(len(line))
+                let char = line[index]
+                if char ==# ' '
+                    continue
+                elseif char !=# ' ' && char != s:comment[0]
+                    break
+                elseif char ==# s:comment[0]
+                    call Print("CommentToggle：去除注释", "Function")
+                    for _ in range(len(s:comment))
+                        if line[index] ==# s:comment[0]
+                            call remove(line, index)
+                        endif
+                    endfor
                     if line[index] ==# ' '
                         call remove(line, index)
                     endif
                     break
-                endfor
-            else
-                call Print("添加注释", "Preproc")
-                call insert(line, ' ')
-                call insert(line, s:comment)
+                endif
+            endfor
+            if char !=# ' ' && char !=# s:comment[0]
+                call Print("CommentToggle：增加注释", "String")
+                let line = (s:comment . ' ')->split('\zs')->extend(line)
             endif
             call setline(line_number, line->join(''))
         endfor
@@ -515,18 +516,16 @@ function! CommentToggleMaker(comment)
     endfunction
 endfunction
 
-no m  <CMD>call CommentToggleMaker('"')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
-nn mm <CMD>call CommentToggleMaker('"')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
 "}}}
-""quickfix-window-function {{{
-" " 从 v:oldfiles 来建立快速修复列表
+"quickfix-window-function {{{
+" 从 v:oldfiles 来建立快速修复列表
 " call setqflist([], ' ', {'lines' : v:oldfiles, 'efm' : '%f', 'quickfixtextfunc' : 'QfOldFiles'})
 " func QfOldFiles(info)
-"     " 获取一段快速修复项目范围的相关信息
+"     获取一段快速修复项目范围的相关信息
 "     let items = getqflist({'id' : a:info.id, 'items' : 1}).items
 "     let l = []
 "     for idx in range(a:info.start_idx - 1, a:info.end_idx - 1)
-"         " 使用简化的文件名
+"         使用简化的文件名
 "       call add(l, fnamemodify(bufname(items[idx].bufnr), ':p:.'))
 "     endfor
 "     return l

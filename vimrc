@@ -92,7 +92,8 @@ au filetype c,cpp ino <buffer> <leader><leader> <space>= 0,<space>
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype c,cpp nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
-au filetype c,cpp nn <buffer> <leader>m gI// <esc>
+au filetype c,cpp nn <buffer> mm <CMD>call CommentToggleMaker('//')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
+au filetype c,cpp no <buffer> m  <CMD>call CommentToggleMaker('//')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
 
 " ABBREVIATION
 au filetype c,cpp inorea <silent> <buffer> itn      int
@@ -145,8 +146,8 @@ au filetype python ino <buffer> # #<space><left><right>
 
 au filetype python nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
 " Comment the line
-au filetype python vn <buffer> <leader>m <C-v>0I# <esc>
-au filetype python nn <buffer> <leader>m <C-v>0I# <esc>
+au filetype python no <buffer> m  <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
+au filetype python nn <buffer> mm <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
 
 " au filetype python ono <buffer> ( :<C-u>normal!t)lvi(<cr>
 
@@ -181,6 +182,8 @@ au filetype vim nn <silent> <buffer> <leader>m <c-v>0I" <esc>
 au filetype vim vn <silent> <buffer> <leader>m <C-v>0I" <esc>
 au filetype vim let maplocalleader = "1"
 au filetype vim setl foldmethod=marker
+au filetype vim no <buffer> m  <CMD>call CommentToggleMaker('"')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
+au filetype vim nn <buffer> mm <CMD>call CommentToggleMaker('"')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
 aug end
 "}}}
 "
@@ -232,6 +235,8 @@ au VimEnter * let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;gray\x7"
 au VimEnter * filetype on
 au VimEnter * syntax   on
 " au BufEnter * match Comment / /
+au VimEnter * no m  <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
+au VimEnter * nn mm <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
 au VimEnter * nn /    :set incsearch hlsearch<CR>/\v
 "au QuickFixCmdPre *  syntax
 "au VimEnter * nn <silent> <CR> :call ChangeDirectory()<CR>
@@ -299,7 +304,7 @@ au VimEnter * nn <BS> :set   hlsearch! incsearch! \| set hlsearch?<CR>
 " au VimEnter * nn <leader>r :horizontal bo terminal++close bash -rcfile ~/.my_bashrc<CR>
 " au VimEnter * nn <leader>r :horizontal bo terminal++close<CR>
 " au VimEnter * nn <leader>t :vertical terminal++close<CR>
-au VimEnter * nn <leader>i :horizontal bo terminal++close python3<CR>
+au VimEnter * nn <leader>i :horizontal bo terminal++close matrix<CR>
 
 " save the file in the buffer
 " au VimEnter * nn S :w<CR>
@@ -530,6 +535,9 @@ autocmd!
 " au filetype man only
 au filetype bash,sh inorea <silent> <buffer> if  if [[<++> ]];then<CR>fi<Esc>?<++><CR>cw
 au filetype bash,sh inorea <silent> <buffer> for for<++> in <++>;do<CR>done<Esc>0kf<cw
+" Comment the line
+au filetype bash no <buffer> m  <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
+au filetype bash nn <buffer> mm <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
 aug end
 " }}}
 
