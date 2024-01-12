@@ -697,13 +697,13 @@ configurerequest(XEvent *e)
             configure(c);
     }
     else {
-        wc.x = ev->x;
-        wc.y = ev->y;
-        wc.width = ev->width;
-        wc.height = ev->height;
+        wc.x            = ev->x;
+        wc.y            = ev->y;
+        wc.width        = ev->width;
+        wc.height       = ev->height;
         wc.border_width = ev->border_width;
-        wc.sibling = ev->above;
-        wc.stack_mode = ev->detail;
+        wc.sibling      = ev->above;
+        wc.stack_mode   = ev->detail;
         XConfigureWindow(dpy, ev->window, ev->value_mask, &wc);
     }
     XSync(dpy, False);
@@ -716,16 +716,16 @@ createmon(void)
 
     m = ecalloc(1, sizeof(Monitor));
     m->tagset[0] = m->tagset[1] = 1;
-    m->mfact = mfact;
-    m->nmaster = nmaster;
-    m->showbar = showbar;
-    m->gappx = gappx;
-    m->topbar = topbar;
-    m->bh = bh;
-    m->lt[0] = &layouts[0];
-    m->lt[1] = &layouts[1 % LENGTH(layouts)];
-    m->nTabs = 0;
-    m->ncTabs = 0;
+    m->mfact     = mfact;
+    m->nmaster   = nmaster;
+    m->showbar   = showbar;
+    m->gappx     = gappx;
+    m->topbar    = topbar;
+    m->bh        = bh;
+    m->lt[0]     = &layouts[0];
+    m->lt[1]     = &layouts[1   % LENGTH(layouts)];
+    m->nTabs     = 0;
+    m->ncTabs    = 0;
     strncpy(m->ltsymbol, layouts[0].symbol, sizeof m->ltsymbol);
     return m;
 }
@@ -1172,7 +1172,7 @@ manage(Window w, XWindowAttributes *wa)
     updatetitle(c);
     getclassname(c);
     if (XGetTransientForHint(dpy, w, &trans) && (t = wintoclient(trans))) {
-        c->mon = t->mon;
+        c->mon  = t->mon;
         c->tags = t->tags;
     }
     else {

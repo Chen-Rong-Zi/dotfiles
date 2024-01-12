@@ -15,7 +15,7 @@ if !exists("g:colorscheme")
     call system("dunstify -I /usr/share/icons/Papirus/48x48/apps/vim.svg rongzi  welcome to vim")
 endif
 
-"call airline#update_statusline()
+" call airline#update_statusline()
 set nocp
 set concealcursor=ni
 set conceallevel=2
@@ -57,19 +57,20 @@ set textwidth=256
 set helplang=cn
 set termwinsize=13*0
 set foldcolumn=1
-" set nu ru ai si ts=4 sw=4
+set foldmethod=indent
+set nu ru ai si ts=4 sw=4
 " vim buffer tab open-tab
-"     <c-[np]> <c-[ey]> <c-t>
+    " <c-[np]> <c-[ey]> <c-t>
 " tmux buffer tab open-tab
-"     <alt-[up,down,left,right]> <alt-[np]> <c-w>t
+    " <alt-[up,down,left,right]> <alt-[np]> <c-w>t
 
 
-"  ██████╗    ██╗ ██████╗██████╗ ██████╗
+ " ██████╗    ██╗ ██████╗██████╗ ██████╗
 " ██╔════╝   ██╔╝██╔════╝██╔══██╗██╔══██╗
 " ██║       ██╔╝ ██║     ██████╔╝██████╔╝
 " ██║      ██╔╝  ██║     ██╔═══╝ ██╔═══╝
 " ╚██████╗██╔╝   ╚██████╗██║     ██║
-"  ╚═════╝╚═╝     ╚═════╝╚═╝     ╚═╝
+ " ╚═════╝╚═╝     ╚═════╝╚═╝     ╚═╝
 " C / CPP filetype script settings--------<++>------------{{{
 aug C
 autocmd!
@@ -92,8 +93,8 @@ au filetype c,cpp ino <buffer> <leader><leader> <space>= 0,<space>
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype c,cpp nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
-au filetype c,cpp nn <buffer> mm <CMD>call CommentToggleMaker('//')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
-au filetype c,cpp no <buffer> m  <CMD>call CommentToggleMaker('//')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
+au filetype c,cpp nn <buffer> mm <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('//'))<CR>g@l
+au filetype c,cpp no <buffer> m  <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('//'))<CR>g@
 
 " ABBREVIATION
 au filetype c,cpp inorea <silent> <buffer> itn      int
@@ -112,6 +113,7 @@ au filetype c,cpp inorea <silent> <buffer> kd       %d
 au filetype c,cpp inorea <silent> <buffer> kf       %f
 au filetype c,cpp inorea <silent> <buffer> kc       %c
 au filetype c,cpp inorea <silent> <buffer> ks       %s
+au filetype c,cpp inorea <silent> <buffer> ku       %u
 au filetype c,cpp inorea <silent> <buffer> klf      %lf
 au filetype c,cpp inorea <silent> <buffer> kld      %ld
 au filetype c,cpp inorea <silent> <buffer> klld     %lld
@@ -146,8 +148,8 @@ au filetype python ino <buffer> # #<space><left><right>
 
 au filetype python nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
 " Comment the line
-au filetype python no <buffer> m  <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
-au filetype python nn <buffer> mm <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
+au filetype python nn <buffer> mm <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('#'))<CR>g@l
+au filetype python no <buffer> m  <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('#'))<CR>g@
 
 " au filetype python ono <buffer> ( :<C-u>normal!t)lvi(<cr>
 
@@ -182,8 +184,8 @@ au filetype vim nn <silent> <buffer> <leader>m <c-v>0I" <esc>
 au filetype vim vn <silent> <buffer> <leader>m <C-v>0I" <esc>
 au filetype vim let maplocalleader = "1"
 au filetype vim setl foldmethod=marker
-au filetype vim no <buffer> m  <CMD>call CommentToggleMaker('"')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
-au filetype vim nn <buffer> mm <CMD>call CommentToggleMaker('"')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
+au filetype vim nn <buffer> mm <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('"'))<CR>g@l
+au filetype vim no <buffer> m  <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('"'))<CR>g@
 aug end
 "}}}
 "
@@ -262,7 +264,7 @@ au VimEnter * nn  U          gU
 au VimEnter * ono <c-l>      g_
 " au VimEnter * match Comment /^ \+/
 " fold method
-au VimEnter * nn s  <Nop>
+au VimEnter * nn <nowait> s  <Nop>
 au VimEnter * nn ff zA
 au Vimenter * nn fk zM
 au VimEnter * nn fj zR
@@ -355,7 +357,7 @@ au VimEnter * ino <c-v>    <Esc>viw
 " au VimEnter * in ; <Esc>o
 
 " spell check
-au VimEnter * nn  <silent> sc :setl  spell!<CR>
+au VimEnter * nn  <silent> <nowait> cs :setl  spell!<CR>
 au VimEnter * ino <c-x> <Cmd>set spell<CR><c-x>s
 
 " shortcuts switched
@@ -536,8 +538,8 @@ autocmd!
 au filetype bash,sh inorea <silent> <buffer> if  if [[<++> ]];then<CR>fi<Esc>?<++><CR>cw
 au filetype bash,sh inorea <silent> <buffer> for for<++> in <++>;do<CR>done<Esc>0kf<cw
 " Comment the line
-au filetype bash no <buffer> m  <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
-au filetype bash nn <buffer> mm <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
+au filetype bash,sh nn <buffer> mm <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('#'))<CR>g@l
+au filetype bash,sh no <buffer> m  <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('#'))<CR>g@
 aug end
 " }}}
 
@@ -630,6 +632,7 @@ aug end
 " ╚══════╝ ╚═════╝╚═╝  ╚═╝╚═╝╚═╝        ╚═╝   ╚══════╝
 "vim filetype script settings--------<++>------------{{{
 source /home/rongzi/.vim/functions/useful.vim
+source /home/rongzi/.vim/functions/higherorder.vim
 " }}}
 
 "source ~/.vim/plugin/grep-operator.vim

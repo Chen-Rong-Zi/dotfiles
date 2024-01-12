@@ -550,6 +550,14 @@ unlet s:cpo_save
 " syntax match LineNr /[{;]$/
 " syntax match LineNr /^};$/
 hi Nothing gui=bold
+hi link cBracket1  Nontext
+hi link cBracket2  cString
+hi link cBracket3  Keyword
+hi link cBracket4  Preproc
+hi link inBracket1 Nothing
+hi link inBracket2 Nothing
+hi link inBracket3 Nothing
+hi link inBracket4 Nothing
 
 syntax match Function       /\v\h+\ze\(/                        contains=@Spell
 syntax match Preproc        /\v\s([\+\-^\*\/%]|[>\=<!]\=?)\s/   contains=keyword,Identifier,@Spell    " + - * / >= <= ==
@@ -557,12 +565,19 @@ syntax match cType          /\v<\u\w{-}\l>\(@!/                 contains=@Spell
 syntax match keyword        /[,|&]\|!=\@!/                      contains=@Spell                              " | & !
 syntax match keyword        /\v[\+\-\|<>&]{2}/                  contains=@Spell                               " ++ -- && || >> <<
 syntax match keyword        /\v\s[|\+\-\*\/]?\=\s/              contains=@Spell                                 " += -= *= /= =
-syntax match Identifier     /\v\*+ @!\w*|[:?.]|->/              contains=PreProc,cNumber,keyword,Function,@Spell                " array[.*] and *pointers and dereference ->
+syntax match Identifier     /\v\*+ @!\w*|[:?.]|->/              contains=PreProc,cNumber,keyword,Function,@Spell,@hidden                " array[.*] and *pointers and dereference ->
 syntax match Nontext        /\v[{}]$|;|^%( *)@>}/               contains=@Spell                               " { } ;
 
-syntax cluster hidden add=Preproc,Nontext,Identifier,Constant,cString,cNumbers,Keyword,constants,cCharacter,cConstant,Function,Nothing,@cStringGroup
-syntax region Nothing matchgroup=Nontext start=/\v%(<while>|<for>|<if>)@<= \(/ end=/\v\)[^)]{-}$/ oneline contains=@hidden,@Spell keepend display
+syntax cluster hidden add=Preproc,Nontext,Identifier,Constant,cString,cNumbers,Keyword,constants,cCharacter,cConstant,Function,Nothing,@cStringGroup,cType,cBracket1,cBracket2,cBracket3,cBracket4
+" 这个困扰我好久的问题就这么解决了？第一个region是解法一，但是解法二显然更好
+" syntax region Nothing matchgroup=Nontext    start=/\v%(<while>|<for>|<if>)@<= \(/ end=/\v\)[^)]{-}$/ oneline contains=@hidden,@Spell keepend display
 syntax region Nothing matchgroup=Identifier start=/\v\h*\[/ end=/]/ oneline contains=@hidden,@Spell display
+
+syntax region inBracket1 matchgroup=cBracket1 start=/(/ end=/)/ display contains=@hidden,inBracket2 oneline
+syntax region inBracket2 matchgroup=cBracket2 start=/(/ end=/)/ display contains=@hidden,inBracket3 contained oneline
+syntax region inBracket3 matchgroup=cBracket3 start=/(/ end=/)/ display contains=@hidden,inBracket4 contained oneline
+syntax region inBracket4 matchgroup=cBracket4 start=/(/ end=/)/ display contains=@hidden,inBracket1 contained oneline
+
 " syntax match Nontext /\v((for|while|if).*)@60<=\)\s*\{=$/    " (  ) after if or while or for
 " syntax match LineNr /\v((for|while|if) )@<=\(/
 " match keyword /\v(<for>|<while>|<if>)/
@@ -587,5 +602,4 @@ syntax keyword Keyword break    conceal cchar=✖
 " syn region keyword  /password/ conceal cchar=*
 " syntax match Constant "return" conceal cchar= contains=return
 
-hi link Conceal Keyword
-
+highlight link conceal Keyword
