@@ -1,9 +1,52 @@
+" function! Notify(){{{
+function! Notify(texts, location='down')
+    let width  = winwidth(0)
+    let height = winheight(0)
+    let shift  = max(a:texts->Map('strcharlen(v:val)'))
+    if a:location ==# 'up'
+        call popup_notification(a:texts, {'col': (width/2 - shift / 2), 'line': 1, 'minwidth': shift, 'time': 800})
+    elseif a:location ==# 'down'
+        call popup_notification(a:texts, {'col': (width/2 - shift / 2), 'line': height, 'minwidth': shift, 'time': 800})
+    endif
+endfunction
+" }}}
+
+" function! Notify(){{{
+function! Icons(filename)
+    return system('exa --icons=always ' . a:filename)->split()[0]
+endfunction
+" }}}
+
+" function! SelectBuffer(){{{
+function! SelectBuffer()
+    function! OpenBuffer(id, index, results)
+        let result = a:results[a:index - 1]->split()[1]
+        if a:index ==# -1 || result ==# '' || system('[[ -d ' . result .  ' ]] && echo 1')
+            return Notify(['取消跳转'], 'up')
+        endif
+        call Notify(['跳转 ' . result])
+        silent! execute 'buf ' . result
+    endfunction
+
+    let names  = getbufinfo({'buflisted': 1})->Map('v:val["name"]')->Filter({k, name -> name !~# '!.*' && len(name) })->Map({k, v -> Icons(v) . ' ' . v})
+    let length = len(names)
+    let width  = max(names->Map('len(v:val)'))
+    if length !=# 0
+        call popup_menu(names, {'minwidth' : width + 2, 'minheight': length * 1, 'callback': {id, index -> OpenBuffer(id, index, names)}})
+    else
+        call Notify(['没有buffer'])
+    endif
+endfunction
+" }}}
+nn <leader>e :call SelectBuffer()<CR>
+
 " function! SelectFile(){{{
 " use fzf to select files quickly
 function! SelectFile()
     function! OpenBuffer(file)
-        if a:file ==# ''
-            return
+        call Notify(['跳转 ' . a:file])
+        if a:file ==# '' || system('[[ -d ' . a:file .  ' ]] && echo 1')
+            return Notify(['取消跳转'], 'up')
         elseif @% == ''
             silent execute 'e ' . a:file
         else
@@ -11,18 +54,26 @@ function! SelectFile()
         endif
     endfunction
 
-    let tmp     = tempname()
-    silent execute '!/home/rongzi/.config/scripts/fzf_for_vim.sh > '.tmp
-    let content = readfile(tmp)->map('OpenBuffer(v:val)')
-    call system('rm -rf ' . tmp)
-    silent execute 'redraw!'
-    call system("dunstify -I /usr/share/icons/Papirus/48x48/apps/vim.svg fzf done")
+    function! Rest_work(id, result, filename)
+        let content    = readfile(a:filename)
+        if a:result !=# 0 || len(content) ==# 0
+            return Notify(['取消跳转'], 'up')
+        endif
+        call OpenBuffer(content[0])
+        let pop_buffer = winbufnr(a:id)
+        silent! execute 'bd ' . pop_buffer
+        call system("rm -rf " . a:filename)
+    endfunction
+
+    let tmp         = tempname()
+    let term_buffer = term_start('/home/rongzi/.config/scripts/fzf_for_vim.sh ' . tmp, {'hidden': 1, 'term_finish': 'close'})
+    let pop_window  = popup_create(term_buffer, {'minwidth': 130, 'minheight': 20, 'border': [], 'callback': {id, result -> Rest_work(id, result, tmp)}})
 endfunction
 " }}}
 nn <leader><c-f> <CMD>call SelectFile()<CR>
 
 " use another way to show chars when in console{{{
-if $DISPLAY == ""
+if $DISPLAY == ''
     set notermguicolors
     set fillchars=vert:\|
     set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
@@ -50,7 +101,7 @@ function! ChangeDirectory()
 endfunction
 
 function! ChangeSrc()
-    if expand("%") ==# '' || system("cd " . expand("%")) =~# '.*没有.*' || system("cd " . expand("%")) =~# '.*No such.*'
+    if expand("%") ==# '' || system("cd " . expand("%")) =~# '.*没有.*' || system("cd " . expand("%")) =~# '.*No such.*' || expand('%') ==# 'popup'
         return
     endif
     execute "let $src = " . shellescape(expand('%:p'))
@@ -252,6 +303,17 @@ au VimEnter * nno  ""  0<CMD>exe 'set operatorfunc=' . string(<SID>MakeWrapper('
 au VimEnter * nno  ''  0<CMD>exe 'set operatorfunc=' . string(<SID>MakeWrapper("'", "'", 1))<CR>g@$
 aug end
 
+
+"function! CommentToggle()  {{{
+function! SendKeys(type)
+    let start_row = getcharpos("'[")[1]
+    let end_row   = getcharpos("']")[1]
+    let line      = getline(start_row, end_row)->Filter({k, v -> len(v)})->Map({k, v -> system('tmux send-keys -t {next} ' . shellescape(v) . "\r")})
+endfunction
+"}}}
+nno <c-g> <CMD>set operatorfunc=funcref('SendKeys')<CR>g@$
+vn  <c-g> <CMD>set operatorfunc=funcref('SendKeys')<CR>g@
+
 "function! CommentToggle()  {{{
 function! CommentToggleMaker(comment)
     function! CommentToggle(type) closure
@@ -338,8 +400,10 @@ endfunction
 
 function! ExitMode()
     silent! only
-    silent! exe 'normal! `Mzz'
-    delmarks M
+    if getpos("'M") !=# [0, 0, 0, 0]
+        exe 'normal! `Mzz'
+        delmarks M
+    endif
     " callee save :-)
     nn <c-n> :bnext<CR>
     nn <c-p> :bprev<CR>
@@ -409,7 +473,7 @@ function! s:GrepOperator(type)
     silent! normal! `[v`]y
 
     call Print("正在查找：" . @@, "Error")
-    silent! exe  'grep -Ri ' . shellescape(@@) . " .. 2>/dev/null"
+    silent! exe  'grep -Rsi ' . shellescape(@@) . " ."
     call Copen(@@)
 
     " set the exit of the mode

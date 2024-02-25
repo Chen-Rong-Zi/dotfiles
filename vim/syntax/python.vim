@@ -146,7 +146,8 @@ syn keyword pythonTodo		FIXME NOTE NOTES TODO XXX contained
 " Triple-quoted strings can contain doctests.
 " <++>
 syn region  pythonString matchgroup=pythonQuotes
-      \ start=+[uU]\=\z(['"]\)+ end="\z1" skip="\\\\\|\\\z1"
+      \ start=+[uU]\=\z(['"]\)+ end="\z1" 
+      " \ start=+[uU]\=\z(['"]\)+ end="\z1" skip="\\\\\|\\\z1"
 "       \ contains=pythonEscape,@Spell
 syn region  pythonString matchgroup=pythonTripleQuotes
       \ start=+[uU]\=\z('''\|"""\)+ end="\z1" keepend
@@ -345,15 +346,30 @@ let &cpo = s:cpo_save
 unlet s:cpo_save
 
 hi Nothing gui=bold
+hi link cBracket1  Nontext
+hi link cBracket2  pythonString
+hi link cBracket3  Keyword
+hi link cBracket4  Preproc
+hi link inBracket1 Nothing
+hi link inBracket2 Nothing
+hi link inBracket3 Nothing
+hi link inBracket4 Nothing
 
 syn keyword Identifier reversed self
-syntax match   Function       /\v\h+\ze\(/
+syntax match   Function       /\v\i+\ze\(/
 syntax match   Preproc        /\v\s([%\+\-\*\/]{1,2}|[>\=<!]\=?)\s/   contains=keyword    " + - * / >= <= ==
 syntax match   keyword        /\v [\+\-\*\/]?\= /                                  " += -= *= /= =
 syntax match   keyword        /, /                                  " ,
-syntax match   Constant       /\v\.@1<=%(\w+)@>\(@!/             contains=Identifier,Nothing
-syntax cluster hidden add=Preproc,Nontext,Identifier,Constant,keyword,constants,Function,Nothing
-syntax region  Nothing matchgroup=Identifier start=/\v<\h*>\[/ end=/]/ oneline contains=@hidden
+" syntax match   Constant       /\v\.@1<=%(\w+)@>\(@!/                  contains=Identifier,Nothing
+syntax match   Comment        /\v-\>/              contains=Identifier,Nothing
+" syntax match   Function       /\v\h+: {0,2}\zs\h*/
+
+syntax cluster hidden  add=Preproc,Nontext,Identifier,Constant,keyword,constants,Function,Nothing,pythonString,pythonStatement,pythonOperator,pythonRepeat,pythonNumber
+syntax region  Nothing   matchgroup=Identifier start=/\v\h*\[/ end=/]/ oneline contains=@hidden, inBracket1 keepend
+syntax region inBracket1 matchgroup=cBracket1 start=/(/ end=/)/ display contains=@hidden,inBracket2,GeneratorExit oneline
+syntax region inBracket2 matchgroup=cBracket2 start=/(/ end=/)/ display contains=@hidden,inBracket3,GeneratorExit contained oneline
+syntax region inBracket3 matchgroup=cBracket3 start=/(/ end=/)/ display contains=@hidden,inBracket4,GeneratorExit contained oneline
+syntax region inBracket4 matchgroup=cBracket4 start=/(/ end=/)/ display contains=@hidden,inBracket5 contained oneline
 
 " vim:set sw=2 sts=2 ts=8 noet:
 " syntax keyword Keyword return conceal cchar=𐅙

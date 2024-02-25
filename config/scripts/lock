@@ -9,8 +9,6 @@ TEXT='#CCCCCC'
 WRONG='#880000bb'
 VERIFYING='#00564dE6'
 
-
-
 i3lock \
 --insidever-color=$CLEAR     \
 --ringver-color=$VERIFYING   \

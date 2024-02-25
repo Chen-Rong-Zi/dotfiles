@@ -12,7 +12,6 @@ if !exists("g:colorscheme")
     syntax on
     let g:colorscheme   = 'onedark'
     let g:airline_theme = 'onedark'
-    call system("dunstify -I /usr/share/icons/Papirus/48x48/apps/vim.svg rongzi  welcome to vim")
 endif
 
 " call airline#update_statusline()
@@ -20,7 +19,7 @@ set nocp
 set concealcursor=ni
 set conceallevel=2
 
-" set smartindent
+" set smartindent tabline
 set eventignore+=FocusGained
 set confirm
 set cursorline
@@ -38,17 +37,17 @@ set scrolloff=7
 set shiftwidth=4
 set showcmd
 set smoothscroll
-" set smarttab
+" set smarttab tabline
 set softtabstop=4
-set synmaxcol=196
+set synmaxcol=2000
 set autochdir
 set termguicolors
 set tabstop=4
-set redrawtime=512
+set redrawtime=500
 set ignorecase
 set nowrap
 set notimeout
-"set timeoutlen=500
+set timeoutlen=500
 set ttimeout
 set ttimeoutlen=128
 set ttyfast
@@ -56,7 +55,7 @@ set virtualedit=NONE
 set textwidth=256
 set helplang=cn
 set termwinsize=13*0
-set foldcolumn=1
+set foldcolumn=0
 set foldmethod=indent
 set nu ru ai si ts=4 sw=4
 " vim buffer tab open-tab
@@ -74,7 +73,7 @@ set nu ru ai si ts=4 sw=4
 " C / CPP filetype script settings--------<++>------------{{{
 aug C
 autocmd!
-au filetype c,cpp call system('dunstify -I /usr/share/icons/Papirus/48x48/apps/vim.svg C "using C syntax"')
+au filetype c,cpp call Notify(['', 'using C/Cpp syntax'], 'up')
 au filetype c,cpp ino <buffer> ; <ESC>A;
 au filetype c,cpp ino <buffer> } {}<left>
 au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
@@ -140,7 +139,7 @@ autocmd!
 " au BufNewFile *.py i#coding=UTF-8<Enter>
 " au BufNewFile *.py i#time:<C-r>=strftime("%H:%m")
 
-au filetype python call system('dunstify -I /usr/share/icons/Papirus/64x64/apps/python3.10.svg python "using python syntax"')
+au filetype python call Notify(['', 'using python syntax'], 'up')
 au filetype python ino <buffer> ; <Esc>A:
 au filetype python ino <buffer> # #<space><left><right>
 " au filetype python ino <buffer> , ,<space><left><right>
@@ -179,7 +178,7 @@ aug end
 "vim filetype script settings--------------<++>------------------{{{
 aug vim
 autocmd!
-au filetype vim call system('dunstify -I /usr/share/icons/Papirus/48x48/apps/vim.svg vim "using vim syntax"')
+au filetype vim call Notify(['', 'using vim syntax'], 'up')
 au filetype vim nn <silent> <buffer> <leader>m <c-v>0I" <esc>
 au filetype vim vn <silent> <buffer> <leader>m <C-v>0I" <esc>
 au filetype vim let maplocalleader = "1"
@@ -199,10 +198,10 @@ aug end
 "terminal buffer script settings--------------<++>------------------{{{
 aug terminal
 autocmd!
-au TerminalOpen * tno <buffer> <leader>jk <c-w>N
+au TerminalOpen * tno <buffer> jk <c-w>N
 au TerminalOpen * tno <buffer> <leader>k  <c-w>k
-au TerminalOpen * setl nornu nonu
-au TerminalOpen * setl nolist
+" au TerminalOpen * setl nornu nonu
+" au TerminalOpen * setl nolist
 " au TerminalOpen * :vertical resize -7
 aug end
 " }}}
@@ -225,7 +224,7 @@ autocmd!
 
 " replace  { [
 " au BufEnter * call ChangeDirectory()
-au BufEnter * call ChangeSrc()
+" au BufEnter * call ChangeSrc()
 
 " INSERT mode
 au VimEnter * let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
@@ -261,7 +260,9 @@ au VimEnter * nn  Y          yg_
 au VimEnter * nn  X          i<CR><Esc>l
 au VimEnter * nn  gU         g~
 au VimEnter * nn  U          gU
+au VimEnter * nn  <c-g>      :call system('tmux send-keys -t + ' . shellescape(getline('.')) . "\r")<CR>
 au VimEnter * ono <c-l>      g_
+au VimEnter * ono <c-h>      ^
 " au VimEnter * match Comment /^ \+/
 " fold method
 au VimEnter * nn <nowait> s  <Nop>
@@ -270,7 +271,7 @@ au Vimenter * nn fk zM
 au VimEnter * nn fj zR
 
 " edit $myvimrc
-au VimEnter * nn <leader>ev :vsplit $MYVIMRC<CR>
+au VimEnter * nn <leader>v :vsplit $MYVIMRC<CR>
 au VimEnter * nm <leader>sv :w<CR>:source $MYVIMRC<CR>
 
 " screen create
@@ -387,7 +388,7 @@ au VimEnter * nn *    *N:set hlsearch<CR>
 au VimEnter * nn <leader>V :e $MYVIMRC<CR>
 
 " return to the current directory
-au VimEnter * nn <leader>e :e .<CR>
+" au VimEnter * nn <leader>e :e .<CR>
 
 " use python3
 au VimEnter * vn rp !python3<CR>
@@ -397,7 +398,7 @@ au VimEnter * vn <s-k>      <Nop>
 au VimEnter * vn <s-j><s-j> <s-j>
 au VimEnter * vn <s-j>      <Nop>
 au VimEnter * vn <c-j>      ;
-au VimEnter * vn <leader>c  :!~/.config/scripts/align<CR>
+au VimEnter * vn n          :silent! !~/.config/scripts/align<CR>
 "au InsertCharPre * normal a<c-n>
 aug END
 " }}}
@@ -574,8 +575,8 @@ au  filetype sql inorea <buffer> check      CHECK
 au  filetype sql inorea <buffer> column     COLUMN
 au  filetype sql inorea <buffer> constraint CONSTRAINT
 au  filetype sql inorea <buffer> create     CREATE
-au  filetype sql inorea <buffer> databaSE   DATABASE
-au  filetype sql inorea <buffer> defaulT    DEFAULT
+au  filetype sql inorea <buffer> database   DATABASE
+au  filetype sql inorea <buffer> default    DEFAULT
 au  filetype sql inorea <buffer> delete     DELETE
 au  filetype sql inorea <buffer> desc       DESC
 au  filetype sql inorea <buffer> distinct   DISTINCT
@@ -584,7 +585,7 @@ au  filetype sql inorea <buffer> else       ELSE
 au  filetype sql inorea <buffer> end        END
 au  filetype sql inorea <buffer> escape     ESCAPE
 au  filetype sql inorea <buffer> exists     EXISTS
-au  filetype sql inorea <buffer> foreigN    FOREIGN
+au  filetype sql inorea <buffer> foreign    FOREIGN
 au  filetype sql inorea <buffer> from       FROM
 au  filetype sql inorea <buffer> group      GROUP
 au  filetype sql inorea <buffer> having     HAVING
@@ -605,7 +606,7 @@ au  filetype sql inorea <buffer> on         ON
 au  filetype sql inorea <buffer> or         OR
 au  filetype sql inorea <buffer> order      ORDER
 au  filetype sql inorea <buffer> outer      OUTER
-au  filetype sql inorea <buffer> primarY    PRIMARY
+au  filetype sql inorea <buffer> primary    PRIMARY
 au  filetype sql inorea <buffer> references REFERENCES
 au  filetype sql inorea <buffer> right      RIGHT
 au  filetype sql inorea <buffer> select     SELECT
@@ -635,4 +636,5 @@ source /home/rongzi/.vim/functions/useful.vim
 source /home/rongzi/.vim/functions/higherorder.vim
 " }}}
 
-"source ~/.vim/plugin/grep-operator.vim
+" source ~/.vim/plugin/grep-operator.vim
+call Notify(['rongzi', 'welcome to vim'])

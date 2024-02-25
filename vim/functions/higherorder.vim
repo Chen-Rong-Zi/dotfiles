@@ -23,7 +23,7 @@ function! Poped(data, index)
     return new_data
 endfunction
 
-function! Filtered(data, expr)
+function! Filter(data, expr)
     return a:data->deepcopy()->filter(a:expr)
 endfunction
 
@@ -31,7 +31,7 @@ function! Assoc(data, value, index)
     return a:data->deepcopy()->insert(a:value, a:index)
 endfunction
 
-function! Reduced(data, func, ...)
+function! Reduce(data, func, ...)
     if a:0 ==# 1
         return a:data->deepcopy()->reduce(a:func, a:000[0])
     elseif a:0 ==# 0

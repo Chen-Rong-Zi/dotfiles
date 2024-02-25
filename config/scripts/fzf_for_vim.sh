@@ -3,4 +3,4 @@
 # 使用 fzf 搜索历史命令
 # selected_command=$(history | fzf --tac --preview "echo {}" --preview-window=up:30%)
 #
-sudo find /home /usr | fzf -m --preview="preview  {}" --preview-window=left,30%,border-right
+sudo find /home /usr -xtype f | fzf -m --preview="preview  {}" --preview-window=left,30%,border-right  >$1

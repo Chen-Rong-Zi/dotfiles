@@ -171,7 +171,7 @@ alias cc="gcc -Wall -Werror -O2"
 alias git-log="git log --all --graph --decorate --oneline"
 alias py="python3 -q"
 alias ipy="ipdb"
-alias open="pcmanfm"
+alias open="xdg-open 2>/dev/null"
 alias nmtui="rfkill unblock wlan && nmtui"
 alias gdb="gdb -q"
 alias tm="tmux"
@@ -181,6 +181,7 @@ alias 废话="bullshit"
 alias ipa="ip a | grep 'wlp1s0' | grep -oP '(?<=inet )([0-9\.]*)'"
 alias view="viewnior"
 alias figlet="figlet -f 'ANSI Shadow'"
+alias sql="rlwrap sql"
 
 export ubuntu="rongzi@139.224.128.37"
 export image_path="/home/rongzi/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S").jpg"
@@ -232,7 +233,7 @@ if [[ -n $DISPLAY ]] && [[ -z $TMUX ]]; then
 fi
 
 if [[ $(pgrep clash) ]];then
-    setproxy >/dev/null
+    setproxy 1>/dev/null 2>&1
 fi
 
 

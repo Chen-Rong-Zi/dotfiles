@@ -1103,30 +1103,30 @@ hi link inBracket2      Nothing
 hi link inBracket3      Nothing
 hi link inBracket4      Nothing
 
-syntax match   Conceal           /\v<end%(for|if|function)>/                conceal    cchar=|
+syntax match   Conceal           /\v<end%(for|if|function)>/     conceal    cchar=|
 syntax match   Conceal           /\v^\s*\zs<func%(tion)?(!@=)?>/ conceal    cchar=𝔽
-syntax match   Keyword           /, /
+syntax match   Keyword           /,                              /
 syntax match   Conceal           /||/                            conceal    cchar=∨
 syntax match   Conceal           /&&/                            conceal    cchar=∧
 syntax match   Conceal           /=\~/                           conceal    cchar=≊
 
-syntax keyword Keyword           let                conceal    cchar=𝕝
-syntax keyword Keyword           continue           conceal    cchar=↺
-syntax keyword Keyword           break              conceal    cchar=✖
-syntax keyword Keyword           return             conceal    cchar=▸
-syntax keyword Keyword           if                 conceal    cchar=𝘐
-syntax keyword Keyword           elseif             conceal    cchar=ℰ
-syntax keyword Keyword           else               conceal    cchar=𝘌
-syntax keyword Keyword           call               conceal    cchar=𝕔
-syntax keyword Keyword           closure            conceal    cchar=ƒ
+syntax keyword Keyword           let                             conceal    cchar=𝕝
+syntax keyword Keyword           continue                        conceal    cchar=↺
+syntax keyword Keyword           break                           conceal    cchar=✖
+syntax keyword Keyword           return                          conceal    cchar=▸
+syntax keyword Keyword           if                              conceal    cchar=𝘐
+syntax keyword Keyword           elseif                          conceal    cchar=ℰ
+syntax keyword Keyword           else                            conceal    cchar=𝘌
+syntax keyword Keyword           call                            conceal    cchar=𝕔
+syntax keyword Keyword           closure                         conceal    cchar=ƒ
 
-syntax region argument_variable matchgroup=keyword start=/a:/ end=/\v\w@1<=>/ concealends oneline
-syntax region local_variable    matchgroup=keyword start=/l:/ end=/\v\w@1<=>/ concealends oneline
-syntax region script_variable   matchgroup=keyword start=/s:/ end=/\v\w@1<=>/ concealends oneline
-syntax region global_variable   matchgroup=keyword start=/g:/ end=/\v\w@1<=>/ concealends oneline
-syntax region window_variable   matchgroup=keyword start=/w:/ end=/\v\w@1<=>/ concealends oneline
-syntax region buffer_variable   matchgroup=keyword start=/b:/ end=/\v\w@1<=>/ concealends oneline
-syntax region vim_variable      matchgroup=keyword start=/v:/ end=/\v\w@1<=>/ concealends oneline
+syntax region  argument_variable matchgroup=keyword              start=/a:/ end=/\v\w@1<=>/ concealends oneline
+syntax region  local_variable    matchgroup=keyword              start=/l:/ end=/\v\w@1<=>/ concealends oneline
+syntax region  script_variable   matchgroup=keyword              start=/s:/ end=/\v\w@1<=>/ concealends oneline
+syntax region  global_variable   matchgroup=keyword              start=/g:/ end=/\v\w@1<=>/ concealends oneline
+syntax region  window_variable   matchgroup=keyword              start=/w:/ end=/\v\w@1<=>/ concealends oneline
+syntax region  buffer_variable   matchgroup=keyword              start=/b:/ end=/\v\w@1<=>/ concealends oneline
+syntax region  vim_variable      matchgroup=keyword              start=/v:/ end=/\v\w@1<=>/ concealends oneline
 
 syntax cluster hidden     contains=keyword,Conceal,argument_variable,local_variable,script_variable,global_variable,window_variable,buffer_variable,vimoper,vimString,vimfunc
 syntax region inBracket1 matchgroup=Bracket1 start=/(/ end=/)/ display contains=inBracket2,@hidden oneline
