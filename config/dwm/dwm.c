@@ -20,6 +20,7 @@
  *
  * To understand everything else, start reading main().
  */
+
 #include <X11/XF86keysym.h>
 #include <errno.h>
 #include <locale.h>
@@ -2935,4 +2936,3 @@ main(int argc, char *argv[])
     XCloseDisplay(dpy);
     return EXIT_SUCCESS;
 }
-

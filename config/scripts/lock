@@ -1,5 +1,8 @@
 #!/bin/bash
 
+if  pgrep i3lock ;then
+    exec logger --tag 'i3lock' 'screen is locked, i3lock is not starting'
+fi
 BLANK='#00000000'
 CLEAR='#ffffff22'
 # DEFAULT='#00897bE6'

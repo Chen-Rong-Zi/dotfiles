@@ -358,18 +358,18 @@ hi link inBracket4 Nothing
 syn keyword Identifier reversed self
 syntax match   Function       /\v\i+\ze\(/
 syntax match   Preproc        /\v\s([%\+\-\*\/]{1,2}|[>\=<!]\=?)\s/   contains=keyword    " + - * / >= <= ==
-syntax match   keyword        /\v [\+\-\*\/]?\= /                                  " += -= *= /= =
+syntax match   keyword        /\v [\+\-\*\/]{0,2}\= /                                  " += -= *= /= =
 syntax match   keyword        /, /                                  " ,
 " syntax match   Constant       /\v\.@1<=%(\w+)@>\(@!/                  contains=Identifier,Nothing
 syntax match   Comment        /\v-\>/              contains=Identifier,Nothing
 " syntax match   Function       /\v\h+: {0,2}\zs\h*/
 
 syntax cluster hidden  add=Preproc,Nontext,Identifier,Constant,keyword,constants,Function,Nothing,pythonString,pythonStatement,pythonOperator,pythonRepeat,pythonNumber
-syntax region  Nothing   matchgroup=Identifier start=/\v\h*\[/ end=/]/ oneline contains=@hidden, inBracket1 keepend
-syntax region inBracket1 matchgroup=cBracket1 start=/(/ end=/)/ display contains=@hidden,inBracket2,GeneratorExit oneline
-syntax region inBracket2 matchgroup=cBracket2 start=/(/ end=/)/ display contains=@hidden,inBracket3,GeneratorExit contained oneline
-syntax region inBracket3 matchgroup=cBracket3 start=/(/ end=/)/ display contains=@hidden,inBracket4,GeneratorExit contained oneline
-syntax region inBracket4 matchgroup=cBracket4 start=/(/ end=/)/ display contains=@hidden,inBracket5 contained oneline
+syntax region  Nothing   matchgroup=Identifier start=/\v\h*\[/ end=/]/ display oneline contains=@hidden, inBracket1
+syntax region inBracket1 matchgroup=cBracket1 start=/(/ end=/)/ display oneline contains=@hidden,inBracket2,GeneratorExit
+syntax region inBracket2 matchgroup=cBracket2 start=/(/ end=/)/ display oneline contains=@hidden,inBracket3,GeneratorExit contained
+syntax region inBracket3 matchgroup=cBracket3 start=/(/ end=/)/ display oneline contains=@hidden,inBracket4,GeneratorExit contained
+syntax region inBracket4 matchgroup=cBracket4 start=/(/ end=/)/ display oneline contains=@hidden,inBracket1 contained
 
 " vim:set sw=2 sts=2 ts=8 noet:
 " syntax keyword Keyword return conceal cchar=𐅙

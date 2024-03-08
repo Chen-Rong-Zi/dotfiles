@@ -5,3 +5,5 @@
 	helper = store
 [alias]
     l = log --all --graph --decorate --oneline
+[http]
+	sslVerify = false

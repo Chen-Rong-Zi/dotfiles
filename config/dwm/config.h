@@ -44,8 +44,9 @@ static const Rule rules[] = {
      */
     /* class            instance title            tags mask isfloating isfullscreen monitor */
     {  "Gimp",          NULL,    NULL,            0,   1,   0,         -1           },
-    {  "Firefox",       NULL,    NULL,            1    <<   8,         0,           0,      -1 },
+    // {  "Firefox",       NULL,    NULL,            1    <<   8,         0,           0,      -1 },
     {  NULL,            NULL,    "joshuto",       0,   1,   0,         1            },
+    {  NULL,            NULL,    "note",          0,   1,   0,         1            },
     {  NULL,            NULL,    "quick",         0,   1,   0,         1            },
     {  NULL,            NULL,    "EmojiFloatWnd", 0,   1,   0,         1            },
     {  NULL,            NULL,    "成员",          0,   1,   0,         1            },
@@ -85,7 +86,7 @@ static const Layout layouts[] = {
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[]   = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL  };
 static const char *termcmd[]    = { "alacritty", NULL  };
-static const char *quick_term[] = { "alacritty", "-t", "quick", NULL  };
+static const char *note[]       = { "/home/rongzi/.config/scripts/note", NULL  };
 static const char *powerMenu[]  = { "/home/rongzi/.config/polybar/pwidgets/scripts/powermenu.sh", NULL  };
 static const char *drun[]       = { "rofi", "-modi", "drun", "-show", "drun", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL };
 static const char *winMenu[]    = { "rofi", "-modi", "window", "-show", "window", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL };
@@ -127,7 +128,7 @@ static const Key keys[] = {
     { MODKEY,                       XK_n,      spawn,          {.v = picom } },
     { MODKEY,                       XK_b,      spawn,          {.v = myPicom } },
     { ControlMask|ShiftMask,        XK_Return, spawn,          {.v = btop } },
-    { MODKEY_ALT,                  XK_Return, spawn,          {.v = quick_term } },
+    { MODKEY_ALT,                   XK_Return, spawn,          {.v = note } },
     { ControlMask|ShiftMask,        XK_h,      spawn,          {.v = joshuto } },
     { MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
     { MODKEY,                       XK_k,      focusstack,     {.i = -1 } },

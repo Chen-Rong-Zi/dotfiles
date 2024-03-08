@@ -14,6 +14,14 @@ if !exists("g:colorscheme")
     let g:airline_theme = 'onedark'
 endif
 
+function! Check()
+    redir => info
+    silent execute 'highlight conceal'
+    redir end
+    echom info
+endfunction
+
+
 " call airline#update_statusline()
 set nocp
 set concealcursor=ni
@@ -47,9 +55,10 @@ set redrawtime=500
 set ignorecase
 set nowrap
 set notimeout
-set timeoutlen=500
-set ttimeout
-set ttimeoutlen=128
+set matchpairs=(:),{:},[:],<:>,":"
+" set timeoutlen=200
+" set ttimeout
+" set ttimeoutlen=128
 set ttyfast
 set virtualedit=NONE
 set textwidth=256
@@ -73,8 +82,9 @@ set nu ru ai si ts=4 sw=4
 " C / CPP filetype script settings--------<++>------------{{{
 aug C
 autocmd!
+au filetype c,cpp let maplocalleader="1"
 au filetype c,cpp call Notify(['', 'using C/Cpp syntax'], 'up')
-au filetype c,cpp ino <buffer> ; <ESC>A;
+au filetype c,cpp ino <buffer> ; <CMD>call AddSuffix(';')<CR>
 au filetype c,cpp ino <buffer> } {}<left>
 au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 
@@ -88,12 +98,16 @@ au filetype c,cpp ino <silent> <buffer> { <c-R>=AddSeprator()<CR><right>{<CR>}<E
 "au filetype c,cpp ino <silent> <buffer> { <right>{<CR>}<Esc>O
 "au filetype c,cpp ino <buffer> { <esc>A{<CR><++>}<ESC>O
 au filetype c,cpp ino <buffer> <leader>m /*    */<esc>4<left>a
+au filetype c,cpp ino <buffer> <c-l> <space>=<space>
 au filetype c,cpp ino <buffer> <leader><leader> <space>= 0,<space>
+au filetype c,cpp ino <buffer> <leader>s ::
+au filetype c,cpp ino <buffer> <leader>f for ( <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<cf>
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype c,cpp nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
-au filetype c,cpp nn <buffer> mm <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('//'))<CR>g@l
-au filetype c,cpp no <buffer> m  <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('//'))<CR>g@
+au filetype c,cpp nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('//')<CR>g@l
+au filetype c,cpp nn <buffer> ; <CMD>call AddSuffix(';')<CR>
+au filetype c,cpp no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('//')<CR>g@
 
 " ABBREVIATION
 au filetype c,cpp inorea <silent> <buffer> itn      int
@@ -108,20 +122,21 @@ au filetype c,cpp inorea <silent> <buffer> #I       # include <><left><C-R>=Eatc
 au filetype c,cpp inorea <silent> <buffer> mm       main(int arg_number, char **arg_value)
 au filetype c,cpp inorea <silent> <buffer> pp       printf("", <++>);<c-o>F"<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> ss       scanf("",  <++>);<c-o>F"<C-R>=Eatchar('\s')<CR>
-au filetype c,cpp inorea <silent> <buffer> kd       %d
-au filetype c,cpp inorea <silent> <buffer> kf       %f
-au filetype c,cpp inorea <silent> <buffer> kc       %c
-au filetype c,cpp inorea <silent> <buffer> ks       %s
-au filetype c,cpp inorea <silent> <buffer> ku       %u
-au filetype c,cpp inorea <silent> <buffer> klf      %lf
-au filetype c,cpp inorea <silent> <buffer> kld      %ld
-au filetype c,cpp inorea <silent> <buffer> klld     %lld
-au filetype c,cpp inorea <silent> <buffer> kllf     %llf
+au filetype c,cpp inorea <silent> <buffer> kd       %d<C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> kf       %f<C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> kc       %c<C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> ks       %s<C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> ku       %u<C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> klf      %lf<C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> kld      %ld<C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> klld     %lld<C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> kllf     %llf<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> fuck     Are you alright?
 
 "  <tab> and <space> visualised
 au filetype c,cpp setl cindent
-au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
+au filetype c,cpp let $src=expand('%')
+" au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
 aug end
 " }}}
 
@@ -140,15 +155,16 @@ autocmd!
 " au BufNewFile *.py i#time:<C-r>=strftime("%H:%m")
 
 au filetype python call Notify(['', 'using python syntax'], 'up')
-au filetype python ino <buffer> ; <Esc>A:
+au filetype python ino <buffer> ; <CMD>call AddSuffix(':')<CR>
 au filetype python ino <buffer> # #<space><left><right>
 " au filetype python ino <buffer> , ,<space><left><right>
 
 
 au filetype python nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
+au filetype python nn <buffer> ; <CMD>call AddSuffix(':')<CR>
 " Comment the line
-au filetype python nn <buffer> mm <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('#'))<CR>g@l
-au filetype python no <buffer> m  <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('#'))<CR>g@
+au filetype python nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
+au filetype python no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
 
 " au filetype python ono <buffer> ( :<C-u>normal!t)lvi(<cr>
 
@@ -164,7 +180,7 @@ au filetype python ia <buffer> ret    return
 au filetype python ia <buffer> @@     1398881912@qq.com
 au filetype python ia <buffer> pirnt  print
 
-au BufEnter *.py highlight link Conceal Keyword
+" au BufEnter *.py highlight link Conceal Keyword
 aug end
 " }}}
 "
@@ -181,10 +197,10 @@ autocmd!
 au filetype vim call Notify(['', 'using vim syntax'], 'up')
 au filetype vim nn <silent> <buffer> <leader>m <c-v>0I" <esc>
 au filetype vim vn <silent> <buffer> <leader>m <C-v>0I" <esc>
-au filetype vim let maplocalleader = "1"
+" au filetype vim let  maplocalleader    = "1"
 au filetype vim setl foldmethod=marker
-au filetype vim nn <buffer> mm <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('"'))<CR>g@l
-au filetype vim no <buffer> m  <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('"'))<CR>g@
+au filetype vim nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('"')<CR>g@l
+au filetype vim no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('"')<CR>g@
 aug end
 "}}}
 "
@@ -200,8 +216,8 @@ aug terminal
 autocmd!
 au TerminalOpen * tno <buffer> jk <c-w>N
 au TerminalOpen * tno <buffer> <leader>k  <c-w>k
-" au TerminalOpen * setl nornu nonu
-" au TerminalOpen * setl nolist
+" au TerminalOpen * setlocal nornu nonu
+" au TerminalOpen * setlocal nolist
 " au TerminalOpen * :vertical resize -7
 aug end
 " }}}
@@ -236,11 +252,11 @@ au VimEnter * let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;gray\x7"
 au VimEnter * filetype on
 au VimEnter * syntax   on
 " au BufEnter * match Comment / /
-au VimEnter * no m  <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@
-au VimEnter * nn mm <CMD>call CommentToggleMaker('#')<CR><CMD>set operatorfunc=CommentToggle<CR>g@l
+au VimEnter * no m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
+au VimEnter * nn mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
 au VimEnter * nn /    :set incsearch hlsearch<CR>/\v
-"au QuickFixCmdPre *  syntax
-"au VimEnter * nn <silent> <CR> :call ChangeDirectory()<CR>
+" au QuickFixCmdPre *  syntax
+" au VimEnter * nn <silent> <CR> :call ChangeDirectory()<CR>
 
 " swich to the head or the end
 au VimEnter * nn  <c-h>      ^
@@ -410,7 +426,7 @@ aug END
 " ██╔═══╝ ██║     ██║   ██║██║   ██║╚════╝██║██║╚██╗██║
 " ██║     ███████╗╚██████╔╝╚██████╔╝      ██║██║ ╚████║
 " ╚═╝     ╚══════╝ ╚═════╝  ╚═════╝       ╚═╝╚═╝  ╚═══╝
-"plug-in settings---------<++>-----------{{{
+" plug-in settings---------<++>-----------{{{
 " NERDTree
 " noremap <leader>t :NERDTreeToggle<CR>
 
@@ -521,7 +537,17 @@ au filetype markdown ino <buffer> ’ ``<left>
 au filetype markdown ino <buffer> ‘ ``<left>
 au filetype markdown ino <buffer> ' ``<left>
 au filetype markdown ino <buffer> ～ ~~~~<left><left>
-au filetype markdown nn  <buffer> <leader>t o\|<Tab><++><Tab>\|<Tab><++><Tab>\|<Tab><++><Tab>\|<Tab><++><Tab>\|<Esc>0/<++><CR>cf>
+au filetype markdown ino <buffer> <c-l> <space><++> \|<Esc>?<++><CR>cw
+au filetype markdown nn  <buffer> <leader>t o<c-r>=AddTableRow()<CR><Esc>^/<++><CR>cw
+au filetype markdown nn  <buffer> <leader><space> <CMD>call CheckBoxToggle()<CR>
+au filetype markdown abbrev <buffer> <>  ↔<c-r>=Eatchar('\s')<CR>
+au filetype markdown abbrev <buffer> ->  →<c-r>=Eatchar('\s')<CR>
+au filetype markdown abbrev <buffer> <-  ←<c-r>=Eatchar('\s')<CR>
+au filetype markdown abbrev <buffer> !   ¬<c-r>=Eatchar('\s')<CR>
+au filetype markdown abbrev <buffer> ===  ≡<c-r>=Eatchar('\s')<CR>
+au filetype markdown abbrev <buffer> or  ∨<c-r>=Eatchar('\s')<CR>
+au filetype markdown abbrev <buffer> and ∧<c-r>=Eatchar('\s')<CR>
+au filetype markdown abbrev <buffer> F   ⊥<c-r>=Eatchar('\s')<CR>
 aug end
 " }}}
 
@@ -539,8 +565,8 @@ autocmd!
 au filetype bash,sh inorea <silent> <buffer> if  if [[<++> ]];then<CR>fi<Esc>?<++><CR>cw
 au filetype bash,sh inorea <silent> <buffer> for for<++> in <++>;do<CR>done<Esc>0kf<cw
 " Comment the line
-au filetype bash,sh nn <buffer> mm <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('#'))<CR>g@l
-au filetype bash,sh no <buffer> m  <CMD>exe 'set operatorfunc=' . string(CommentToggleMaker('#'))<CR>g@
+au filetype bash,sh nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
+au filetype bash,sh no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
 aug end
 " }}}
 

@@ -559,19 +559,19 @@ hi link inBracket2 Nothing
 hi link inBracket3 Nothing
 hi link inBracket4 Nothing
 
-syntax match Function       /\v\h+\ze\(/                        contains=@Spell
+syntax match Function       /\v\i+\ze\(/                        contains=@Spell
 syntax match Preproc        /\v\s([\+\-^\*\/%]|[>\=<!]\=?)\s/   contains=keyword,Identifier,@Spell    " + - * / >= <= ==
 syntax match cType          /\v<\u\w{-}\l>\(@!/                 contains=@Spell
 syntax match keyword        /[,|&]\|!=\@!/                      contains=@Spell                              " | & !
-syntax match keyword        /\v[\+\-\|<>&]{2}/                  contains=@Spell                               " ++ -- && || >> <<
+syntax match keyword        /++\|--\|&&\|>>\|<</                  contains=@Spell                               " ++ -- && || >> <<
 syntax match keyword        /\v\s[|\+\-\*\/]?\=\s/              contains=@Spell                                 " += -= *= /= =
-syntax match Identifier     /\v\*+ @!\w*|[:?.]|->/              contains=PreProc,cNumber,keyword,Function,@Spell,@hidden                " array[.*] and *pointers and dereference ->
+syntax match Identifier     /\v\*+\w*|[:?.]|-\>/              contains=PreProc,cNumber,keyword,Function,@Spell,@hidden                " array[.*] and *pointers and dereference ->
 syntax match Nontext        /\v[{}]$|;|^%( *)@>}/               contains=@Spell                               " { } ;
 
-syntax cluster hidden add=Preproc,Nontext,Identifier,Constant,cString,cNumbers,Keyword,constants,cCharacter,cConstant,Function,Nothing,@cStringGroup,cType,cBracket1,cBracket2,cBracket3,cBracket4
+syntax cluster hidden add=Preproc,Nontext,Identifier,Constant,cString,cNumbers,Keyword,constants,cCharacter,cConstant,Function,Nothing,@cStringGroup,cType,cStorageClass
 " 这个困扰我好久的问题就这么解决了？第一个region是解法一，但是解法二显然更好
 " syntax region Nothing matchgroup=Nontext    start=/\v%(<while>|<for>|<if>)@<= \(/ end=/\v\)[^)]{-}$/ oneline contains=@hidden,@Spell keepend display
-syntax region Nothing matchgroup=Identifier start=/\v\h*\[/ end=/]/ oneline contains=@hidden,@Spell display
+syntax region Nothing matchgroup=Identifier start=/\v\h*\[/ end=/]/ oneline contains=@hidden,@Spell,inBracket1
 
 syntax region inBracket1 matchgroup=cBracket1 start=/(/ end=/)/ display contains=@hidden,inBracket2 oneline
 syntax region inBracket2 matchgroup=cBracket2 start=/(/ end=/)/ display contains=@hidden,inBracket3 contained oneline
@@ -586,6 +586,7 @@ syntax match Constant /\v<[[:upper:]_]+>/    contains=Function      " Constant d
 
 syntax match   Keyword /\v^ {-}\zs<else if/       conceal cchar=ℰ
 syntax match   Keyword /\v^ {-}\zs<else%( if)@!/  conceal cchar=𝘌
+syntax keyword Identifier this
 syntax keyword Keyword if       conceal cchar=𝘐
 syntax keyword Keyword int      conceal cchar=𝗜
 syntax keyword Keyword typedef  conceal cchar=𝕋
