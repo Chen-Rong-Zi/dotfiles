@@ -12,7 +12,8 @@ endif
 " The default highlighting.
 hi def link qfFileName Directory
 hi def link qfLineNr   LineNr
-hi def link qfError    Error
+" hi def link qfError    Error
+hi qfError cterm=underline guifg=#E06C75
 hi def link Output     Error
 hi def Nothing gui=bold
 

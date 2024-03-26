@@ -225,8 +225,7 @@ if exists("c_comment_strings")
   syn region cComment2String    contained start=+L\=\\\@<!"+ skip=+\\\\\|\\"+ end=+"+ end="$" contains=cSpecial
   syn region  cCommentL start="//" skip="\\$" end="$" keepend contains=@cCommentGroup,cComment2String,cCharacter,cNumbersCom,cSpaceError,cWrongComTail,@Spell
   if exists("c_no_comment_fold")
-    " Use "extend" here to have preprocessor lines not terminate halfway a
-    " comment.
+    " Use "extend" here to have preprocessor lines not terminate halfway a comment.
     syn region cComment matchgroup=cCommentStart start="/\*" end="\*/" contains=@cCommentGroup,cCommentStartError,cCommentString,cCharacter,cNumbersCom,cSpaceError,@Spell extend
   else
     syn region cComment matchgroup=cCommentStart start="/\*" end="\*/" contains=@cCommentGroup,cCommentStartError,cCommentString,cCharacter,cNumbersCom,cSpaceError,@Spell fold extend
@@ -559,33 +558,35 @@ hi link inBracket2 Nothing
 hi link inBracket3 Nothing
 hi link inBracket4 Nothing
 
-syntax match Function       /\v\i+\ze\(/                        contains=@Spell
-syntax match Preproc        /\v\s([\+\-^\*\/%]|[>\=<!]\=?)\s/   contains=keyword,Identifier,@Spell    " + - * / >= <= ==
-syntax match cType          /\v<\u\w{-}\l>\(@!/                 contains=@Spell
-syntax match keyword        /[,|&]\|!=\@!/                      contains=@Spell                              " | & !
-syntax match keyword        /++\|--\|&&\|>>\|<</                  contains=@Spell                               " ++ -- && || >> <<
-syntax match keyword        /\v\s[|\+\-\*\/]?\=\s/              contains=@Spell                                 " += -= *= /= =
-syntax match Identifier     /\v\*+\w*|[:?.]|-\>/              contains=PreProc,cNumber,keyword,Function,@Spell,@hidden                " array[.*] and *pointers and dereference ->
-syntax match Nontext        /\v[{}]$|;|^%( *)@>}/               contains=@Spell                               " { } ;
+syntax match Function       /\v\i+\ze\(/                         display contains=@Spell
+syntax match Preproc        /\v\s([\+\-^\*\/%]|[>\=<!]\=?)\s/    display contains=@Spell    " + - * / >= <= ==
+syntax match cType          /\v<\u\w{-}>/                        display
+syntax match keyword        /[,|&]\|!=\@!/                       display contains=@Spell                              " | & !
+syntax match keyword        /++\|--\|&&\|>>\|<</                 display contains=@Spell                               " ++ -- && || >> <<
+syntax match keyword        /\v\s[|\+\-\*\/^]?\=\s/               display contains=@Spell                                 " += -= *= /= =
+syntax match Identifier     /\v\*+\s@!\w*|[:?.]|-\>/              display contains=Function                             " array[.*] and *pointers and dereference ->
+syntax match Nontext        /\v[{}]$|;|^%( *)@>}/                display contains=@Spell                               " { } ;
 
-syntax cluster hidden add=Preproc,Nontext,Identifier,Constant,cString,cNumbers,Keyword,constants,cCharacter,cConstant,Function,Nothing,@cStringGroup,cType,cStorageClass
+syntax cluster hidden add=cBitField,cBlock,cCharacter,cComment,cCommentL,cConstant,cCppInWrapper,cCppOutWrapper,cCppString,cDefine,cLabel,cMulti,cNumbers,cOperator,cout,cPragma,cPreCondit,cPreConditMatch,cPreProc,cRepeat,cSpecialCharacter,cStatement,cStorageClass,cString,cStructure,cType,Ctype,cTypedef,cUserCont,cWrongComTail,Function,Identifier,inBracket1,keyword,Keyword,Nontext,Nothing,Preproc
+
+
 " 这个困扰我好久的问题就这么解决了？第一个region是解法一，但是解法二显然更好
 " syntax region Nothing matchgroup=Nontext    start=/\v%(<while>|<for>|<if>)@<= \(/ end=/\v\)[^)]{-}$/ oneline contains=@hidden,@Spell keepend display
-syntax region Nothing matchgroup=Identifier start=/\v\h*\[/ end=/]/ oneline contains=@hidden,@Spell,inBracket1
+syntax region Nothing matchgroup=Identifier start=/\v\h*\[/ end=/]/ display oneline contains=@hidden
 
-syntax region inBracket1 matchgroup=cBracket1 start=/(/ end=/)/ display contains=@hidden,inBracket2 oneline
-syntax region inBracket2 matchgroup=cBracket2 start=/(/ end=/)/ display contains=@hidden,inBracket3 contained oneline
-syntax region inBracket3 matchgroup=cBracket3 start=/(/ end=/)/ display contains=@hidden,inBracket4 contained oneline
+syntax region inBracket1 matchgroup=cBracket1 start=/(/ end=/)/ display contains=@hidden,inBracket2 nextgroup=inBracket2 oneline
+syntax region inBracket2 matchgroup=cBracket2 start=/(/ end=/)/ display contains=@hidden,inBracket3 contained nextgroup=inBracket3 oneline
+syntax region inBracket3 matchgroup=cBracket3 start=/(/ end=/)/ display contains=@hidden,inBracket4 contained nextgroup=inBracket4 oneline
 syntax region inBracket4 matchgroup=cBracket4 start=/(/ end=/)/ display contains=@hidden,inBracket1 contained oneline
 
 " syntax match Nontext /\v((for|while|if).*)@60<=\)\s*\{=$/    " (  ) after if or while or for
 " syntax match LineNr /\v((for|while|if) )@<=\(/
 " match keyword /\v(<for>|<while>|<if>)/
 " syntax match Constant /\%(if\|while\|for\)\s*([^)]*)\s*{/          " Constant defined by #define or const
-syntax match Constant /\v<[[:upper:]_]+>/    contains=Function      " Constant defined by #define or const
+syntax match cConstant /\v<[[:upper:]_]{2,}>/    " Constant defined by #define or const
 
-syntax match   Keyword /\v^ {-}\zs<else if/       conceal cchar=ℰ
-syntax match   Keyword /\v^ {-}\zs<else%( if)@!/  conceal cchar=𝘌
+syntax match   Keyword /\v^ {-}\zs<else *if/  display conceal cchar=ℰ
+syntax match   Keyword /\v<else>%( if)@!/     display conceal cchar=𝘌
 syntax keyword Identifier this
 syntax keyword Keyword if       conceal cchar=𝘐
 syntax keyword Keyword int      conceal cchar=𝗜
@@ -600,7 +601,19 @@ syntax keyword Keyword unsigned conceal cchar=𝕌
 syntax keyword Keyword return   conceal cchar=▶
 syntax keyword Keyword continue conceal cchar=↺
 syntax keyword Keyword break    conceal cchar=✖
+syntax keyword Keyword template conceal cchar=𝘛
+syntax keyword Keyword typename conceal cchar=𝕥
+syntax keyword Keyword this     conceal cchar=𝖲
+syntax keyword Keyword vector   conceal cchar=𝗏
+" syntax keyword Keyword vector   conceal cchar=𝘷
 " syn region keyword  /password/ conceal cchar=*
 " syntax match Constant "return" conceal cchar= contains=return
+
+if expand('%') =~# '.*\.cpp'
+    highlight link cout   Nothing
+    highlight link incout Keyword
+    syntax region cout   matchgroup=Keyword start=/\v%(%(std::)=)@10<=cout/ matchgroup=Nontext end=/$/ contains=@hidden,incout nextgroup=incout display oneline
+    syntax match  incout /<</ conceal cchar=. contained
+endif
 
 highlight link conceal Keyword

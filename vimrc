@@ -14,13 +14,6 @@ if !exists("g:colorscheme")
     let g:airline_theme = 'onedark'
 endif
 
-function! Check()
-    redir => info
-    silent execute 'highlight conceal'
-    redir end
-    echom info
-endfunction
-
 
 " call airline#update_statusline()
 set nocp
@@ -47,7 +40,7 @@ set showcmd
 set smoothscroll
 " set smarttab tabline
 set softtabstop=4
-set synmaxcol=2000
+set synmaxcol=256
 set autochdir
 set termguicolors
 set tabstop=4
@@ -55,7 +48,7 @@ set redrawtime=500
 set ignorecase
 set nowrap
 set notimeout
-set matchpairs=(:),{:},[:],<:>,":"
+set matchpairs=(:),{:},[:],\":\",':',<:>
 " set timeoutlen=200
 " set ttimeout
 " set ttimeoutlen=128
@@ -101,7 +94,9 @@ au filetype c,cpp ino <buffer> <leader>m /*    */<esc>4<left>a
 au filetype c,cpp ino <buffer> <c-l> <space>=<space>
 au filetype c,cpp ino <buffer> <leader><leader> <space>= 0,<space>
 au filetype c,cpp ino <buffer> <leader>s ::
-au filetype c,cpp ino <buffer> <leader>f for ( <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<cf>
+au filetype c,cpp ino <buffer> <leader>tmp template <typename T><C-R>=Eatchar('\s')<CR>
+
+" au filetype c,cpp ino <buffer> <leader>f for ( <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<cf>
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype c,cpp nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
@@ -110,19 +105,27 @@ au filetype c,cpp nn <buffer> ; <CMD>call AddSuffix(';')<CR>
 au filetype c,cpp no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('//')<CR>g@
 
 " ABBREVIATION
+au filetype   cpp inorea <silent> <buffer> lambda   [&](){return <++>;}<Esc>F&<right><right>a<C-R>
+au filetype   cpp inorea <silent> <buffer> lamdba   [&](){return <++>;}<Esc>F&<right><right>a<C-R>
 au filetype c,cpp inorea <silent> <buffer> itn      int
+au filetype c,cpp inorea <silent> <buffer> vecotr   vector<><left><C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> vector   vector<><left><C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> vectro   vector<><left><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> retrun   return
 au filetype c,cpp inorea <silent> <buffer> retunr   return
 au filetype c,cpp inorea <silent> <buffer> reutrn   return
 au filetype c,cpp inorea <silent> <buffer> for      for ( <++>; <++>; <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<cf>
 au filetype c,cpp inorea <silent> <silent> <buffer> while  while ( )<left><left>
 au filetype c,cpp inorea <silent> <silent> <buffer> if     if ( )<left><left>
+au filetype c,cpp inorea <silent> <buffer> self     this-><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> #i       # include <><left><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> #I       # include <><left><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> mm       main(int arg_number, char **arg_value)
 au filetype c,cpp inorea <silent> <buffer> pp       printf("", <++>);<c-o>F"<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> ss       scanf("",  <++>);<c-o>F"<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> kd       %d<C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> kx       %x<C-R>=Eatchar('\s')<CR>
+au filetype c,cpp inorea <silent> <buffer> kX       %X<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> kf       %f<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> kc       %c<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> ks       %s<C-R>=Eatchar('\s')<CR>
@@ -135,7 +138,7 @@ au filetype c,cpp inorea <silent> <buffer> fuck     Are you alright?
 
 "  <tab> and <space> visualised
 au filetype c,cpp setl cindent
-au filetype c,cpp let $src=expand('%')
+au filetype c,cpp let $src=expand('%:p')
 " au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
 aug end
 " }}}
@@ -154,6 +157,9 @@ autocmd!
 " au BufNewFile *.py i#coding=UTF-8<Enter>
 " au BufNewFile *.py i#time:<C-r>=strftime("%H:%m")
 
+au filetype python compiler pylint
+au filetype python setl makeprg=pylint\ --reports=n\ --msg-template=\"{path}:{line}:\ {msg_id}\ {symbol},\ {obj}\ 错误：{msg}\"\ %:p
+au filetype python setl errorformat=%f:%l:\ %m
 au filetype python call Notify(['', 'using python syntax'], 'up')
 au filetype python ino <buffer> ; <CMD>call AddSuffix(':')<CR>
 au filetype python ino <buffer> # #<space><left><right>
@@ -162,6 +168,7 @@ au filetype python ino <buffer> # #<space><left><right>
 
 au filetype python nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
 au filetype python nn <buffer> ; <CMD>call AddSuffix(':')<CR>
+au filetype python nn <buffer> <leader>test :botright terminal python_test<CR>
 " Comment the line
 au filetype python nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
 au filetype python no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
@@ -214,9 +221,16 @@ aug end
 "terminal buffer script settings--------------<++>------------------{{{
 aug terminal
 autocmd!
-au TerminalOpen * tno <buffer> jk <c-w>N
-au TerminalOpen * tno <buffer> <leader>k  <c-w>k
-" au TerminalOpen * setlocal nornu nonu
+au terminalOpen * tno <buffer> jk <c-w>N
+au terminalOpen * tno <buffer> <leader>k  <c-w>k
+au TerminalOpen * normal gg
+au TerminalOpen * nn q <CMD>call DeleteTerminal()<CR>
+au TerminalOpen * if &buftype ==# 'terminal'
+                \ | setlocal nolist
+                \ | setlocal nornu
+                \ | endif
+" au TerminalOpen * let &number = 0
+" au TerminalOpen * let &relativenumber = 0
 " au TerminalOpen * setlocal nolist
 " au TerminalOpen * :vertical resize -7
 aug end
@@ -252,8 +266,8 @@ au VimEnter * let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;gray\x7"
 au VimEnter * filetype on
 au VimEnter * syntax   on
 " au BufEnter * match Comment / /
-au VimEnter * no m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
-au VimEnter * nn mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
+" au VimEnter * no m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
+" au VimEnter * nn mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
 au VimEnter * nn /    :set incsearch hlsearch<CR>/\v
 " au QuickFixCmdPre *  syntax
 " au VimEnter * nn <silent> <CR> :call ChangeDirectory()<CR>
@@ -309,10 +323,10 @@ au VimEnter * nn - :vertical resize -10<CR>
 au VimEnter * nn = :vertical resize +10<CR>
 
 " cd to other directory quickly
-au VimEnter * nn <leader>jh :cd ~<CR>
-au VimEnter * nn <leader>jd :cd ~/Downloads<CR>
-au VimEnter * nn <leader>jc :cd ~/.config<CR>
-au VimEnter * nn <leader>jl :cd ~/.Lectures<CR>
+" au VimEnter * nn <leader>jh :cd ~<CR>
+" au VimEnter * nn <leader>jd :cd ~/Downloads<CR>
+" au VimEnter * nn <leader>jc :cd ~/.config<CR>
+" au VimEnter * nn <leader>jl :cd ~/.Lectures<CR>
 
 "cmap 1 !
 au VimEnter * nn gp   %
@@ -323,7 +337,7 @@ au VimEnter * nn <BS> :set   hlsearch! incsearch! \| set hlsearch?<CR>
 " au VimEnter * nn <leader>r :horizontal bo terminal++close bash -rcfile ~/.my_bashrc<CR>
 " au VimEnter * nn <leader>r :horizontal bo terminal++close<CR>
 " au VimEnter * nn <leader>t :vertical terminal++close<CR>
-au VimEnter * nn <leader>i :horizontal bo terminal++close matrix<CR>
+au VimEnter * nn <leader>i :horizontal bo terminal++close python3 -q <CR>
 
 " save the file in the buffer
 " au VimEnter * nn S :w<CR>
@@ -462,6 +476,8 @@ Plug 'junegunn/fzf.vim'
 " Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 " If you have nodejs
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
+Plug 'pycqa/pylint'
+Plug 'vim-scripts/pylint.vim'
 call plug#end()
 " }}}
 
@@ -536,18 +552,33 @@ au filetype markdown ino <buffer> * **<left>
 au filetype markdown ino <buffer> ’ ``<left>
 au filetype markdown ino <buffer> ‘ ``<left>
 au filetype markdown ino <buffer> ' ``<left>
+au filetype markdown ino <buffer> !  ¬
+au filetype markdown ino <buffer> F  ⊥
+au filetype markdown ino <buffer> /  ·
+au filetype markdown ino <buffer> +  ＋
+au filetype markdown ino <buffer> jn ∩
+au filetype markdown ino <buffer> bk ∪
+au filetype markdown ino <buffer> sum ∑
+au filetype markdown ino <buffer> pro ∏
+au filetype markdown ino <buffer> any ∃
+au filetype markdown ino <buffer> all ∀
+au filetype markdown ino <buffer> in  ∈
+au filetype markdown ino <buffer> nin ∉
+au filetype markdown ino <buffer> ziji ⊆
+au filetype markdown ino <buffer> yiho ⊕ 
 au filetype markdown ino <buffer> ～ ~~~~<left><left>
 au filetype markdown ino <buffer> <c-l> <space><++> \|<Esc>?<++><CR>cw
 au filetype markdown nn  <buffer> <leader>t o<c-r>=AddTableRow()<CR><Esc>^/<++><CR>cw
 au filetype markdown nn  <buffer> <leader><space> <CMD>call CheckBoxToggle()<CR>
-au filetype markdown abbrev <buffer> <>  ↔<c-r>=Eatchar('\s')<CR>
-au filetype markdown abbrev <buffer> ->  →<c-r>=Eatchar('\s')<CR>
-au filetype markdown abbrev <buffer> <-  ←<c-r>=Eatchar('\s')<CR>
-au filetype markdown abbrev <buffer> !   ¬<c-r>=Eatchar('\s')<CR>
-au filetype markdown abbrev <buffer> ===  ≡<c-r>=Eatchar('\s')<CR>
-au filetype markdown abbrev <buffer> or  ∨<c-r>=Eatchar('\s')<CR>
-au filetype markdown abbrev <buffer> and ∧<c-r>=Eatchar('\s')<CR>
-au filetype markdown abbrev <buffer> F   ⊥<c-r>=Eatchar('\s')<CR>
+au filetype markdown nn  <buffer> m  <CMD>let &operatorfunc=funcref('IntoLatex')<CR>g@
+au filetype markdown nn  <buffer> mm <CMD>let &operatorfunc=funcref('IntoLatex')<CR>g@l
+au filetype markdown vn  <buffer> m <CMD>let &operatorfunc=funcref('IntoLatex')<CR>g@
+au filetype markdown abbrev <buffer> <>  ↔
+au filetype markdown abbrev <buffer> ->  →
+au filetype markdown abbrev <buffer> <-  ←
+au filetype markdown abbrev <buffer> ===  ≡
+au filetype markdown abbrev <buffer> or  ∨
+au filetype markdown abbrev <buffer> and ∧
 aug end
 " }}}
 
@@ -566,7 +597,7 @@ au filetype bash,sh inorea <silent> <buffer> if  if [[<++> ]];then<CR>fi<Esc>?<+
 au filetype bash,sh inorea <silent> <buffer> for for<++> in <++>;do<CR>done<Esc>0kf<cw
 " Comment the line
 au filetype bash,sh nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
-au filetype bash,sh no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
+au filetype bash,sh nn <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
 aug end
 " }}}
 
@@ -662,5 +693,5 @@ source /home/rongzi/.vim/functions/useful.vim
 source /home/rongzi/.vim/functions/higherorder.vim
 " }}}
 
-" source ~/.vim/plugin/grep-operator.vim
+source ~/.vim/plugin/grep-operator.vim
 call Notify(['rongzi', 'welcome to vim'])

@@ -1,3 +1,43 @@
+"function! IntoLatex()
+function! IntoLatex(type)
+    function! AddDollar(line)
+        if a:line[0:1] ==# a:line[-2:-1] && a:line[0:1] ==# '$$'
+            return a:line[2:-3]
+            call Notify(['删去$$'])
+        else
+            return "$$" . a:line . "$$"
+            call Notify(['添加$$..$$'])
+        endif
+    endfunction
+    let [pos, min_number, max_number] = [getcharpos("']"), getcharpos("'[")[1], getcharpos("']")[1]]
+    let content = getline(min_number, max_number)
+        \->map('AddDollar(v:val)')
+        \->map('setline(v:key + min_number, v:val)')
+endfunction
+
+" function! FileType(file){{{
+function! FileType(file)
+    if a:file =~# '\v.*\.py$'
+        return 'python'
+    elseif a:file =~# '\v.*\.[ch]$'
+        return 'c'
+    elseif a:file =~# '\v.*\.cpp$'
+        return 'cpp'
+    else
+        return 'else'
+    endif
+endfunction
+"}}}
+
+" function! Deleteterminal(){{{
+function! DeleteTerminal()
+    let term_list = getbufinfo({'bufloaded' : 1})->Filter({k, v->v['name'] =~# '^!.*'})
+    for term_buf in term_list
+        exe 'bd! ' . term_buf['bufnr']
+    endfor
+endfunction
+" }}}
+
 " function! AddTableRow(){{{
 function! AddTableRow()
     let pos     = getpos('.')
@@ -19,13 +59,15 @@ function! ReplacePairs()
             return ['[', ']']
         elseif ['<', '>']->index(a:char) !=# -1
             return ['<', '>']
+        elseif ['d', 'd']->index(a:char) !=# -1
+            return ['', '']
         else
             return [a:char, a:char]
         endif
     endfunction
-    normal %
+    normal! %
     let pair1 = getcharpos('.')
-    normal %
+    normal! %
     let pair2 = getcharpos('.')
     if pair1[1] ># pair2[1] || (pair1[1] ==# pair2[1] && pair1[2] ># pair2[2])
         let temp  = pair1
@@ -75,7 +117,7 @@ function! Notify(texts, location='down', time=800)
     hi Pmenu ctermfg=145
     let width  = winwidth(0)
     let height = winheight(0)
-    let shift  = max(a:texts->Map('strcharlen(v:val)'))
+    let shift  = max(a:texts->Map('len(v:val)'))
     if a:location ==# 'up'
         let line = 1
     elseif a:location ==# 'down'
@@ -88,6 +130,7 @@ function! Notify(texts, location='down', time=800)
         \'time': a:time,
         \'borderchars' : ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
         \ })
+    return 0
 endfunction
 " }}}
 
@@ -99,43 +142,47 @@ endfunction
 
 " function! SelectBuffer(){{{
 function! SelectBuffer()
-    function! OpenBuffer(id, index) closure
-        if a:index ==# -1
-            return Notify(['取消跳转'], 'up')
-        endif
-        silent! execute 'buf ' . names[a:index - 1]->split(' ')[0]
-        call Notify(['跳转 ' . names[a:index - 1][:-1]])
-    endfunction
-
     let names = getbufinfo({'buflisted': 1})
-              \->filter('v:val["name"][0] !=# "!"')
-              \->map('v:val["bufnr"] . ((v:val["bufnr"] >= 10)? " ":"  " ). Icons(v:val["name"]) . "  " . v:val["name"]')
-    if len(names) !=# 0
-        call popup_menu(names, {'borderchars' : ['─', '│', '─', '│', '╭', '╮', '╯', '╰'], 'callback': funcref('OpenBuffer')})
-    else
-        call Notify(['没有buffer'])
-    endif
+            \->filter('v:val["name"][0] !=# "!"')
+            \->map({i, buf->buf["name"]})
+    let icon_name = names->Map({k, v->Icons(v) . ' ' . v})
+
+    call popup_menu(icon_name, {'borderchars' : ['─', '│', '─', '│', '╭', '╮', '╯', '╰'], 'callback': {id, result->(result !=# -1)? SwitchBuffer(names[result-1]):''}})
     call DeleteBuffer()
 endfunction
 " }}}
 nn <leader>e :call SelectBuffer()<CR>
 
+" function! SwitchBuffer(file){{{
+function! SwitchBuffer(file)
+    call Notify(['跳转 ' . a:file])
+    if isdirectory(a:file)
+        call Notify([a:file . ' 是目录，不能打开'])
+        " silent execute 'Explore ' . a:file
+        " 似乎vim不能在pop_window打开的时候使用Explore
+    else
+        silent execute 'buf ' . a:file
+    endif
+endfunction
+" }}}
+
+" function! OpenBuffer(file){{{
+function! OpenBuffer(file)
+    call Notify(['跳转 ' . a:file])
+    if isdirectory(a:file)
+        call Notify([a:file . ' 是目录，不能打开'])
+        " silent execute 'Explore ' . a:file " 似乎vim不能在pop_window打开的时候使用Explore
+    else
+        silent execute 'vsplit ' . a:file
+    endif
+endfunction
+" }}}
+
 " function! JoshutoSelectFile(){{{
 function! JoshutoSelectFile()
-    function! OpenBuffer(file)
-        echom a:file
-        call Notify(['跳转 ' . a:file])
-        if a:file ==# '' || system('[[ -d ' . a:file .  ' ]] && echo 1')
-            " silent execute 'Explore ' . a:file
-            " 似乎vim不能在pop_window打开的时候使用Explore
-        elseif @% == ''
-            silent execute 'e ' . a:file
-        else
-            silent execute 'vsplit ' . a:file
-        endif
-    endfunction
-
     function! Rest_work(id, result, filename)
+        silent! normal! `J
+        delmarks J
         let content    = readfile(a:filename)
         if len(content) ==# 0
             return Notify(['取消跳转'], 'up')
@@ -147,8 +194,9 @@ function! JoshutoSelectFile()
     hi clear Pmenu
     hi Pmenu ctermfg=145
     let tmp         = tempname()
-    let term_buffer = term_start('/home/rongzi/.config/scripts/joshuto_for_vim.sh ' . tmp, {'hidden': 1, 'term_finish': 'close'})
-    let pop_window  = popup_create(term_buffer, {'minwidth': 90, 'minheight': 30, 'border': [1, 1, 1, 1], 'borderchars':['─', '│', '─', '│', '╭', '╮', '╯', '╰'], 'callback': {id, result -> Rest_work(id, result, tmp)}})
+    normal! mJ
+    let term_buffer = term_start('/home/rongzi/.config/scripts/joshuto_for_vim.sh ' . tmp, {'hidden': 1, 'term_finish': 'close', 'norestore':1})
+    let pop_window  = popup_create(term_buffer, {'minwidth': 90, 'minheight': 25, 'border': [1, 1, 1, 1], 'borderchars':['─', '│', '─', '│', '╭', '╮', '╯', '╰'], 'callback': {id, result -> Rest_work(id, result, tmp)}})
 endfunction
 " }}}
 nn <leader><c-j> <CMD>call JoshutoSelectFile()<CR>
@@ -156,19 +204,6 @@ nn <leader><c-j> <CMD>call JoshutoSelectFile()<CR>
 " function! SelectFile(){{{
 " use fzf to select files quickly
 function! SelectFile()
-    function! OpenBuffer(file)
-        echom a:file
-        call Notify(['跳转 ' . a:file])
-        if a:file ==# '' || system('[[ -d ' . a:file .  ' ]] && echo 1')
-            " silent execute 'Explore ' . a:file
-            " 似乎vim不能在pop_window打开的时候使用Explore
-        elseif @% == ''
-            silent execute 'e ' . a:file
-        else
-            silent execute 'vsplit ' . a:file
-        endif
-    endfunction
-
     function! Rest_work(id, result, filename)
         let content    = readfile(a:filename)
         if len(content) ==# 0
@@ -181,8 +216,8 @@ function! SelectFile()
     hi clear Pmenu
     hi Pmenu ctermfg=145
     let tmp         = tempname()
-    let term_buffer = term_start('/home/rongzi/.config/scripts/fzf_for_vim.sh ' . tmp, {'hidden': 1, 'term_finish': 'close'})
-    let pop_window  = popup_create(term_buffer, {'minwidth': 130, 'minheight': 20, 'border': [1, 1, 1, 1], 'borderchars':['─', '│', '─', '│', '╭', '╮', '╯', '╰'], 'callback': {id, result -> Rest_work(id, result, tmp)}})
+    let term_buffer = term_start('/home/rongzi/.config/scripts/fzf_for_vim.sh ' . tmp, {'hidden': 1, 'term_finish': 'close', 'norestore' : 1})
+    let pop_window  = popup_create(term_buffer, {'minwidth': 130, 'minheight': 20, 'maxheight': 35, 'border': [1, 1, 1, 1], 'borderchars':['─', '│', '─', '│', '╭', '╮', '╯', '╰'], 'callback': {id, result -> Rest_work(id, result, tmp)}})
 endfunction
 " }}}
 nn <leader><c-f> <CMD>call SelectFile()<CR>
@@ -239,25 +274,19 @@ endfunction
 
 "function! ToggleConcealLevel()   toggle conceal chars{{{
 
-function! ToggleConcealLevel()
-    if &conceallevel == 0
-        setlocal conceallevel=2
-    else
-        setlocal conceallevel=0
-    endif
+function! ToggleConcealLevelOutter()
+    let conceal_level = 1
+    let level = {'0': 0, '1': 1, '2': 3}
+    function! ToggleConcealLevel() closure
+        let conceal_level = (conceal_level + 1) % 3
+        exe 'setlocal conceallevel=' . level[string(conceal_level)]
+    endfunction
+    return funcref('ToggleConcealLevel')
 endfunction
 "}}}
 
+call ToggleConcealLevelOutter()
 nnoremap <silent> <C-c><C-y> <CMD>call ToggleConcealLevel()<CR>
-"function! SwitchBuffer()  switch to another buffer {{{
-" <++>TODO
-function! SwitchBuffer()
-    bnext
-    silent execute '!notify-send -i vim another buffer'
-    silent execute 'redraw!'
-endfunction
-" nnoremap <silent> <c-p> <CMD>call SwitchBuffer()<CR>
-"}}}
 
 "function! Fcitx5pinyin(){{{
 function! Fcitx5pinyin()
@@ -267,7 +296,7 @@ function! Fcitx5keyboard()
     call system('fcitx5-remote -s keyboard')
 endfunction
 
-func Eatchar(pat)
+func! Eatchar(pat)
     let c = nr2char(getchar(0))
     return (c =~ a:pat) ? '' : c
 endfunc
@@ -343,7 +372,6 @@ endfunction
 
 "function! MoveCursor(row, col){{{
 function! MoveCursor(row, col)
-    echom [a:row, a:col]
     call setcursorcharpos(a:row, a:col)
 endfunction
 "}}}}}}
@@ -515,7 +543,7 @@ endfunction
 "function! Quick_CD(){{{
 function! Quick_CD()
     echohl keyword
-    let input = expand(input("要跳转的目录: "))
+    let input = expand(input("要跳转的目录:  "))
     echohl None
     let cmd = 'locate  -l 1 ' . shellescape(input)
     let path = system(cmd)->substitute('\n', '', 'g')
@@ -544,7 +572,6 @@ nn cd <CMD>call Quick_CD()<CR>
 "  ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚══════╝
 "self defined modes {{{
 function! ModeInit()
-    call ExitMode()
     " jump to last M mark if there already have M, otherwise set the M mark here
     exe 'normal! mM'
     nn <c-n> :cnext<CR>
@@ -557,7 +584,7 @@ function! ExitMode()
         exe 'normal! `Mzz'
         delmarks M
     endif
-    silent! only
+    " silent! only
     " callee save :-)
     nn <c-n> :bnext<CR>
     nn <c-p> :bprev<CR>
@@ -565,7 +592,7 @@ function! ExitMode()
     return 1
 endfunction
 
-function! s:GrepOperator(type)
+function! GrepOperator(type)
     let last_buffer_number = 'None'
     let save_reg           = 'None'
     function! SaveReg() closure
@@ -577,7 +604,7 @@ function! s:GrepOperator(type)
     function! Copen(text)
         call SearchArgumentText(a:text)
         copen
-        redraw!
+        " redraw!
         setlocal nolist nonu nornu
         exe "normal! \<c-w>k"
     endfunction
@@ -611,16 +638,20 @@ function! s:GrepOperator(type)
         let last_buffer_number = curr_buffer_number
         silent! cprev
     endfunction
-    function! GrepOperatorInit()
-        call SaveReg()
-        call ModeInit()
-        nn <c-n> <CMD>call Cnext()<CR>
-        nn <c-p> <CMD>call Cprev()<CR>
-    endfunction
     function! ExitOperatorMode()
         silent! cclose
         call RestoreReg()
         call ExitMode()
+    endfunction
+    function! GrepOperatorInit()
+        if exists('s:ExitModeFunc')
+            call s:ExitModeFunc()
+        endif
+        let s:ExitModeFunc=funcref('ExitOperatorMode')
+        call SaveReg()
+        call ModeInit()
+        nn <c-n> <CMD>call Cnext()<CR>
+        nn <c-p> <CMD>call Cprev()<CR>
     endfunction
 
     " init the mode
@@ -630,6 +661,7 @@ function! s:GrepOperator(type)
     call Notify(["正在查找：" . @@])
     silent! exe  'grep -Rsi ' . shellescape(@@) . " ."
     call Copen(@@)
+    redraw!
 
     " set the exit of the mode
     nn q <CMD>call ExitOperatorMode() <CR>
@@ -641,48 +673,69 @@ function! DebugMode()
     function! ExitDebugMode()
         silent! cclose
         call ExitMode()
+        unlet s:ExitModeFunc
     endfunction
 
     function! DebugModeInit()
-        silent! normal `M
-        if !(expand("%") =~# '.*\.c')
-            call Notify(["只有C文件可以Debug"])
+        silent! call s:ExitModeFunc()
+        if expand('%') !~# '\v.*\.c(pp)='
+            call Notify(['不进入debug模式'])
             return 0
         endif
+
+        let s:ExitModeFunc = funcref('ExitDebugMode')
         return ModeInit()
     endfunction
 
     function! Copen()
-        silent! copen
+        silent copen 13
         setlocal nonumber norelativenumber nolist
-        redraw!
+        exe "normal! \<c-w>k"
     endfunction
 
-    if !DebugModeInit()
-        return 0
+    if DebugModeInit()
+        silent! execute 'make -f /home/rongzi/.Lectures/term1/hw/program_design/makefile'
+        call Copen()
+        nn q <CMD>call <SID>ExitModeFunc() <CR>
+        return
     endif
-
-    silent! execute 'make -f /home/rongzi/.Lectures/term1/hw/program_design/makefile'
-    call Copen()
-    nn q <CMD>call ExitDebugMode() <CR>
 endfunction
 " }}}
 
 "function! RunMode(){{{
 function! RunMode()
-    " silent! exe 'make -f /home/rongzi/.Lectures/term1/hw/program_design/makefile'
-    function! RunModeInit()
-        silent! normal! `M
-        if !(expand("%") =~# '.*\.c')
-            call Print("错误：只有C文件可以make", "Error")
-            return 0
+    function! ExitRunMode() closure
+        if exists('s:term_bufnr') && bufnr(s:term_bufnr) !=# -1
+            exe 'bd! ' . s:term_bufnr
         endif
+        call ExitMode()
+        unlet s:ExitModeFunc
+    endfunction
+
+    function! RunModeInit()
+        silent! call s:ExitModeFunc()
+        let filetype = FileType(expand('%'))
+        if ['cpp', 'c', 'python']->index(filetype) ==# -1
+            return Notify(['只能运行C/CPP/PYTHON文件'])
+        endif
+        let s:ExitModeFunc = funcref('ExitRunMode')
         return ModeInit()
     endfunction
 
-    if !RunModeInit()
-        return 0
+    if RunModeInit() ==# 1
+        set splitbelow
+        echom expand('%')
+        let cmd = {'c': 'io -q ', 'cpp': 'io -q ', 'python': 'python3 -i '}[FileType(expand('%'))] . expand('%')
+        let s:term_bufnr = term_start(cmd, {'term_finish':'open'})
+        nn q <CMD>call <SID>ExitModeFunc()<CR>
     endif
+endfunction
+" }}}
+
+"function! RunMode(){{{
+function! LintMode()
+    " silent! exe 'make -f /home/rongzi/.Lectures/term1/hw/program_design/makefile'
+    call RunModeInit()
     " let result = system('g++ -o $bin ' . expand('%'))
     " if len(getqflist()) ==# 1
     if 1 ># 0
@@ -690,7 +743,7 @@ function! RunMode()
         " setl termwinsize=10*0
         " silent! exe 'bo term ' . $bin
         silent! exe 'bo term io -q ' . expand('%')
-        " redraw!
+        redraw!
     else
         call DebugMode()
     endif
@@ -699,11 +752,18 @@ function! RunMode()
     return 1
 endfunction
 " }}}
+"
 " {{{
-au VimEnter * no <leader>g <CMD>set  operatorfunc=<SID>GrepOperator<CR>g@
-" au VimEnter * nn <leader>g <CMD>call GrepMode()    <CR>
-au VimEnter * nn <leader>d <CMD>call DebugMode() <CR>
-au VimEnter * nn <leader>r <CMD>call RunMode()   <CR>
+aug mode
+au!
+au User GrepModeTrigger  normal! g@iw
+au User DebugModeTrigger call DebugMode()
+" au User RunModeTrigger   call RunMode()
+nn <leader>r :doautocmd User RunModeTrigger<CR>
+nn <silent> <leader>r <CMD>call RunMode()<CR>
+nn <silent> <leader>d :doautocmd User DebugModeTrigger<CR>
+nn <silent> <leader>g :let &operatorfunc=funcref("GrepOperator")<CR>:doautocmd User GrepModeTrigger<CR>
+aug end
 " }}}
 
 " function! FoldColumnToggle(){{{

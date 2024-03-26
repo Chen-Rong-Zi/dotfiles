@@ -291,7 +291,8 @@ if !exists("python_no_doctest_highlight")
   if !exists("python_no_doctest_code_highlight")
     syn region pythonDoctest
 	  \ start="^\s*>>>\s" end="^\s*$"
-	  \ contained contains=ALLBUT,pythonDoctest,pythonFunction,@Spell
+	  \ contained contains=@hidden
+" 	  \ contained contains=ALLBUT,pythonDoctest,pythonFunction,@Spell
     syn region pythonDoctestValue
 	  \ start=+^\s*\%(>>>\s\|\.\.\.\s\|"""\|'''\)\@!\S\++ end="$"
 	  \ contained
@@ -354,26 +355,32 @@ hi link inBracket1 Nothing
 hi link inBracket2 Nothing
 hi link inBracket3 Nothing
 hi link inBracket4 Nothing
+hi link PythonHint constant
 
-syn keyword Identifier reversed self
 syntax match   Function       /\v\i+\ze\(/
 syntax match   Preproc        /\v\s([%\+\-\*\/]{1,2}|[>\=<!]\=?)\s/   contains=keyword    " + - * / >= <= ==
-syntax match   keyword        /\v [\+\-\*\/]{0,2}\= /                                  " += -= *= /= =
-syntax match   keyword        /, /                                  " ,
+syntax match   keyword        /\v [\+\-\*\/%]{0,2}\= /                                  " += -= *= /= =
+syntax match   keyword        /,[ \n]/                                  " ,
 " syntax match   Constant       /\v\.@1<=%(\w+)@>\(@!/                  contains=Identifier,Nothing
 syntax match   Comment        /\v-\>/              contains=Identifier,Nothing
 " syntax match   Function       /\v\h+: {0,2}\zs\h*/
 
-syntax cluster hidden  add=Preproc,Nontext,Identifier,Constant,keyword,constants,Function,Nothing,pythonString,pythonStatement,pythonOperator,pythonRepeat,pythonNumber
-syntax region  Nothing   matchgroup=Identifier start=/\v\h*\[/ end=/]/ display oneline contains=@hidden, inBracket1
-syntax region inBracket1 matchgroup=cBracket1 start=/(/ end=/)/ display oneline contains=@hidden,inBracket2,GeneratorExit
-syntax region inBracket2 matchgroup=cBracket2 start=/(/ end=/)/ display oneline contains=@hidden,inBracket3,GeneratorExit contained
-syntax region inBracket3 matchgroup=cBracket3 start=/(/ end=/)/ display oneline contains=@hidden,inBracket4,GeneratorExit contained
-syntax region inBracket4 matchgroup=cBracket4 start=/(/ end=/)/ display oneline contains=@hidden,inBracket1 contained
+syntax cluster hidden  add=Comment,Function,Identifier,inBracket1,keyword,Nothing,Preproc,pythonAsync,pythonComment,pythonConditional,pythonDecoratorName,pythonEscape,pythonException,pythonExceptions,pythonInclude,pythonNumber,pythonOperator,pythonRepeat,pythonStatement,pythonString
+
+
+syntax region  Nothing   matchgroup=Identifier start=/\v\i*\[/ end=/]/ display oneline contains=@hidden
+syntax region inBracket1 matchgroup=cBracket1 start=/(/ end=/)/ display oneline contains=@hidden,inBracket2,PythonHint
+syntax region inBracket2 matchgroup=cBracket2 start=/(/ end=/)/ display oneline contains=@hidden,inBracket3 contained
+syntax region inBracket3 matchgroup=cBracket3 start=/(/ end=/)/ display oneline contains=@hidden,inBracket4 contained
+syntax region inBracket4 matchgroup=cBracket4 start=/(/ end=/)/ display oneline contains=@hidden contained keepend
+syntax match  PythonHint /\v%(\i+: *)@20<=\I*/ contained
+
+
 
 " vim:set sw=2 sts=2 ts=8 noet:
 " syntax keyword Keyword return conceal cchar=𐅙
 " syntax keyword Keyword return conceal cchar=⇶⇰
+syntax keyword Identifier self
 syntax keyword keyword lambda   conceal cchar=λ
 syntax keyword keyword None     conceal cchar=∅
 syntax keyword Keyword yield    conceal cchar=⇇
@@ -384,5 +391,8 @@ syntax keyword Keyword break    conceal cchar=✖
 syntax keyword Keyword if       conceal cchar=𝘐
 syntax keyword Keyword elif     conceal cchar=ℰ
 syntax keyword Keyword else     conceal cchar=𝘌
+" syntax keyword Keyword and      conceal cchar=•
+" syntax keyword Keyword or       conceal cchar=＋
+" syntax keyword Keyword not      conceal cchar=¬
 
 hi! link conceal keyword

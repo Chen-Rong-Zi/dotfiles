@@ -842,4 +842,4 @@ syntax cluster shCommandSubList add=Nothing
 syntax cluster shLoopList       add=Nothing
 
 syntax match keyword /&&/ conceal cchar=∧
-syntax region Nothing matchgroup=Keyword start=/\v\[{1,2} @=/ end=/\v \]{1,2}%(; {0,3}then)?/ oneline concealends cchar=: contains=@shEchoList,@shExprList1,@shSubShList
+syntax region Nothing matchgroup=Keyword start=/\v\[\[ / end=/\v \]\]%(; {0,3}then)?/ oneline concealends cchar=: contains=@shEchoList,@shExprList1,@shSubShList

@@ -29,12 +29,10 @@ fj() {
 
 jo() {
     if [[ $(file $1 2>/dev/null | awk  '{print $2}') == 'directory' ]];then
-        echo 1
         joshuto $1
     elif [[ -z $1 ]];then
         joshuto ./
     else
-        echo 3
         joshuto $( echo $1 | awk -F / -v OFS=/ '{$NF="";print}' )
     fi
 }

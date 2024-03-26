@@ -1105,7 +1105,7 @@ hi link inBracket4      Nothing
 
 syntax match   Conceal           /\v<end%(for|if|function)>/     conceal    cchar=|
 syntax match   Conceal           /\v^\s*\zs<func%(tion)?(!@=)?>/ conceal    cchar=𝔽
-syntax match   Keyword           /,                              /
+syntax match   Keyword           /,/
 syntax match   Conceal           /||/                            conceal    cchar=∨
 syntax match   Conceal           /&&/                            conceal    cchar=∧
 syntax match   Conceal           /=\~/                           conceal    cchar=≊
