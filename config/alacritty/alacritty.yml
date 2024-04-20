@@ -10,7 +10,9 @@ env:
   # each instance of Alacritty. If it is not present, alacritty will
   # check the local terminfo database and use `alacritty` if it is
   # available, otherwise `xterm-256color` is used.
+    # TERM: alacritty
   TERM: xterm-256color
+  # TERM: xterm
 #   source: ~/.config/alacritty/alacritty.env
 
 # shell:
@@ -105,7 +107,7 @@ font:
     #     family: FiraCode Nerd Font
     #     family: Fixedsys Excelsior
     family: FiraCode Nerd Font
-    style: thin
+    style: medium
 
     # The `style` can be specified to pick a specific face.
     #style: Regular
@@ -622,3 +624,4 @@ enable_experimental_conpty_backend: false
 #   - { key: NumpadEnter,             chars: "\n"                              }
 import:
   - ~/Downloads/Github/alacritty-theme/themes/tokyo-night.yaml
+  # - ~/Downloads/Github/alacritty-theme/themes/smoooooth.yaml

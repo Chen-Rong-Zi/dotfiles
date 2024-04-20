@@ -240,6 +240,7 @@ if &diff
   call s:h("CursorLine", { "gui": "underline" })  "the screen line that the cursor is in when 'cursorline' is set
 else
   call s:h("CursorLine", { "bg": s:cursor_grey })  "the screen line that the cursor is in when 'cursorline' is set
+  " call s:h("CursorLine", { "bg": s:red })  "the screen line that the cursor is in when 'cursorline' is set
 endif
 call s:h("Directory",  { "fg": s:blue    })  "directory names       (and other special names in      listings)
 call s:h("DiffAdd",    { "bg": s:green,  "fg":  s:black      })  "diff mode: Added   line

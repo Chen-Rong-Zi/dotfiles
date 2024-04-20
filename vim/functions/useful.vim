@@ -1,4 +1,27 @@
-"function! IntoLatex()
+"function! CR() {{{
+function! CR()
+    let [trash1, row, col, trash2] = getcharpos('.')
+    let curr_line = getline(row)
+    let next_line = getline(row + 1)
+
+    if curr_line =~# '^\s*$'
+        call setline(row, '')
+    endif
+
+    if next_line =~# '^\s*$'
+        let indent = repeat(' ', cindent(row) - len(next_line))
+        call setline(row + 1, indent)
+        call cursor(row + 1, len(indent) + 1)
+    else
+        execute 'normal o'
+        let indent = repeat(' ', cindent(row))
+        call setline(row + 1, indent)
+        call cursor(row + 1, len(indent) + 1)
+    endif
+endfunction
+" }}}
+
+"function! IntoLatex() {{{
 function! IntoLatex(type)
     function! AddDollar(line)
         if a:line[0:1] ==# a:line[-2:-1] && a:line[0:1] ==# '$$'
@@ -14,6 +37,7 @@ function! IntoLatex(type)
         \->map('AddDollar(v:val)')
         \->map('setline(v:key + min_number, v:val)')
 endfunction
+"}}}
 
 " function! FileType(file){{{
 function! FileType(file)
@@ -23,6 +47,8 @@ function! FileType(file)
         return 'c'
     elseif a:file =~# '\v.*\.cpp$'
         return 'cpp'
+    elseif a:file =~# '\v.*\.java$'
+        return 'java'
     else
         return 'else'
     endif
@@ -112,28 +138,100 @@ endfunction
 " }}}
 
 " function! Notify(){{{
-function! Notify(texts, location='down', time=800)
+function! NotifyMaker()
+    let notify_queue = [0, winheight(0)]
+    function! SetDead(begin, row) closure
+        for i in range(a:row + 2)
+            let trash = notify_queue->remove(index(notify_queue, a:begin + i))
+        endfor
+    endfunction
+
+    function! AddInfo(begin, row) closure
+        for i in range(a:row + 2)
+            let notify_queue = notify_queue->add(a:begin + i)
+        endfor
+        let notify_queue = notify_queue->sort({a, b -> a > b})
+    endfunction
+
+    function! GetInfo() closure
+        return notify_queue
+    endfunction
+
+    function! SpareRow(lease_space) closure abort
+        function! GetIndex(space_between_list, n) abort
+            if a:n ==# 0
+                return 1
+            else
+                return GetIndex(a:space_between_list, a:n - 1) + a:space_between_list[a:n - 1] + 1
+            endif
+        endfunction
+        let without_car    = notify_queue[1:]
+        let space_between  = range(len(without_car))->map({n -> without_car[n] - notify_queue[n] - 1})
+        let possible_index = copy(space_between)->filter({idx, val -> val > a:lease_space + 2})
+        if len(possible_index) ==# 0
+            return notify_queue[-1] + 1
+        else
+            return GetIndex(space_between, space_between->index(possible_index[0]))
+        endif
+    endfunction
+
+    function! SpareRowDown(lease_space) closure abort
+        function! GetIndex(space_between_list, n) abort closure
+            if a:n ==# -1
+                return notify_queue[-1]
+            else
+                return GetIndex(a:space_between_list, a:n + 1) -  a:space_between_list[a:n + 1] - 1
+            endif
+        endfunction
+        let without_car    = notify_queue[1:]
+        let space_between  = range(len(without_car))->map({n -> without_car[n] - notify_queue[n] - 1})
+        let possible_index = copy(space_between)->filter({idx, val -> val > a:lease_space + 2})
+        if len(possible_index) ==# 0
+            return notify_queue[-1] - a:lease_space
+        else
+            return GetIndex(space_between, space_between->index(possible_index[0]) - len(space_between)) - a:lease_space
+        endif
+    endfunction
+    return [funcref('SetDead'), funcref('AddInfo'), funcref('GetInfo'), funcref('SpareRow')]
+endfunction
+
+let [s:SetNotifyDead, s:AddNotifyInfo, s:GetNotifyInfo, s:SpareRow] = NotifyMaker()
+
+function! Notify(texts, location='down', time=800) abort
     hi clear Pmenu
     hi Pmenu ctermfg=145
-    let width  = winwidth(0)
-    let height = winheight(0)
-    let shift  = max(a:texts->Map('len(v:val)'))
-    if a:location ==# 'up'
-        let line = 1
-    elseif a:location ==# 'down'
-        let line = height
+    let width = winwidth(0)
+    let shift = max(a:texts->Map('len(v:val)'))
+    let notify_queue = s:GetNotifyInfo()
+
+    let col = width / 2 - shift / 2
+    if a:location ==# 'down'
+        let row = SpareRowDown(len(a:texts) + 2)
+    else
+        let row = SpareRow(len(a:texts) + 2)
     endif
+    " echom row
+
+    call s:AddNotifyInfo(row, len(a:texts))
     call popup_notification(a:texts, {
-        \'col': (width/2 - shift / 2),
-        \'line': line,
-        \'minwidth': shift,
-        \'time': a:time,
-        \'borderchars' : ['─', '│', '─', '│', '╭', '╮', '╯', '╰']
+        \'col'         : col,
+        \'line'        : row,
+        \'minwidth'    : shift,
+        \'time'        : a:time,
+        \'zindex'      : 200,
+        \'borderchars' : ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+        \'callback'    : {...->  s:SetNotifyDead(row, len(a:texts))}
         \ })
     return 0
 endfunction
 " }}}
 
+function! Test()
+    for i in range(10)
+        call Notify(['   ' . - i, ''], 'down')
+        " call Notify(['   ' . i, '', ''], 'up')
+    endfor
+endfunction
 " function! Icons(){{{
 function! Icons(filename)
     return system('exa --icons=always ' . shellescape(a:filename))->split()[0]
@@ -482,12 +580,14 @@ function! CommentToggleMaker(comment)
                 return AddOrDelComment(a:line[1:], a:comment)->insert(' ', 0)
             elseif a:line[0] ==# a:comment[0]
                 let comment_len = strcharlen(a:comment)
+                let line_len    = len(a:line)
                 if a:line[:comment_len - 1]->join('') ==# a:comment
-                    let has_space = a:line[comment_len - 1:] !=# [] && a:line[comment_len] ==# ' '
+                    let has_space = line_len > comment_len  && a:line[comment_len] ==# ' '
                     return a:line[comment_len + has_space:]
                 endif
+            else
+                return (a:comment . ' ')->split('\zs')->extend(a:line)
             endif
-            return (a:comment . ' ')->split('\zs')->extend(a:line)
         endfunction
 
         let [pos, min_number, max_number] = [getcharpos("']"), getcharpos("'[")[1], getcharpos("']")[1]]
@@ -495,9 +595,6 @@ function! CommentToggleMaker(comment)
             \->map('split(v:val, ''\zs'')')
             \->map('AddOrDelComment(v:val, a:comment)')
             \->map('setline(v:key + min_number, (v:val)->join(""))')
-        " if content !=# []
-            " call MoveCursor(pos[1], pos[2])
-        " endif
     endfunction
     return funcref('CommentToggle')
 endfunction
@@ -573,13 +670,16 @@ nn cd <CMD>call Quick_CD()<CR>
 "self defined modes {{{
 function! ModeInit()
     " jump to last M mark if there already have M, otherwise set the M mark here
-    exe 'normal! mM'
+    let s:origin_winid = win_getid()
+    execute 'normal! mM'
     nn <c-n> :cnext<CR>
     nn <c-p> :cprev<CR>
     return 1
 endfunction
 
 function! ExitMode()
+    let origin_winnr = getwininfo(s:origin_winid)[0]['winnr']
+    execute origin_winnr . ' wincmd w'
     if getcharpos("'M") !=# [0, 0, 0, 0]
         exe 'normal! `Mzz'
         delmarks M
@@ -702,9 +802,22 @@ function! DebugMode()
 endfunction
 " }}}
 
+let s:time_passby   = 0
+function! MakeTimeStamp()
+    let last_run_time = reltimefloat(reltime())
+    function! TimeStampInner() closure
+        let old_time      = last_run_time
+        let last_run_time = reltimefloat(reltime())
+        let s:time_passby   = last_run_time - old_time
+    endfunction
+    return funcref('TimeStampInner')
+endfunction
+let s:TimeStamp = MakeTimeStamp()
+
+let A = {->s:TimeStamp()}
 "function! RunMode(){{{
 function! RunMode()
-    function! ExitRunMode() closure
+    function! ExitRunMode()
         if exists('s:term_bufnr') && bufnr(s:term_bufnr) !=# -1
             exe 'bd! ' . s:term_bufnr
         endif
@@ -714,21 +827,34 @@ function! RunMode()
 
     function! RunModeInit()
         silent! call s:ExitModeFunc()
-        let filetype = FileType(expand('%'))
-        if ['cpp', 'c', 'python']->index(filetype) ==# -1
-            return Notify(['只能运行C/CPP/PYTHON文件'])
+        if ['java', 'cpp', 'c', 'python']->index(FileType(expand('%'))) ==# -1
+            call Notify(['只能运行C/Cpp/Python/Java文件'])
+            return 0
         endif
         let s:ExitModeFunc = funcref('ExitRunMode')
         return ModeInit()
     endfunction
 
-    if RunModeInit() ==# 1
-        set splitbelow
-        echom expand('%')
-        let cmd = {'c': 'io -q ', 'cpp': 'io -q ', 'python': 'python3 -i '}[FileType(expand('%'))] . expand('%')
-        let s:term_bufnr = term_start(cmd, {'term_finish':'open'})
-        nn q <CMD>call <SID>ExitModeFunc()<CR>
+    if RunModeInit() !=# 1
+        return Notify(['ModeInit失败，不进入RunMode'])
     endif
+
+    let run_only     = 0
+    let script_path  = expand('%')
+    let filetype     = FileType(script_path)
+    let run_cmds     = {'c': 'io -q ', 'cpp': 'io -q ', 'java': 'io -q ', 'python': 'python3 -i '}
+    let term_options = {'term_finish':'open'}
+
+    if s:time_passby <# 1.5
+        let run_only = 1
+        call Notify(['运行过快,据上一次运行只有 ' . s:time_passby . 's'], 'up')
+    endif
+
+    let cmd = run_cmds[filetype] . script_path . (run_only ? ' -r' : '')
+    belowright let s:term_bufnr = term_start(cmd, term_options)
+    execute   'normal! ' . "\<c-w>k" . "zz" . "\<c-w>j"
+    call s:TimeStamp()
+    nn q <CMD>call <SID>ExitModeFunc()<CR>
 endfunction
 " }}}
 
@@ -759,7 +885,7 @@ au!
 au User GrepModeTrigger  normal! g@iw
 au User DebugModeTrigger call DebugMode()
 " au User RunModeTrigger   call RunMode()
-nn <leader>r :doautocmd User RunModeTrigger<CR>
+" nn <leader>r :doautocmd User RunModeTrigger<CR>
 nn <silent> <leader>r <CMD>call RunMode()<CR>
 nn <silent> <leader>d :doautocmd User DebugModeTrigger<CR>
 nn <silent> <leader>g :let &operatorfunc=funcref("GrepOperator")<CR>:doautocmd User GrepModeTrigger<CR>

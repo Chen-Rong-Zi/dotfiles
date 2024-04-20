@@ -551,8 +551,8 @@ unlet s:cpo_save
 hi Nothing gui=bold
 hi link cBracket1  Nontext
 hi link cBracket2  cString
-hi link cBracket3  Keyword
-hi link cBracket4  Preproc
+hi link cBracket3  Special
+hi link cBracket4  Keyword
 hi link inBracket1 Nothing
 hi link inBracket2 Nothing
 hi link inBracket3 Nothing
@@ -578,6 +578,11 @@ syntax region inBracket1 matchgroup=cBracket1 start=/(/ end=/)/ display contains
 syntax region inBracket2 matchgroup=cBracket2 start=/(/ end=/)/ display contains=@hidden,inBracket3 contained nextgroup=inBracket3 oneline
 syntax region inBracket3 matchgroup=cBracket3 start=/(/ end=/)/ display contains=@hidden,inBracket4 contained nextgroup=inBracket4 oneline
 syntax region inBracket4 matchgroup=cBracket4 start=/(/ end=/)/ display contains=@hidden,inBracket1 contained oneline
+
+syntax region inBracket1 matchgroup=cBracket1 start=/</ end=/>/ display contains=@hidden,inBracket2 nextgroup=inBracket2 oneline
+syntax region inBracket2 matchgroup=cBracket2 start=/</ end=/>/ display contains=@hidden,inBracket3 contained nextgroup=inBracket3 oneline
+syntax region inBracket3 matchgroup=cBracket3 start=/</ end=/>/ display contains=@hidden,inBracket4 contained nextgroup=inBracket4 oneline
+syntax region inBracket4 matchgroup=cBracket4 start=/</ end=/>/ display contains=@hidden,inBracket1 contained oneline
 
 " syntax match Nontext /\v((for|while|if).*)@60<=\)\s*\{=$/    " (  ) after if or while or for
 " syntax match LineNr /\v((for|while|if) )@<=\(/
@@ -605,6 +610,8 @@ syntax keyword Keyword template conceal cchar=𝘛
 syntax keyword Keyword typename conceal cchar=𝕥
 syntax keyword Keyword this     conceal cchar=𝖲
 syntax keyword Keyword vector   conceal cchar=𝗏
+syntax keyword Keyword decltype conceal cchar=𝘿
+syntax match   Keyword /\[=\]/  conceal cchar=λ
 " syntax keyword Keyword vector   conceal cchar=𝘷
 " syn region keyword  /password/ conceal cchar=*
 " syntax match Constant "return" conceal cchar= contains=return
@@ -616,4 +623,4 @@ if expand('%') =~# '.*\.cpp'
     syntax match  incout /<</ conceal cchar=. contained
 endif
 
-highlight link conceal Keyword
+hi! link conceal Keyword

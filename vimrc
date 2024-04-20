@@ -8,29 +8,31 @@
 " Leader map
 let mapleader = ","
 if !exists("g:colorscheme")
-    colorscheme onedark
+    set termguicolors
+    set encoding=utf-8
     syntax on
-    let g:colorscheme   = 'onedark'
-    let g:airline_theme = 'onedark'
+    colorscheme tokyonight
+    let g:tokyonight_style = 'storm'
+    let g:colorscheme      = 'tokyonight'
+    let g:airline_theme    = 'tokyonight'
 endif
 
 
-" call airline#update_statusline()
+"" call airline#update_statusline()
 set nocp
 set concealcursor=ni
 set conceallevel=2
 
-" set smartindent tabline
+"" set smartindent tabline
 set eventignore+=FocusGained
 set confirm
 set cursorline
-set encoding=utf-8
 set expandtab
 set fillchars=vert:┃
-" set fillchars=vert:│
+"" set fillchars=vert:│
+" set lazyredraw
 set list
 set listchars=leadmultispace:│\ \ \ ,trail:-,precedes:>,extends:<,tab:⏐\ 
-set lazyredraw
 set linebreak
 set nohlsearch
 set rnu nu
@@ -42,13 +44,13 @@ set smoothscroll
 set softtabstop=4
 set synmaxcol=256
 set autochdir
-set termguicolors
 set tabstop=4
 set redrawtime=500
 set ignorecase
 set nowrap
 set notimeout
 set matchpairs=(:),{:},[:],\":\",':',<:>
+
 " set timeoutlen=200
 " set ttimeout
 " set ttimeoutlen=128
@@ -56,14 +58,14 @@ set ttyfast
 set virtualedit=NONE
 set textwidth=256
 set helplang=cn
-set termwinsize=13*0
+set termwinsize=10*0
 set foldcolumn=0
 set foldmethod=indent
 set nu ru ai si ts=4 sw=4
 " vim buffer tab open-tab
-    " <c-[np]> <c-[ey]> <c-t>
-" tmux buffer tab open-tab
-    " <alt-[up,down,left,right]> <alt-[np]> <c-w>t
+"    " <c-[np]> <c-[ey]> <c-t>
+"" tmux buffer tab open-tab
+"    " <alt-[up,down,left,right]> <alt-[np]> <c-w>t
 
 
  " ██████╗    ██╗ ██████╗██████╗ ██████╗
@@ -105,8 +107,8 @@ au filetype c,cpp nn <buffer> ; <CMD>call AddSuffix(';')<CR>
 au filetype c,cpp no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('//')<CR>g@
 
 " ABBREVIATION
-au filetype   cpp inorea <silent> <buffer> lambda   [&](){return <++>;}<Esc>F&<right><right>a<C-R>
-au filetype   cpp inorea <silent> <buffer> lamdba   [&](){return <++>;}<Esc>F&<right><right>a<C-R>
+au filetype   cpp inorea <silent> <buffer> lambda   [=] (auto <++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
+au filetype   cpp inorea <silent> <buffer> lamdba   [=] (auto <++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> itn      int
 au filetype c,cpp inorea <silent> <buffer> vecotr   vector<><left><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> vector   vector<><left><C-R>=Eatchar('\s')<CR>
@@ -114,7 +116,8 @@ au filetype c,cpp inorea <silent> <buffer> vectro   vector<><left><C-R>=Eatchar(
 au filetype c,cpp inorea <silent> <buffer> retrun   return
 au filetype c,cpp inorea <silent> <buffer> retunr   return
 au filetype c,cpp inorea <silent> <buffer> reutrn   return
-au filetype c,cpp inorea <silent> <buffer> for      for ( <++>; <++>; <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<cf>
+au filetype c,cpp inorea <silent> <buffer> for      for ( <++>; <++>; <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<ca>
+au filetype c,cpp inorea <silent> <buffer> ffor     for ( auto &it : <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<ca>
 au filetype c,cpp inorea <silent> <silent> <buffer> while  while ( )<left><left>
 au filetype c,cpp inorea <silent> <silent> <buffer> if     if ( )<left><left>
 au filetype c,cpp inorea <silent> <buffer> self     this-><C-R>=Eatchar('\s')<CR>
@@ -141,6 +144,78 @@ au filetype c,cpp setl cindent
 au filetype c,cpp let $src=expand('%:p')
 " au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
 aug end
+" }}}
+
+"      ██╗ █████╗ ██╗   ██╗ █████╗ 
+"      ██║██╔══██╗██║   ██║██╔══██╗
+"      ██║███████║██║   ██║███████║
+" ██   ██║██╔══██║╚██╗ ██╔╝██╔══██║
+" ╚█████╔╝██║  ██║ ╚████╔╝ ██║  ██║
+"  ╚════╝ ╚═╝  ╚═╝  ╚═══╝  ╚═╝  ╚═╝
+" java filetype script settings--------<++>------------{{{
+aug java
+autocmd!
+au filetype java let maplocalleader="1"
+au filetype java call Notify(['', 'using Java syntax'], 'up')
+au filetype java ino <buffer> ; <CMD>call AddSuffix(';')<CR>
+au filetype java ino <buffer> } {}<left>
+au filetype java ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+
+" au filetype c ino <cr> <esc>o
+" au filetype c ino <c-h> <left>
+" au filetype c ino <c-l> <right>
+" au filetype c ino <c-j> <down>
+" au filetype c ino <c-k> <up>
+"
+au filetype java ino <silent> <buffer> { <c-R>=AddSeprator()<CR><right>{<CR>}<Esc>O
+"au filetype java ino <silent> <buffer> { <right>{<CR>}<Esc>O
+"au filetype java ino <buffer> { <esc>A{<CR><++>}<ESC>O
+au filetype java ino <buffer> <leader>m /*    */<esc>4<left>a
+au filetype java ino <buffer> <c-l> <space>=<space>
+au filetype java ino <buffer> <leader><leader> <space>= 0,<space>
+au filetype java ino <buffer> <leader>s ::
+
+" au filetype java ino <buffer> <leader>f for ( <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<cf>
+" # au filetype java nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
+au filetype java nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
+au filetype java nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
+au filetype java nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('//')<CR>g@l
+au filetype java nn <buffer> ; <CMD>call AddSuffix(';')<CR>
+au filetype java no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('//')<CR>g@
+
+" ABBREVIATION
+au filetype java inorea <silent> <buffer> lambda   (<++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> lamdba   (<++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> itn      int
+au filetype java inorea <silent> <buffer> retrun   return
+au filetype java inorea <silent> <buffer> retunr   return
+au filetype java inorea <silent> <buffer> reutrn   return
+au filetype java inorea <silent> <buffer> for      for ( <++>; <++>; <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<ca>
+au filetype java inorea <silent> <buffer> ffor     for ( <++> i : <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<ca>
+au filetype java inorea <silent> <silent> <buffer> while  while ( )<left><left>
+au filetype java inorea <silent> <silent> <buffer> if     if ( )<left><left>
+au filetype java inorea <silent> <buffer> mm       main(String[] args)
+au filetype java inorea <silent> <buffer> pp       System.out.println(<++>);<Esc>F<ca<<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> pf       System.out.printf("<++>", <++>);<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> kd       %d<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> kx       %x<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> kX       %X<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> kf       %f<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> kc       %c<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> ks       %s<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> ku       %u<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> klf      %lf<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> kld      %ld<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> klld     %lld<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> kllf     %llf<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> fuck     Are you alright?
+
+"  <tab> and <space> visualised
+au filetype java setl cindent
+au filetype java let $src=expand('%:p')
+" au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
+aug end
+
 " }}}
 
 
@@ -224,7 +299,7 @@ autocmd!
 au terminalOpen * tno <buffer> jk <c-w>N
 au terminalOpen * tno <buffer> <leader>k  <c-w>k
 au TerminalOpen * normal gg
-au TerminalOpen * nn q <CMD>call DeleteTerminal()<CR>
+au TerminalOpen * nn q <CMD>call DeleteTerminal() \| unmap q<CR> 
 au TerminalOpen * if &buftype ==# 'terminal'
                 \ | setlocal nolist
                 \ | setlocal nornu
@@ -254,20 +329,25 @@ autocmd!
 
 " replace  { [
 " au BufEnter * call ChangeDirectory()
-" au BufEnter * call ChangeSrc()
+" au BufEnter * \|call ChangeSrc()\|
+" au TextChangedI * call popup_menu(["Futk your"], {})
 
-" INSERT mode
+"a INSERT mode
+au DirChanged * call Notify(['当前位于' . expand('%:p')], 'down')
+
+au VimEnter * let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
 au VimEnter * let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
 " REPLACE mode
-au VimEnter * let &t_SR = "\<Esc>[3 q" . "\<Esc>]12;white\x7"
+
 " NORMAL mode
 au VimEnter * let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;gray\x7"
 
 au VimEnter * filetype on
 au VimEnter * syntax   on
+au VimEnter * set lazyredraw
 " au BufEnter * match Comment / /
-" au VimEnter * no m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
-" au VimEnter * nn mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
+au VimEnter * no m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
+au VimEnter * nn mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
 au VimEnter * nn /    :set incsearch hlsearch<CR>/\v
 " au QuickFixCmdPre *  syntax
 " au VimEnter * nn <silent> <CR> :call ChangeDirectory()<CR>
@@ -379,7 +459,7 @@ au VimEnter * cno <c-a> <c-b>
 " Transform the word to UPPER-CASE
 au VimEnter * ino <BS>     <Nop>
 au VimEnter * ino <c-u>    <esc>viwUviwA
-au VimEnter * ino <c-j>    <esc>A<CR>
+au VimEnter * ino <c-j>    <CMD>call CR()<CR>
 au VimEnter * ino <c-c>    <Esc>
 au VimEnter * ino <c-v>    <Esc>viw
 " Turn the ; into <CR>
@@ -465,8 +545,8 @@ call plug#begin()
 "   - e.g. `call plug#begin('~/.vim/plugged')`
 "   - Avoid using standard Vim directory names like 'plugin'
 " Make sure you use single quotes
-Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
+Plug 'vim-airline/vim-airline'
 
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
@@ -689,9 +769,9 @@ aug end
 " ███████║╚██████╗██║  ██║██║██║        ██║   ███████║
 " ╚══════╝ ╚═════╝╚═╝  ╚═╝╚═╝╚═╝        ╚═╝   ╚══════╝
 "vim filetype script settings--------<++>------------{{{
-source /home/rongzi/.vim/functions/useful.vim
-source /home/rongzi/.vim/functions/higherorder.vim
+source ~/.vim/functions/useful.vim
+source ~/.vim/functions/higherorder.vim
+source ~/.vim/plugin/grep-operator.vim
 " }}}
 
-source ~/.vim/plugin/grep-operator.vim
-call Notify(['rongzi', 'welcome to vim'])
+" call Notify(['rongzi', 'welcome to vim'])
