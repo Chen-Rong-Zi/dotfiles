@@ -563,11 +563,12 @@ syntax match Preproc        /\v\s([\+\-^\*\/%]|[>\=<!]\=?)\s/    display contain
 syntax match cType          /\v<\u\w{-}>/                        display
 syntax match keyword        /[,|&]\|!=\@!/                       display contains=@Spell                              " | & !
 syntax match keyword        /++\|--\|&&\|>>\|<</                 display contains=@Spell                               " ++ -- && || >> <<
-syntax match keyword        /\v\s[|\+\-\*\/^]?\=\s/               display contains=@Spell                                 " += -= *= /= =
+syntax match purple        /\v\s[|\+\-\*\/^]?\=\s/               display contains=@Spell                                 " += -= *= /= =
 syntax match Identifier     /\v\*+\s@!\w*|[:?.]|-\>/              display contains=Function                             " array[.*] and *pointers and dereference ->
 syntax match Nontext        /\v[{}]$|;|^%( *)@>}/                display contains=@Spell                               " { } ;
 
-syntax cluster hidden add=cBitField,cBlock,cCharacter,cComment,cCommentL,cConstant,cCppInWrapper,cCppOutWrapper,cCppString,cDefine,cLabel,cMulti,cNumbers,cOperator,cout,cPragma,cPreCondit,cPreConditMatch,cPreProc,cRepeat,cSpecialCharacter,cStatement,cStorageClass,cString,cStructure,cType,Ctype,cTypedef,cUserCont,cWrongComTail,Function,Identifier,inBracket1,keyword,Keyword,Nontext,Nothing,Preproc
+" syntax cluster hidden add=cBitField,cBlock,cCharacter,cComment,cCommentL,cConstant,cCppInWrapper,cCppOutWrapper,cCppString,cDefine,cLabel,cMulti,cNumbers,cOperator,cout,cPragma,cPreCondit,cPreConditMatch,cPreProc,cRepeat,cSpecialCharacter,cStatement,cStorageClass,cString,cStructure,cType,Ctype,cTypedef,cUserCont,cWrongComTail,Function,Identifier,inBracket1,keyword,Keyword,Nontext,Nothing,Preproc
+syntax cluster hidden contains=TOP
 
 
 " 这个困扰我好久的问题就这么解决了？第一个region是解法一，但是解法二显然更好
@@ -590,7 +591,7 @@ syntax region inBracket4 matchgroup=cBracket4 start=/</ end=/>/ display contains
 " syntax match Constant /\%(if\|while\|for\)\s*([^)]*)\s*{/          " Constant defined by #define or const
 syntax match cConstant /\v<[[:upper:]_]{2,}>/    " Constant defined by #define or const
 
-syntax match   Keyword /\v^ {-}\zs<else *if/  display conceal cchar=ℰ
+syntax match   Keyword /\v\zs<else *if/  display conceal cchar=ℰ
 syntax match   Keyword /\v<else>%( if)@!/     display conceal cchar=𝘌
 syntax keyword Identifier this
 syntax keyword Keyword if       conceal cchar=𝘐
@@ -611,6 +612,8 @@ syntax keyword Keyword typename conceal cchar=𝕥
 syntax keyword Keyword this     conceal cchar=𝖲
 syntax keyword Keyword vector   conceal cchar=𝗏
 syntax keyword Keyword decltype conceal cchar=𝘿
+syntax keyword Keyword const    conceal cchar=𝘾
+syntax keyword Keyword catch    conceal cchar=𝔼
 syntax match   Keyword /\[=\]/  conceal cchar=λ
 " syntax keyword Keyword vector   conceal cchar=𝘷
 " syn region keyword  /password/ conceal cchar=*

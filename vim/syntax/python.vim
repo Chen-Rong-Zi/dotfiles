@@ -349,7 +349,7 @@ unlet s:cpo_save
 hi Nothing gui=bold
 hi link cBracket1  Nontext
 hi link cBracket2  pythonString
-hi link cBracket3  Keyword
+hi link cBracket3  Special
 hi link cBracket4  Preproc
 hi link inBracket1 Nothing
 hi link inBracket2 Nothing
@@ -359,7 +359,7 @@ hi link PythonHint constant
 
 syntax match   Function       /\v\i+\ze\(/
 syntax match   Preproc        /\v\s([%\+\-\*\/]{1,2}|[>\=<!]\=?)\s/   contains=keyword    " + - * / >= <= ==
-syntax match   keyword        /\v [\+\-\*\/%]{0,2}\= /                                  " += -= *= /= =
+syntax match   purple        /\v [\+\-\*\/%]{0,2}\= /                                  " += -= *= /= =
 syntax match   keyword        /,[ \n]/                                  " ,
 " syntax match   Constant       /\v\.@1<=%(\w+)@>\(@!/                  contains=Identifier,Nothing
 syntax match   Comment        /\v-\>/              contains=Identifier,Nothing

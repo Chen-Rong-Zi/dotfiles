@@ -184,7 +184,7 @@ syn match vimNumber                 '0[0-7]\+'                                 s
 syn match vimNumber                 '0[bB][01]\+'                              skipwhite nextgroup=vimGlobal,vimSubst,vimCommand,vimComment,vim9Comment           
 
 " All vimCommands are contained by vimIsCommand. {{{2
-syn match vimCmdSep                 "[:|]\+"          skipwhite nextgroup=vimAddress,vimAutoCmd,vimEcho,vimIsCommand,vimExtCmd,vimFilter,vimLet,vimMap,vimMark,vimSet,vimSyntax,vimUserCmd
+" syn match vimCmdSep                 "[:|]\+"          skipwhite nextgroup=vimAddress,vimAutoCmd,vimEcho,vimIsCommand,vimExtCmd,vimFilter,vimLet,vimMap,vimMark,vimSet,vimSyntax,vimUserCmd
 syn match vimIsCommand              "\<\h\w*\>"       contains=vimCommand
 syn match vimVar        contained   "\<\h[a-zA-Z0-9#_]*\>"
 syn match vimVar                    "\<[bwglstav]:\h[a-zA-Z0-9#_]*\>"
@@ -1096,15 +1096,14 @@ hi link buffer_variable Error
 hi link vim_variable    Keyword
 hi link Bracket1        SpecialKey
 hi link Bracket2        String
-hi link Bracket3        Diffchange
+hi link Bracket3        Special
 hi link Bracket4        htmlLink
 hi link inBracket1      Nothing
 hi link inBracket2      Nothing
 hi link inBracket3      Nothing
 hi link inBracket4      Nothing
 
-syntax match   Conceal           /\v<end%(for|if|function)>/     conceal    cchar=|
-syntax match   Conceal           /\v^\s*\zs<func%(tion)?(!@=)?>/ conceal    cchar=𝔽
+syntax match   Conceal           /\v<end%(for|if|def|function|while|class)>/     conceal    cchar=|
 syntax match   Keyword           /,/
 syntax match   Conceal           /||/                            conceal    cchar=∨
 syntax match   Conceal           /&&/                            conceal    cchar=∧
@@ -1118,15 +1117,26 @@ syntax keyword Keyword           if                              conceal    ccha
 syntax keyword Keyword           elseif                          conceal    cchar=ℰ
 syntax keyword Keyword           else                            conceal    cchar=𝘌
 syntax keyword Keyword           call                            conceal    cchar=𝕔
-syntax keyword Keyword           closure                         conceal    cchar=ƒ
+" syntax keyword Keyword           closure                         conceal    cchar=
 
-syntax region  argument_variable matchgroup=keyword              start=/a:/ end=/\v\w@1<=>/ concealends oneline
-syntax region  local_variable    matchgroup=keyword              start=/l:/ end=/\v\w@1<=>/ concealends oneline
-syntax region  script_variable   matchgroup=keyword              start=/s:/ end=/\v\w@1<=>/ concealends oneline
-syntax region  global_variable   matchgroup=keyword              start=/g:/ end=/\v\w@1<=>/ concealends oneline
-syntax region  window_variable   matchgroup=keyword              start=/w:/ end=/\v\w@1<=>/ concealends oneline
-syntax region  buffer_variable   matchgroup=keyword              start=/b:/ end=/\v\w@1<=>/ concealends oneline
-syntax region  vim_variable      matchgroup=keyword              start=/v:/ end=/\v\w@1<=>/ concealends oneline
+syntax keyword Keyword number     conceal cchar=𝗜
+syntax keyword Keyword float      conceal cchar=ƒ
+syntax keyword Keyword list       conceal cchar=𝕃
+syntax keyword Keyword func       conceal cchar=𝔽
+syntax keyword Keyword function   conceal cchar=𝔽
+syntax keyword Keyword bool       conceal cchar=𝔹
+syntax keyword Keyword dictionary conceal cchar=𝔻
+syntax keyword Keyword string     conceal cchar=𝕊
+syntax keyword Keyword any        conceal cchar=𝖺
+syntax keyword Keyword this       conceal cchar=𝖲
+
+" syntax region  argument_variable matchgroup=keyword              start=/a:/ end=/\v\w@1<=>/ contains=TOP concealends display oneline
+" syntax region  local_variable    matchgroup=keyword              start=/l:/ end=/\v\w@1<=>/ contains=TOP concealends display oneline
+" syntax region  script_variable   matchgroup=keyword              start=/s:/ end=/\v\w@1<=>/ contains=TOP concealends display oneline
+" syntax region  global_variable   matchgroup=keyword              start=/g:/ end=/\v\w@1<=>/ contains=TOP concealends display oneline
+" syntax region  window_variable   matchgroup=keyword              start=/w:/ end=/\v\w@1<=>/ contains=TOP concealends display oneline
+" syntax region  buffer_variable   matchgroup=keyword              start=/b:/ end=/\v\w@1<=>/ contains=TOP concealends display oneline
+" syntax region  vim_variable      matchgroup=keyword              start=/v:/ end=/\v\w@1<=>/ contains=TOP concealends display oneline
 
 syntax cluster hidden     contains=keyword,Conceal,argument_variable,local_variable,script_variable,global_variable,window_variable,buffer_variable,vimoper,vimString,vimfunc
 syntax region inBracket1 matchgroup=Bracket1 start=/(/ end=/)/ display contains=inBracket2,@hidden oneline

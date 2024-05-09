@@ -5,32 +5,45 @@
 "                ██║ ╚═╝ ██║   ██║    ╚████╔╝ ██║██║ ╚═╝ ██║██║  ██║╚██████╗
 "                ╚═╝     ╚═╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝
 
+func! Eatchar(pat)
+    let c = nr2char(getchar(0))
+    return (c =~ a:pat) ? '' : c
+endfunction
 " Leader map
+"
 let mapleader = ","
 if !exists("g:colorscheme")
     set termguicolors
     set encoding=utf-8
     syntax on
     colorscheme tokyonight
-    let g:tokyonight_style = 'storm'
+    let g:tokyonight_style = 'night'
     let g:colorscheme      = 'tokyonight'
     let g:airline_theme    = 'tokyonight'
+    let g:autocomplete     = 1
 endif
 
+" call call airline update_statusLIne()
 
-"" call airline#update_statusline()
+function! PasteScreenShot()
+    let path = system("ls /home/rongzi/Pictures/screenshot | tail -n 1 | xargs -I _  realpath _")
+    put = path
+endfunction
+
+" call airline#update_statusline()
 set nocp
 set concealcursor=ni
 set conceallevel=2
 
-"" set smartindent tabline
+" set smartindent tabline
 set eventignore+=FocusGained
 set confirm
 set cursorline
+set dictionary+=$HOME/.vim/dictionary/keyword.txt
 set expandtab
 set fillchars=vert:┃
-"" set fillchars=vert:│
-" set lazyredraw
+" set fillchars=vert:│
+set lazyredraw
 set list
 set listchars=leadmultispace:│\ \ \ ,trail:-,precedes:>,extends:<,tab:⏐\ 
 set linebreak
@@ -40,7 +53,7 @@ set scrolloff=7
 set shiftwidth=4
 set showcmd
 set smoothscroll
-" set smarttab tabline
+" set smarttab tablinae
 set softtabstop=4
 set synmaxcol=256
 set autochdir
@@ -50,6 +63,17 @@ set ignorecase
 set nowrap
 set notimeout
 set matchpairs=(:),{:},[:],\":\",':',<:>
+" set previewpopup=height:10,width:60
+set pumheight=10
+set completeopt=menuone,popup,noinsert,noselect
+set completepopup=height:10,width:10,align:item,highlight:CompletePopup
+" echom id
+
+" if id
+    " call popup_settext(id, 'async info: ' .. "asdfasdf")
+    " call popup_show(id)
+" endif
+set shortmess=c
 
 " set timeoutlen=200
 " set ttimeout
@@ -78,8 +102,8 @@ set nu ru ai si ts=4 sw=4
 aug C
 autocmd!
 au filetype c,cpp let maplocalleader="1"
-au filetype c,cpp call Notify(['', 'using C/Cpp syntax'], 'up')
-au filetype c,cpp ino <buffer> ; <CMD>call AddSuffix(';')<CR>
+au filetype c,cpp call s:util.Notify(['', 'using C/Cpp syntax'], 'up')
+au filetype c,cpp ino <buffer> ; <ScriptCmd>call s:util.AddSuffix(';')<CR>
 au filetype c,cpp ino <buffer> } {}<left>
 au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 
@@ -89,7 +113,7 @@ au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 " au filetype c ino <c-j> <down>
 " au filetype c ino <c-k> <up>
 "
-au filetype c,cpp ino <silent> <buffer> { <c-R>=AddSeprator()<CR><right>{<CR>}<Esc>O
+au filetype c,cpp ino <buffer> { <ScriptCmd>call s:util.BracketIndent()<CR>
 "au filetype c,cpp ino <silent> <buffer> { <right>{<CR>}<Esc>O
 "au filetype c,cpp ino <buffer> { <esc>A{<CR><++>}<ESC>O
 au filetype c,cpp ino <buffer> <leader>m /*    */<esc>4<left>a
@@ -102,28 +126,30 @@ au filetype c,cpp ino <buffer> <leader>tmp template <typename T><C-R>=Eatchar('\
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype c,cpp nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
-au filetype c,cpp nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('//')<CR>g@l
-au filetype c,cpp nn <buffer> ; <CMD>call AddSuffix(';')<CR>
-au filetype c,cpp no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('//')<CR>g@
+au BufEnter *.c*  let g:comment = '//'
+au filetype c,cpp nn <buffer> ;    <ScriptCmd>call s:util.AddSuffix(';')<CR>
 
 " ABBREVIATION
 au filetype   cpp inorea <silent> <buffer> lambda   [=] (auto <++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
 au filetype   cpp inorea <silent> <buffer> lamdba   [=] (auto <++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> itn      int
+au filetype c,cpp inorea <silent> <buffer> ao      auto
+au filetype c,cpp inorea <silent> <buffer> var      auto
+au filetype c,cpp inorea <silent> <buffer> val      const
 au filetype c,cpp inorea <silent> <buffer> vecotr   vector<><left><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> vector   vector<><left><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> vectro   vector<><left><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> retrun   return
 au filetype c,cpp inorea <silent> <buffer> retunr   return
 au filetype c,cpp inorea <silent> <buffer> reutrn   return
-au filetype c,cpp inorea <silent> <buffer> for      for ( <++>; <++>; <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<ca>
-au filetype c,cpp inorea <silent> <buffer> ffor     for ( auto &it : <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<ca>
+au filetype c,cpp inorea <silent> <buffer> for      for ( int i = 0; i <<++>; i += 1 )<CR>{}<left><CR><esc>O<++><esc>2k02f<ca>
+au filetype c,cpp inorea <silent> <buffer> ffor     for ( auto &it :<++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<ca>
 au filetype c,cpp inorea <silent> <silent> <buffer> while  while ( )<left><left>
 au filetype c,cpp inorea <silent> <silent> <buffer> if     if ( )<left><left>
 au filetype c,cpp inorea <silent> <buffer> self     this-><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> #i       # include <><left><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> #I       # include <><left><C-R>=Eatchar('\s')<CR>
-au filetype c,cpp inorea <silent> <buffer> mm       main(int arg_number, char **arg_value)
+au filetype c,cpp inorea <silent> <buffer> mm       main(const int arg_number, const char **arg_value)
 au filetype c,cpp inorea <silent> <buffer> pp       printf("", <++>);<c-o>F"<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> ss       scanf("",  <++>);<c-o>F"<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> kd       %d<C-R>=Eatchar('\s')<CR>
@@ -140,7 +166,7 @@ au filetype c,cpp inorea <silent> <buffer> kllf     %llf<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> fuck     Are you alright?
 
 "  <tab> and <space> visualised
-au filetype c,cpp setl cindent
+au filetype c,cpp setl smartindent
 au filetype c,cpp let $src=expand('%:p')
 " au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
 aug end
@@ -156,10 +182,11 @@ aug end
 aug java
 autocmd!
 au filetype java let maplocalleader="1"
-au filetype java call Notify(['', 'using Java syntax'], 'up')
-au filetype java ino <buffer> ; <CMD>call AddSuffix(';')<CR>
+au filetype java call s:util.Notify(['', 'using Java syntax'], 'up')
+au filetype java ino <buffer> { <ScriptCmd>call s:util.BracketIndent()<CR>
 au filetype java ino <buffer> } {}<left>
 au filetype java ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+au filetype java ino <buffer> ; <ScriptCmd>call s:util.AddSuffix(';')<CR>
 
 " au filetype c ino <cr> <esc>o
 " au filetype c ino <c-h> <left>
@@ -167,7 +194,6 @@ au filetype java ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 " au filetype c ino <c-j> <down>
 " au filetype c ino <c-k> <up>
 "
-au filetype java ino <silent> <buffer> { <c-R>=AddSeprator()<CR><right>{<CR>}<Esc>O
 "au filetype java ino <silent> <buffer> { <right>{<CR>}<Esc>O
 "au filetype java ino <buffer> { <esc>A{<CR><++>}<ESC>O
 au filetype java ino <buffer> <leader>m /*    */<esc>4<left>a
@@ -179,24 +205,29 @@ au filetype java ino <buffer> <leader>s ::
 " # au filetype java nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype java nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype java nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
-au filetype java nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('//')<CR>g@l
-au filetype java nn <buffer> ; <CMD>call AddSuffix(';')<CR>
-au filetype java no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('//')<CR>g@
+au BufEnter *.java let g:comment = '//'
+au filetype java nn <buffer> ; <ScriptCmd>call s:util.AddSuffix(';')<CR>
 
 " ABBREVIATION
 au filetype java inorea <silent> <buffer> lambda   (<++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
 au filetype java inorea <silent> <buffer> lamdba   (<++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
 au filetype java inorea <silent> <buffer> itn      int
+au filetype java inorea <silent> <buffer> val      final
+au filetype java inorea <silent> <buffer> self     this.<c-r>=Eatchar('\s')<CR>
 au filetype java inorea <silent> <buffer> retrun   return
 au filetype java inorea <silent> <buffer> retunr   return
 au filetype java inorea <silent> <buffer> reutrn   return
-au filetype java inorea <silent> <buffer> for      for ( <++>; <++>; <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<ca>
-au filetype java inorea <silent> <buffer> ffor     for ( <++> i : <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<ca>
+au filetype java inorea <silent> <buffer> for      for ( int i = 0; i < <++>; i += 1 )<CR>{}<left><CR><esc>O<++><esc>2k02f<ca>
+au filetype java inorea <silent> <buffer> ffor     for ( var i : <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<ca>
 au filetype java inorea <silent> <silent> <buffer> while  while ( )<left><left>
 au filetype java inorea <silent> <silent> <buffer> if     if ( )<left><left>
 au filetype java inorea <silent> <buffer> mm       main(String[] args)
 au filetype java inorea <silent> <buffer> pp       System.out.println(<++>);<Esc>F<ca<<C-R>=Eatchar('\s')<CR>
 au filetype java inorea <silent> <buffer> pf       System.out.printf("<++>", <++>);<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
+au filetype java inorea <silent> <buffer> sc       static
+au filetype java inorea <silent> <buffer> ps       public static
+au filetype java inorea <silent> <buffer> pu       public
+au filetype java inorea <silent> <buffer> pr       private
 au filetype java inorea <silent> <buffer> kd       %d<C-R>=Eatchar('\s')<CR>
 au filetype java inorea <silent> <buffer> kx       %x<C-R>=Eatchar('\s')<CR>
 au filetype java inorea <silent> <buffer> kX       %X<C-R>=Eatchar('\s')<CR>
@@ -235,19 +266,17 @@ autocmd!
 au filetype python compiler pylint
 au filetype python setl makeprg=pylint\ --reports=n\ --msg-template=\"{path}:{line}:\ {msg_id}\ {symbol},\ {obj}\ 错误：{msg}\"\ %:p
 au filetype python setl errorformat=%f:%l:\ %m
-au filetype python call Notify(['', 'using python syntax'], 'up')
-au filetype python ino <buffer> ; <CMD>call AddSuffix(':')<CR>
+au filetype python call s:util.Notify(['', 'using python syntax'], 'up')
+au filetype python ino <buffer> ; <ScriptCmd>call s:util.AddSuffix(':')<CR>
 au filetype python ino <buffer> # #<space><left><right>
 " au filetype python ino <buffer> , ,<space><left><right>
 
 
 au filetype python nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
-au filetype python nn <buffer> ; <CMD>call AddSuffix(':')<CR>
+au filetype python nn <buffer> ; <ScriptCmd>call s:util.AddSuffix(':')<CR>
 au filetype python nn <buffer> <leader>test :botright terminal python_test<CR>
 " Comment the line
-au filetype python nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
-au filetype python no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
-
+au BufEnter *.py let g:comment = '#'
 " au filetype python ono <buffer> ( :<C-u>normal!t)lvi(<cr>
 
 " au filetype python ia <buffer> if if:<left>
@@ -276,13 +305,25 @@ aug end
 "vim filetype script settings--------------<++>------------------{{{
 aug vim
 autocmd!
-au filetype vim call Notify(['', 'using vim syntax'], 'up')
+au filetype vim inorea <silent> <buffer> val const
+au filetype vim inorea <silent> <buffer> lambda (<++> ) => <++><Esc>2F<ca<
+au filetype vim inorea <silent> <buffer> lamdba (<++> ) => <++><Esc>2F<ca<
+au filetype vim call s:util.Notify(['', 'using vim syntax'], 'up')
 au filetype vim nn <silent> <buffer> <leader>m <c-v>0I" <esc>
 au filetype vim vn <silent> <buffer> <leader>m <C-v>0I" <esc>
+au filetype vim ino <buffer> { <ScriptCmd>call s:util.BracketIndent()<CR>
 " au filetype vim let  maplocalleader    = "1"
 au filetype vim setl foldmethod=marker
-au filetype vim nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('"')<CR>g@l
-au filetype vim no <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('"')<CR>g@
+au filetype vim if getline(1) =~# '.*vim9script.*'
+                        \| let g:comment = "#"
+                        \| else
+                        \| let g:comment = '"'
+                        \| endif
+au BufEnter *.vim* if getline(1) =~# '.*vim9script.*'
+                        \| let g:comment = "#"
+                        \| else
+                        \| let g:comment = '"'
+                        \| endif
 aug end
 "}}}
 "
@@ -299,7 +340,7 @@ autocmd!
 au terminalOpen * tno <buffer> jk <c-w>N
 au terminalOpen * tno <buffer> <leader>k  <c-w>k
 au TerminalOpen * normal gg
-au TerminalOpen * nn q <CMD>call DeleteTerminal() \| unmap q<CR> 
+" au TerminalOpen * nn q <ScriptCmd>:call s:util.DeleteTerminal() \| unmap q<CR>
 au TerminalOpen * if &buftype ==# 'terminal'
                 \ | setlocal nolist
                 \ | setlocal nornu
@@ -321,19 +362,16 @@ aug end
 " Normal settings setted when entering vim--------------<++>------------------{{{
 aug normal
 autocmd!
-""autocmd StdinReadPre * let s:std_in=1
-" au BufWinEnter * if argc() == 0 && !exists('s:std_in') |tt|endif
+import autoload "./.vim/functions/useful.vim" as util
 
-" " number in front of lines
-" au VimEnter * ino <c-@> <Nop>
-
-" replace  { [
-" au BufEnter * call ChangeDirectory()
-" au BufEnter * \|call ChangeSrc()\|
-" au TextChangedI * call popup_menu(["Futk your"], {})
+au InsertCharPre * if g:autocomplete ==# 1
+                    \| call s:util.Complete()
+                    \| endif
+au VimEnter * nn  <leader><tab> <CMD>let g:autocomplete = !g:autocomplete \| echom g:autocomplete<CR>
+au VimEnter * ino <leader><tab> <CMD>let g:autocomplete = !g:autocomplete \| echom g:autocomplete<CR>
 
 "a INSERT mode
-au DirChanged * call Notify(['当前位于' . expand('%:p')], 'down')
+au DirChanged * call s:util.Notify(['当前位于' . expand('%:~')], 'up')
 
 au VimEnter * let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
 au VimEnter * let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
@@ -346,13 +384,14 @@ au VimEnter * filetype on
 au VimEnter * syntax   on
 au VimEnter * set lazyredraw
 " au BufEnter * match Comment / /
-au VimEnter * no m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
-au VimEnter * nn mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
-au VimEnter * nn /    :set incsearch hlsearch<CR>/\v
 " au QuickFixCmdPre *  syntax
 " au VimEnter * nn <silent> <CR> :call ChangeDirectory()<CR>
 
 " swich to the head or the end
+au VimEnter * nn  Q "
+au VimEnter * nn  /    :set incsearch hlsearch<CR>/\v
+au VimEnter * nn  <leader><space> q:
+au VimEnter * nn  <leader>o <CMD>!xdg-open % &<CR>
 au VimEnter * nn  <c-h>      ^
 au VimEnter * nn  <c-l>      g_
 au VimEnter * nn  <c-j>      ;
@@ -370,19 +409,16 @@ au VimEnter * nn  Y          yg_
 au VimEnter * nn  X          i<CR><Esc>l
 au VimEnter * nn  gU         g~
 au VimEnter * nn  U          gU
-au VimEnter * nn  <c-g>      :call system('tmux send-keys -t + ' . shellescape(getline('.')) . "\r")<CR>
-au VimEnter * ono <c-l>      g_
-au VimEnter * ono <c-h>      ^
-" au VimEnter * match Comment /^ \+/
+
 " fold method
-au VimEnter * nn <nowait> s  <Nop>
+au VimEnter * nn <nowait> s  c
 au VimEnter * nn ff zA
 au Vimenter * nn fk zM
 au VimEnter * nn fj zR
 
 " edit $myvimrc
 au VimEnter * nn <leader>v :vsplit $MYVIMRC<CR>
-au VimEnter * nm <leader>sv :w<CR>:source $MYVIMRC<CR>
+au VimEnter * nn <leader>sv :w<CR>:source $MYVIMRC<CR>
 
 " screen create
 au VimEnter * nn <leader>sh :set splitright<CR>:vsplit<CR>
@@ -409,7 +445,6 @@ au VimEnter * nn = :vertical resize +10<CR>
 " au VimEnter * nn <leader>jl :cd ~/.Lectures<CR>
 
 "cmap 1 !
-au VimEnter * nn gp   %
 au VimEnter * nn w    <c-w>
 au VimEnter * nn <BS> :set   hlsearch! incsearch! \| set hlsearch?<CR>
 
@@ -429,6 +464,7 @@ au VimEnter * ino <F2> <Esc>:put=system('sed \"s/\(.*\)/{\1}/g\" <(seq -s \", \"
 
 " auto complete the () <> [] {}
 au VimEnter * ino (  ()<left>
+au VimEnter * ino <c-o>  ()<left>
 au VimEnter * ino [  []<left>
 au VimEnter * ino {  {}<left>
 au VimEnter * ino '  ''<left>
@@ -459,17 +495,21 @@ au VimEnter * cno <c-a> <c-b>
 " Transform the word to UPPER-CASE
 au VimEnter * ino <BS>     <Nop>
 au VimEnter * ino <c-u>    <esc>viwUviwA
-au VimEnter * ino <c-j>    <CMD>call CR()<CR>
+au VimEnter * ino <c-j>    <ScriptCmd>:call s:util.CR()<CR>
 au VimEnter * ino <c-c>    <Esc>
 au VimEnter * ino <c-v>    <Esc>viw
+
+au VimEnter * ono <c-l>      g_
+au VimEnter * ono <c-h>      ^
 " Turn the ; into <CR>
 " au VimEnter * cno ; <CR>
+
 " au VimEnter * nn  ; <CR>
 " au VimEnter * in ; <Esc>o
 
 " spell check
 au VimEnter * nn  <silent> <nowait> cs :setl  spell!<CR>
-au VimEnter * ino <c-x> <Cmd>set spell<CR><c-x>s
+" au VimEnter * ino <c-x> <Cmd>set spell<CR><c-x>s
 
 " shortcuts switched
 au VimEnter * nn  <space> :
@@ -483,7 +523,7 @@ au VimEnter * vn \|    :!
 au VimEnter * vn s     :s/
 au VimEnter * vn <c-h> ^
 au VimEnter * vn <c-l> g_
-au VimEnter * vn *     y:call SearchSelectedText()<CR>
+au VimEnter * vn *     y<ScriptCMD>call s:util.SearchSelectedText() \| %s///gn<CR>
 au VimEnter * vn v     <Esc>
 
 au VimEnter * inorea 123 {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
@@ -493,7 +533,7 @@ au VimEnter * vn #    <c-v>0I#<space><esc>
 au VimEnter * vn /    <C-v>0I//<space><esc>
 au VimEnter * vn ;    <C-v>0I;<esc>
 au VimEnter * vn <CR> !copy<CR>
-au VimEnter * nn *    *N:set hlsearch<CR>
+au VimEnter * nn *    *N:set hlsearch \| %s///gn<CR>
 " return to the file .vimrc
 au VimEnter * nn <leader>V :e $MYVIMRC<CR>
 
@@ -509,7 +549,6 @@ au VimEnter * vn <s-j><s-j> <s-j>
 au VimEnter * vn <s-j>      <Nop>
 au VimEnter * vn <c-j>      ;
 au VimEnter * vn n          :silent! !~/.config/scripts/align<CR>
-"au InsertCharPre * normal a<c-n>
 aug END
 " }}}
 
@@ -635,7 +674,6 @@ au filetype markdown ino <buffer> ' ``<left>
 au filetype markdown ino <buffer> !  ¬
 au filetype markdown ino <buffer> F  ⊥
 au filetype markdown ino <buffer> /  ·
-au filetype markdown ino <buffer> +  ＋
 au filetype markdown ino <buffer> jn ∩
 au filetype markdown ino <buffer> bk ∪
 au filetype markdown ino <buffer> sum ∑
@@ -646,13 +684,14 @@ au filetype markdown ino <buffer> in  ∈
 au filetype markdown ino <buffer> nin ∉
 au filetype markdown ino <buffer> ziji ⊆
 au filetype markdown ino <buffer> yiho ⊕ 
+au filetype markdown ino <buffer> fuhe ∘
+au filetype markdown ino <buffer> jx ＋
 au filetype markdown ino <buffer> ～ ~~~~<left><left>
 au filetype markdown ino <buffer> <c-l> <space><++> \|<Esc>?<++><CR>cw
-au filetype markdown nn  <buffer> <leader>t o<c-r>=AddTableRow()<CR><Esc>^/<++><CR>cw
-au filetype markdown nn  <buffer> <leader><space> <CMD>call CheckBoxToggle()<CR>
-au filetype markdown nn  <buffer> m  <CMD>let &operatorfunc=funcref('IntoLatex')<CR>g@
-au filetype markdown nn  <buffer> mm <CMD>let &operatorfunc=funcref('IntoLatex')<CR>g@l
-au filetype markdown vn  <buffer> m <CMD>let &operatorfunc=funcref('IntoLatex')<CR>g@
+au filetype markdown nn  <buffer> <leader>t <ScriptCmd>put = s:util.AddTableRow()<CR><Esc>^/<++><CR>cw
+au filetype markdown nn  <buffer> <leader><space> <ScriptCMD>call s:util.CheckBoxToggle()<CR>
+au filetype markdown nn  <buffer> <leader>c <ScriptCmd>let &operatorfunc=s:util.IntoLatex<CR>g@l
+au filetype markdown vn  <buffer> <leader>c <ScriptCmd>let &operatorfunc=s:util.IntoLatex<CR>g@
 au filetype markdown abbrev <buffer> <>  ↔
 au filetype markdown abbrev <buffer> ->  →
 au filetype markdown abbrev <buffer> <-  ←
@@ -676,8 +715,7 @@ autocmd!
 au filetype bash,sh inorea <silent> <buffer> if  if [[<++> ]];then<CR>fi<Esc>?<++><CR>cw
 au filetype bash,sh inorea <silent> <buffer> for for<++> in <++>;do<CR>done<Esc>0kf<cw
 " Comment the line
-au filetype bash,sh nn <buffer> mm <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@l
-au filetype bash,sh nn <buffer> m  <CMD>let &operatorfunc=CommentToggleMaker('#')<CR>g@
+au BufEnter *.sh,*.bash let g:comment='#'
 aug end
 " }}}
 
@@ -768,10 +806,59 @@ aug end
 " ╚════██║██║     ██╔══██╗██║██╔═══╝    ██║   ╚════██║
 " ███████║╚██████╗██║  ██║██║██║        ██║   ███████║
 " ╚══════╝ ╚═════╝╚═╝  ╚═╝╚═╝╚═╝        ╚═╝   ╚══════╝
-"vim filetype script settings--------<++>------------{{{
-source ~/.vim/functions/useful.vim
-source ~/.vim/functions/higherorder.vim
-source ~/.vim/plugin/grep-operator.vim
-" }}}
+" vim filetype script settings--------<++>------------{{{
+aug scripts
+au!
+au VimEnter * nn <leader>e     <ScriptCmd>call s:util.SelectBuffer()<CR>
+au vimenter * nn <leader><c-j> <ScriptCmd>call s:util.JoshutoSelectFile()<CR>
+au VimEnter * nn <leader><c-f> <ScriptCmd>call s:util.SelectFile()<CR>
+au VimEnter * nn <silent> <C-c><C-y> <ScriptCmd>call s:util.ToggleConcealLevel()<CR>
+au vimenter * vn <leader>w     y<ScriptCmd>call s:util.SearchSelectedText()<CR><ScriptCMD>call s:util.VisualWrapper()<CR>
 
-" call Notify(['rongzi', 'welcome to vim'])
+au filetype * nn <buffer> m  <ScriptCmd>call s:util.CommentToggleMaker(g:comment)<CR>g@
+au filetype * nn <buffer> mm <ScriptCmd>call s:util.CommentToggleMaker(g:comment)<CR>g@$
+au filetype * vn <buffer> m  <ScriptCmd>call s:util.CommentToggleMaker(g:comment)<CR>g@
+
+au vimenter * nn ( <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('(', ')', 2)<CR>g@
+au vimenter * nn { <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('{', '}', 2)<CR>g@
+au vimenter * nn " <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('"', '"', 2)<CR>g@
+au vimenter * nn ' <ScriptCmd>let &operatorfunc=s:util.MakeWrapper("'", "'", 2)<CR>g@
+au vimenter * nn [ <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('[', ']', 1)<CR>g@
+
+au vimenter * vn ( <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('(', ')', 2)<CR>g@
+au vimenter * vn { <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('{', '}', 2)<CR>g@
+au vimenter * vn " <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('"', '"', 2)<CR>g@
+au vimenter * vn ' <ScriptCmd>let &operatorfunc=s:util.MakeWrapper("'", "'", 2)<CR>g@
+au vimenter * vn [ <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('[', ']', 1)<CR>g@
+
+au vimenter * nn (( 0<ScriptCmd>let &operatorfunc=s:util.MakeWrapper('(', ')', 2)<CR>g@$
+au vimenter * nn {{ 0<ScriptCmd>let &operatorfunc=s:util.MakeWrapper('{', '}', 2)<CR>g@$
+au vimenter * nn "" 0<ScriptCmd>let &operatorfunc=s:util.MakeWrapper('"', '"', 2)<CR>g@$
+au vimenter * nn '' 0<ScriptCmd>let &operatorfunc=s:util.MakeWrapper("'", "'", 2)<CR>g@$
+au vimenter * nn [[ 0<ScriptCmd>let &operatorfunc=s:util.MakeWrapper('[', ']', 1)<CR>g@$
+
+au VimEnter * nn <c-g> <ScriptCmd>let &operatorfunc=s:util.SendKeys<CR>g@$
+au VimEnter * vn <c-g> <ScriptCmd>let &operatorfunc=s:util.SendKeys<CR>g@
+
+au VimEnter * nn cd <ScriptCMD>call s:util.Quick_CD()<CR>
+
+au User GrepModeTrigger  normal! g@iw
+au User DebugModeTrigger call s:util.DebugMode()
+" au User RunModeTrigger   call RunMode()
+" nn <leader>r :doautocmd User RunModeTrigger<CR>
+au VimEnter * nn <silent> <leader>r <ScriptCmd>call s:util.RunMode()<CR>
+au VimEnter * nn <silent> <leader>d :doautocmd User DebugModeTrigger<CR>
+au Vimenter * nn <silent> <leader>g <ScriptCmd>let &operatorfunc=s:util.GrepOperator<CR>
+au Vimenter * vn <silent> <leader>g <ScriptCmd>let &operatorfunc=s:util.GrepOperator<CR>g@
+
+au VimEnter * nn gp <ScriptCmd>call s:util.PercentSign()<CR>
+au VimEnter * nn gh <ScriptCmd>call s:util.PercentSign(0)<CR>
+au VimEnter * nn gl <ScriptCmd>call s:util.PercentSign(1)<CR>
+au VimEnter * nn  % <ScriptCmd>call s:util.PercentSign()<CR>
+au VimEnter * ono ig <ScriptCmd>call s:util.PercentSign1()<CR>
+au VimEnter * ono ag <ScriptCmd>call s:util.PercentSign2()<CR>
+au VimEnter * vn ig <ScriptCmd>call s:util.PercentSign1()<CR>
+au VimEnter * vn ag <ScriptCmd>call s:util.PercentSign2()<CR>
+
+aug end
+" }}}

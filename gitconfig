@@ -7,5 +7,5 @@
     l = log --all --graph --decorate --oneline
 [http]
 	sslVerify = false
-[diff]
+[merge]
 	tool = vimdiff

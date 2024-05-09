@@ -1,511 +1,990 @@
-"function! CR() {{{
-function! CR()
-    let [trash1, row, col, trash2] = getcharpos('.')
-    let curr_line = getline(row)
-    let next_line = getline(row + 1)
+vim9script
+import "./higherorder.vim" as fp
 
-    if curr_line =~# '^\s*$'
-        call setline(row, '')
-    endif
-
-    if next_line =~# '^\s*$'
-        let indent = repeat(' ', cindent(row) - len(next_line))
-        call setline(row + 1, indent)
-        call cursor(row + 1, len(indent) + 1)
-    else
-        execute 'normal o'
-        let indent = repeat(' ', cindent(row))
-        call setline(row + 1, indent)
-        call cursor(row + 1, len(indent) + 1)
-    endif
-endfunction
-" }}}
-
-"function! IntoLatex() {{{
-function! IntoLatex(type)
-    function! AddDollar(line)
-        if a:line[0:1] ==# a:line[-2:-1] && a:line[0:1] ==# '$$'
-            return a:line[2:-3]
-            call Notify(['删去$$'])
-        else
-            return "$$" . a:line . "$$"
-            call Notify(['添加$$..$$'])
-        endif
-    endfunction
-    let [pos, min_number, max_number] = [getcharpos("']"), getcharpos("'[")[1], getcharpos("']")[1]]
-    let content = getline(min_number, max_number)
-        \->map('AddDollar(v:val)')
-        \->map('setline(v:key + min_number, v:val)')
-endfunction
-"}}}
-
-" function! FileType(file){{{
-function! FileType(file)
-    if a:file =~# '\v.*\.py$'
+# function FileType(file){{{
+export def FileType(file: string): string
+    if file =~# '\v.*\.py$'
         return 'python'
-    elseif a:file =~# '\v.*\.[ch]$'
+    elseif file =~# '\v.*\.[ch]$'
         return 'c'
-    elseif a:file =~# '\v.*\.cpp$'
+    elseif file =~# '\v.*\.cpp$'
         return 'cpp'
-    elseif a:file =~# '\v.*\.java$'
+    elseif file =~# '\v.*\.java$'
         return 'java'
     else
         return 'else'
     endif
-endfunction
-"}}}
+enddef
+# }}}
 
-" function! Deleteterminal(){{{
-function! DeleteTerminal()
-    let term_list = getbufinfo({'bufloaded' : 1})->Filter({k, v->v['name'] =~# '^!.*'})
-    for term_buf in term_list
-        exe 'bd! ' . term_buf['bufnr']
-    endfor
-endfunction
-" }}}
+# function Icons(){{{
+def Icons(filename: string): string
+    return system('exa --icons=always ' .. shellescape(filename))->split()[0]
+enddef
+# }}}
 
-" function! AddTableRow(){{{
-function! AddTableRow()
-    let pos     = getpos('.')
-    let columns = max([getline(pos[1]-1)->count('|') - 1, 2])
-    let column  = ' <++> |'
-    return range(columns)->reduce({old, new -> old . column}, '|')
-endfunction
-" }}}
-
-" function! ReplacePairs(){{{
-function! ReplacePairs()
-    function! GetPairs(char)
-        " let pairs = &matchpairs->split(',')->map({i, v -> v->split(':')})
-        if ['{', '}']->index(a:char) !=# -1
-            return ['{', '}']
-        elseif ['(', ')']->index(a:char) !=# -1
-            return ['(', ')']
-        elseif ['[', ']']->index(a:char) !=# -1
-            return ['[', ']']
-        elseif ['<', '>']->index(a:char) !=# -1
-            return ['<', '>']
-        elseif ['d', 'd']->index(a:char) !=# -1
-            return ['', '']
+# function Complete() {{{
+def Cword(): string
+    def CwordHelper(index: number, sofar: string, line: string): string
+        if index <# 0
+            return sofar
+        elseif line[index] !~# '[[:keyword:]]'
+            return sofar
         else
-            return [a:char, a:char]
+            return CwordHelper(index - 1, line[index] .. sofar, line)
         endif
-    endfunction
-    normal! %
-    let pair1 = getcharpos('.')
-    normal! %
-    let pair2 = getcharpos('.')
-    if pair1[1] ># pair2[1] || (pair1[1] ==# pair2[1] && pair1[2] ># pair2[2])
-        let temp  = pair1
-        let pair1 = pair2
-        let pair2 = temp
+    enddef
+
+    const [_, row: number, col: number, _] = getcharpos('.')
+    const line: string = getline('.')[ : col - 2] .. v:char
+    return CwordHelper(col - 1, '', line)
+enddef
+
+export def Complete()
+    if  pumvisible() ==# 0 && strcharlen(Cword()) >=# 2
+        feedkeys("\<c-x>\<c-z>")
+        feedkeys("\<c-n>")
     endif
-    let [pair1_row, pair2_row, pair1_col, pair2_col] = [pair1[1], pair2[1], pair1[2], pair2[2]]
-    if pair1 ==# pair2    " 若没有组合对则退出
-        return Notify(['未发现组合对'])
+enddef
+
+# }}}
+
+# function Strip() {{{
+def Strip(source: string, char: string, direction: string = ''): string
+    if direction !=# 'right'
+        if source[0] ==# char
+            return source[1 : ]->Strip(char, direction)
+        else
+            return source
+        endif
+    endif
+    if direction !=# 'left'
+        if source[- 1 : - 1] ==# char
+            return source[ : - 2]->Strip(char, direction)
+        else
+            return source
+        endif
+    endif
+    return 'Strip defulat return statement'
+enddef
+
+def Lstrip(source: string, char: string): string
+    return Strip(source, char, 'left')
+enddef
+
+def Rstrip(source: string, char: string): string
+    return Strip(source, char, 'right')
+enddef
+# }}}
+
+# function AddSuffix(){{{
+export def AddSuffix(char: string)
+    const line: string = getline('.')->Rstrip(' ')
+    if line[- 1 : - 1] ==# char
+        Notify(['该位置已有 ' .. char])
+        return
     endif
 
-    call Print('请输入一个字符', "Function")
-    let char  = getcharstr()
-    if pair1_row ==# pair2_row
-        let line      = getline(pair1_row)->split('\zs')
-        let old_pairs = GetPairs(line[pair1_col-1])
-        let [line[pair1_col-1], line[pair2_col-1]] = GetPairs(char)
-        call setline(pair1_row, line->join(''))
+    setline('.', line .. char)
+    normal! mS
+    var message: string
+    redir => message
+    silent! marks S
+    redir END
+    Notify(['添加分号至', '']->extend(message->split("\n")))
+enddef
+# }}}
+
+# function CR() {{{
+export def CR()
+    const [_, row: number, col: number, _] = getcharpos('.')
+    const curr_line: string = getline(row)
+    const next_line: string = getline(row + 1)
+
+    setline(row, curr_line->Rstrip(' '))
+
+    const indent: string = repeat(' ', cindent(row))
+    if Rstrip(next_line, ' ') ==# ''
+        setline(row + 1, indent)
     else
-        let [pair1_line, pair2_line] = [pair1_row, pair2_row]->map({i, v->getline(v)->split('\zs')})
-        let [pair1_line[pair1_col-1], pair2_line[pair2_col-1]] = GetPairs(char)
-        let old_pairs = GetPairs(pair1_line[pair1_col-1])
-        call setline(pair1_row, pair1_line->join(''))
-        call setline(pair2_row, pair2_line->join(''))
+        put = indent .. ''
     endif
-    call Notify([old_pairs->join(' ') . '被替换为' . GetPairs(char)->join(' ')], 'down', 1000)
-endfunction
-nn gr <CMD>call ReplacePairs()<CR>
-" }}}
+    setcursorcharpos(row + 1, len(indent) + 1)
+enddef
+# }}}
 
-" function! CheckBoxToggle(){{{
-function! CheckBoxToggle()
-    let [a, row, col, d]  = getcharpos('.')
-    let line = getline('.')
-    let [left, right] = [stridx(line, '['), stridx(line, ']')]
+# function Notify() {{{
+class Queue
+    static var queue: list<number> = [0, &lines]
+    var upper: number = 0
+    var lower: number = &lines
+
+    def new(this.upper, this.lower)
+        Queue.queue[-1] = &lines
+    enddef
+
+    def ReleasePlace(base: number, size: number)
+        Queue.queue = fp.Filter(Queue.queue,
+                                (_, pos: number): bool => pos < base || pos >= base + size)
+    enddef
+
+    def _HoldPlace(base: number, size: number)
+        Queue.queue = Queue.queue
+                        ->extend(range(base, base + size - 1))
+                        ->fp.Sort((a: number, b: number): number => a - b)
+
+        const half: number = Queue.queue[- 1] / 2
+    enddef
+
+    def SearchSpaceReverse(size: number): number
+        def SearchLower(pre: number, curr: number): number
+            if Queue.queue->index(pre) ==# -1
+                return pre
+            elseif pre - curr - 1 >=# size
+                return pre - size
+            else
+                return curr
+            endif
+        enddef
+        return fp.Reduce(fp.Reversed(Queue.queue), SearchLower, this.lower)
+    enddef
+
+    def SearchSpace(size: number): number
+        def SearchUpper(pre: number, curr: number): number
+            if Queue.queue->index(pre) ==# -1
+                return pre
+            elseif curr - pre - 1 >=# size
+                return pre + 1
+            else
+                return curr
+            endif
+        enddef
+        return fp.Reduce(Queue.queue, SearchUpper, this.upper)
+    enddef
+
+    def Allocate(size: number, location: string): number
+        # find the postion
+        const base: number = {
+            'up':   this.SearchSpace(size),
+            'down': this.SearchSpaceReverse(size)
+        }[location]
+
+        if base + size ># Queue.queue[-1] || base <=# 0
+            return 1
+        else
+            this._HoldPlace(base, size)
+            return base
+        endif
+    enddef
+endclass
+
+final notify_queue = Queue.new(0, &lines)
+
+export def Notify(texts: list<string>, location ='down', time = 800)
+    def GetCol(): number
+        const width: number = &columns
+        const shift: number = max(fp.Map(texts, (_, val: string): number => len(val)))
+        return width / 2 - shift / 2 + 3  # 这个3是用来微调的，删去也可以
+    enddef
+    const row: number = notify_queue.Allocate(len(texts) + 2, location)
+
+    const options = {
+        'col': GetCol(),
+        'line': row,
+        'time': time,
+        'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+        'callback': (id: number, index: number): void => notify_queue.ReleasePlace(row, len(texts) + 2)
+    }
+    popup_notification(texts, options)
+enddef
+# }}}
+
+# function IntoLatex() {{{
+export def IntoLatex(type: string)
+    def AddDollar(line: string): string
+        if line[0 : 1] ==# line[- 2 : - 1] && line[0 : 1] ==# '$$'
+            Notify(['删去$$'], 'up')
+            return line[2 : - 3]
+        else
+            Notify(['添加$$..i$$'], 'down')
+            return "$$" .. line .. "$$"
+        endif
+    enddef
+    const [min_nr: number, max_nr: number] = [getcharpos("'[")[1], getcharpos("']")[1]]
+    getline(min_nr, max_nr)
+        ->fp.Map((_, val: string): string => AddDollar(val))
+        ->fp.Map((key, val: string): bool => setline(key + min_nr, val))
+enddef
+# }}}
+
+# function Deleteterminal(){{{
+export def DeleteTerminal()
+    const Get_buffers  = (_): list<dict<any>> => getbufinfo({'bufloaded':  1})
+    const Filter_term  = fp.Filtered((_, v: dict<any>): bool => v['name'] =~# '\v^!.*$')
+    const Get_nr       = fp.Mapped((_, v): number => v['bufnr'])
+    const Term_nrs     = fp.Compose(Get_buffers, Filter_term, Get_nr)
+
+    const ToParam      = (nrs: list<number>): string => string(nrs)->substitute('\v[,\[\]'']', '', 'g')
+    const Filter_none  = (param: string): string => len(param) ># 0 ?  'bd! ' .. param : ''
+    const Make_command = fp.Compose(Term_nrs, ToParam, Filter_none)
+
+    silent! exe Make_command(0)
+enddef
+# }}}
+
+# function AddTableRow(){{{
+export def AddTableRow(): string
+    const pos:     list<number> = getpos('.')
+    const columns: number = max([getline(pos[1])->count('|') - 1, 2])
+    const column:  string    = ' <++> |'
+    return range(columns)->reduce((old, new) => old .. column, '|')
+enddef
+# }}}
+
+
+export class SearchStrategy
+    static def Search(texts: list<any>, part: string, row: number, col: number, step: number, nest_level: number, FoundOther: func(string, string): bool): list<number>
+        const next_step = step ==# 0 ? 1 : - 1
+        const Next_row  = (txts) => step ==# 0 ? 1 : len(txts[step])
+        var myrow   = row
+        var mycol   = col
+        var mylevel = nest_level
+        while true
+            if texts ==# [[]]
+                return [-1, -1]
+            endif
+            if texts[step] ==# []
+                texts->remove(step)
+                myrow += next_step
+                mycol =  Next_row(texts)
+                continue
+            endif
+            # echom 'texts = ' .. string(texts[step]->join('')) .. " |myrow = " .. myrow .. "  mycol = " .. mycol .. "   mylevel = " .. mylevel .. '   part = ' .. part .. "   step = " .. step .. "  FoundOther(texts[step][step]) = " ..  FoundOther(texts[step][step])
+            if FoundOther(texts[step][step], part)
+                mylevel += 1
+                texts[step]->remove(step)
+                mycol += next_step
+                continue
+            elseif texts[step][step] ==# part && mylevel !=# 0
+                mylevel -= 1
+                texts[step]->remove(step)
+                mycol += next_step
+                continue
+            elseif texts[step][step] ==# part && mylevel ==# 0
+                return [myrow, mycol]
+            else
+                texts[step]->remove(step)
+                mycol += next_step
+                continue
+            endif
+        endwhile
+        return [-1, -1]
+    enddef
+
+    static def SearchLeft(start_row: number, start_col: number, part: string, FoundOther: func(string, string): bool): list<number>
+        const lower = max([start_row - Pair.range, 1])
+        const upper = start_row
+        var lines   = getline(lower, upper)
+        var texts   = lines->fp.Map((_, v) => v->split('\zs'))
+        if texts[-1] !=# []
+            texts[-1]->insert('', start_col)
+        else
+            texts->insert('', 0)
+        endif
+        texts[-1]   = texts[-1][ : start_col]
+        return SearchStrategy.Search(texts, part, start_row, start_col + 1, -1, 0, FoundOther)
+    enddef
+
+    static def SearchRight(start_row: number, start_col: number, part: string, FoundOther: func(string, string): bool): list<number>
+        const lower = start_row
+        const upper = start_row + Pair.range - 1
+        var   lines = getline(lower, upper)
+        var texts   = lines->fp.Map((_, v) => v->split('\zs'))
+        if texts[0] !=# []
+            texts[0]->insert('', start_col - 1)
+        else
+            texts->insert('', 0)
+        endif
+        texts[0]    = texts[0][start_col - 1 : ]
+        return SearchStrategy.Search(texts, part, start_row, start_col - 1, 0, 0, FoundOther)
+    enddef
+
+
+    # SearchStrategy1
+    static def InnerStrategy(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool): list<number>
+        const [l_row, l_col] = SearchStrategy.SearchLeft(start_row,  start_col, left, FoundOther)
+        const [r_row, r_col] = SearchStrategy.SearchRight(start_row, start_col + 1, right, FoundOther)
+        return [l_row, l_col, r_row, r_col]
+    enddef
+
+    # SearchStrategy2
+    static def LeftSideStrategy(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool): list<number>
+        const [l_row, l_col] = SearchStrategy.SearchRight(start_row, start_col, left, FoundOther)
+        if l_row <=# 0 || l_col <=# 0
+            return [-1, -1, -1, -1]
+        endif
+        const [r_row, r_col] = SearchStrategy.SearchRight(l_row,     l_col + 1, right, FoundOther)
+        return [l_row, l_col, r_row, r_col]
+    enddef
+
+    # SearchStrategy3
+    static def RightSideStrategy(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool): list<number>
+        const [r_row, r_col] = SearchStrategy.SearchLeft(start_row, start_col, right, FoundOther)
+        if r_row <=# 0 || r_col <=# 0
+            return [-1, -1, -1, -1]
+        endif
+        const [l_row, l_col] = SearchStrategy.SearchLeft(r_row,     r_col - 1,  left, FoundOther)
+        return [l_row, l_col, r_row, r_col]
+    enddef
+
+    # SearchStrategy4
+    static def Mix1(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool): list<number>
+        var [l_row, l_col, r_row, r_col] = InnerStrategy(left, right, start_row, start_col, FoundOther)
+        if l_row <=# 0 || l_col <=# 0 || r_row <=# 0 || r_col <=# 0
+            [l_row, l_col, r_row, r_col] = LeftSideStrategy(left, right, start_row, start_col, FoundOther)
+        endif
+        if l_row <=# 0 || l_col <=# 0 || r_row <=# 0 || r_col <=# 0
+            [l_row, l_col, r_row, r_col] = RightSideStrategy(left, right, start_row, start_col, FoundOther)
+        endif
+        return [l_row, l_col, r_row, r_col]
+    enddef
+
+    # SearchStrategy5
+    static def Mix2(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool): list<number>
+        var [l_row, l_col, r_row, r_col] = InnerStrategy(left, right, start_row, start_col, FoundOther)
+        if l_row <=# 0 || l_col <=# 0 || r_row <=# 0 || r_col <=# 0
+            return [l_row, l_col, r_row, r_col]
+        else
+            return RightSideStrategy(left, right, start_row, start_col, FoundOther)
+        endif
+    enddef
+
+    # SearchStrategy6
+    static def PreventSame(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool): list<number>
+        const [l_row, l_col] = SearchStrategy.SearchLeft(start_row, start_col, left, FoundOther)
+        const [r_row, r_col] = SearchStrategy.SearchRight(start_row, start_col + 1, right, FoundOther)
+        if l_row ==# r_row
+            return [l_row, l_col + 1, r_row, r_col - 1]
+        else
+            return [-1, -1, -1, -1]
+        endif
+    enddef
+
+    # SearchStrategy7
+    static def LeftSingleStrategy(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool): list<number>
+        var [r_row, r_col] = SearchStrategy.SearchRight(start_row, start_col, right, FoundOther)
+        return Position.new(r_row, r_col)
+    enddef
+
+    # SearchStrategy8
+    static def RightSingleStrategy(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool): list<number>
+        var [l_row, l_col] = SearchStrategy.SearchRight(start_row, start_col, right, FoundOther)
+        return Position.new(l_row, l_col)
+    enddef
+
+    # SearchStrategy9
+    static def GiveUp(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool = (x: string, y: string) => false): list<number>
+        return [-1, -1, -1, -1]
+    enddef
+endclass
+
+export class Position
+    var row: number
+    var col: number
+
+    def new(row: number, col: number)
+        this.row = row
+        this.col = col
+    enddef
+    def Distance(anchor = Position.new(1, 1)): number
+        const big_bit   = abs(anchor.row - this.row)
+        const small_bit = abs(anchor.col - this.col)
+        return big_bit * 10 + small_bit
+    enddef
+    def Valid(): bool
+        return this.row >= 1 && this.col >= 1
+    enddef
+    static def Compare(anchor = Position.new(1, 1), pos1 = Position.new(1, 1), pos2 = Position.new(1, 1)): number
+        return pos1.Distance(anchor) - pos2.Distance(anchor)
+    enddef
+endclass
+
+export class Pair
+    static const range: number = 10
+    var left:  string
+    var right: string
+    var l_pos: Position
+    var r_pos: Position
+    var start_pos: Position
+
+    def new(left: string, right: string, start_row: number, start_col: number, SearchS: func = SearchStrategy.InnerStrategy)
+        this.left      = left
+        this.right     = right
+        this.start_pos = Position.new(start_row,  start_col)
+        if !this.start_pos.Valid()
+            this.Empty()
+            return
+        endif
+        const [l_row, l_col, r_row, r_col] = this.Search(SearchS)
+        this.l_pos     = Position.new(l_row, l_col)
+        this.r_pos     = Position.new(r_row, r_col)
+    enddef
+
+    def newLeftSingle(left: string, right: string, l_pos: Position)
+        this.left  = left
+        this.right = right
+        this.l_pos = l_pos
+        if !l_pos.Valid()
+            this.Empty()
+            return
+        endif
+        this.r_pos = SearchStrategy.LeftSingleStrategy(left, this.l_pos.row, this.l_pos.col, this.GetFoundOther())
+    enddef
+    def newEmpty()
+        this.l_pos = Position.new(-1, -1)
+        this.r_pos = Position.new(-1, -1)
+        this.start_pos  = Position.new(-1, -1)
+        this.left  = ''
+        this.right  = ''
+    enddef
+    def Empty()
+        this.l_pos = Position.new(-1, -1)
+        this.r_pos = Position.new(-1, -1)
+        this.start_pos  = Position.new(-1, -1)
+        this.left  = ''
+        this.right  = ''
+    enddef
+    def newRightSingle(left: string, right: string, r_pos: Position)
+        this.left  = left
+        this.right = right
+        this.r_pos = r_pos
+        this.l_pos = SearchStrategy.RightSingleStrategy(right, this.l_pos.row, this.l_pos.col, this.GetFoundOther())
+    enddef
+
+    def Valid(): bool
+        return this.l_pos.Valid() && this.r_pos.Valid() && this.start_pos.Valid()
+    enddef
+
+    def Show()
+        echom [[this.l_pos.row, this.l_pos.col], [this.r_pos.row, this.r_pos.col]]
+    enddef
+
+    def SameRow(): bool
+        return this.l_pos.row ==# this.r_pos.row
+    enddef
+
+    def Search(Strateg: func): list<number>
+        return Strateg(this.left, this.right, this.start_pos.row, this.start_pos.col, this.GetFoundOther())
+    enddef
+
+    def Distance(anchor = Position.new(0, 0)): number
+        return min([this.l_pos.Distance(anchor), this.r_pos.Distance(anchor)])
+    enddef
+
+    def Segment(): number
+        return this.l_pos.Distance(this.r_pos)
+    enddef
+
+    def Contains(pos: Position): bool
+        return this.l_pos.row <=# pos.row && pos.row <=# this.r_pos.row && this.l_pos.col <=# pos.col && pos.col <=# this.r_pos.col
+    enddef
+
+    def ContainsStart(): bool
+        return this.l_pos.row <=# this.start.row && this.start.row <=# this.r_pos.row && this.l_pos.col <=# this.start.col && this.start.col <=# this.r_pos.col
+    enddef
+    def GetFoundOther(): func(string, string): bool
+        def FoundOther(other: string, part: string): bool
+            if this.left ==# this.right
+                return false
+            elseif [other, part] ==# [this.left, this.right]
+                return true
+            elseif [part, other] ==# [this.left, this.right]
+                return true
+            else
+                return false
+            endif
+        enddef
+        return FoundOther
+    enddef
+endclass
+
+const MATCHPAIRS = [
+    ['{', '}'],
+    ['<', '>'],
+    ['[', ']'],
+    ['(', ')'],
+    ["'", "'"],
+    ['"', '"'],
+    ['`', '`'],
+    ['def', ")"]
+]
+
+
+const GetPair = (char: string): list<string> => {
+    return {
+        '{': ['{', '}'],
+        '}': ['{', '}'],
+        '(': ['(', ')'],
+        ')': ['(', ')'],
+        '<': ['<', '>'],
+        '>': ['<', '>'],
+        '[': ['[', ']'],
+        ']': ['[', ']'],
+        '"': ['"', '"'],
+        '`': ['`', '`'],
+        'def': ['def', ')'],
+        "'": ["'", "'"]}[char]
+}
+
+const GetOther = (char: string): string => {
+    return {
+        '{': '}',
+        '}': '{',
+        '(': ')',
+        ')': '(',
+        '<': '>',
+        '>': '<',
+        '[': ']',
+        ']': '[',
+        '"': '',
+        "'": ""}[char]
+}
+
+
+export def Match(): list<Pair>
+    const line = getline('.')->split('\zs')
+    const [_, row, col, _] = getcharpos('.')
+    const pos = Position.new(row, col)
+    const GetPossibleIndexs = fp.Compose(
+                    fp.Mapped((_, v: string): list<number> =>
+                        fp.IndexAll(line, v)),
+                    fp.Reduced((pre: list<number>, curr: list<number>) =>
+                        (pre + curr), []),
+                    fp.Filtered((_, v: number): bool => v !=# -1))
+
+    const MakePair = (_, v: number): Pair => {
+                        const a_pair = GetPair(line[v])
+                        return Pair.new(a_pair[0], a_pair[1], row, v + 1, SearchStrategy.Mix1)
+                    }
+
+    const SortPair = (a: Pair, b: Pair, target_pos: Position) => {
+        const closest = a.Distance(target_pos) - b.Distance(target_pos)
+        if ! a.Contains(target_pos) && ! b.Contains(target_pos)
+            return closest
+        elseif a.Contains(target_pos) && b.Contains(target_pos)
+            return closest
+        elseif a.Contains(target_pos)
+            return -1
+        else
+            return 1
+        endif
+    }
+
+    const GuessPairs = fp.Compose(
+                    GetPossibleIndexs,
+                    fp.Mapped(MakePair),
+                    fp.Filtered((_, v: Pair): bool => v.Valid()),
+                    fp.Sorted((a: Pair, b: Pair): number => SortPair(a, b, pos)))
+    return GuessPairs(fp.Reduce(MATCHPAIRS, (pre, curr) => pre + curr, []))
+enddef
+
+export def PercentSign(order: number = -1): Pair
+    const pairs = Match()
+    if len(pairs) <=# 0
+        return Pair.new('_', '_', -1, -1, SearchStrategy.GiveUp)
+    endif
+    const pair = pairs[0]
+    const [_, row, col, _] = getpos('.')
+    const pos = Position.new(row, col)
+
+    if pair.l_pos.Distance(pos) !=# 0 && order ==# -1
+        setcursorcharpos(pair.l_pos.row, pair.l_pos.col)
+    elseif pair.l_pos.Distance(pos) ==# 0 && order ==# -1
+        setcursorcharpos(pair.r_pos.row, pair.r_pos.col)
+    elseif order ==# 0
+        setcursorcharpos(pair.l_pos.row, pair.l_pos.col)
+    else
+        setcursorcharpos(pair.r_pos.row, pair.r_pos.col)
+    endif
+    return pair
+enddef
+
+export def PercentSign1()
+    const pairs = Match()
+    if len(pairs) <=# 0
+        return
+    endif
+    const pair = pairs[0]
+    if pair.Segment() ==# 1
+        setcursorcharpos(pair.l_pos.row, pair.l_pos.col)
+        normal! aa
+        setcursorcharpos(pair.l_pos.row, pair.l_pos.col + 1)
+        normal! v
+        setcursorcharpos(pair.r_pos.row, pair.r_pos.col)
+        return
+    endif
+    if mode() ==# 'v'
+        normal! v
+    endif
+    if !pair.SameRow() && strcharlen(getline(pair.l_pos.row)) ==# pair.l_pos.col
+        setcursorcharpos(pair.l_pos.row + 1, 1)
+    else
+        setcursorcharpos(pair.l_pos.row, pair.l_pos.col + 1)
+    endif
+    normal! v
+    setcursorcharpos(pair.r_pos.row, pair.r_pos.col - 1)
+    return
+enddef
+
+export def PercentSign2()
+    const pairs = Match()
+    if len(pairs) <=# 0
+        return
+    endif
+    const pair = pairs[0]
+    if mode() ==# 'v'
+        normal! v
+    endif
+    setcursorcharpos(pair.l_pos.row, pair.l_pos.col)
+    normal v
+    setcursorcharpos(pair.r_pos.row, pair.r_pos.col)
+    return
+enddef
+
+## function ReplacePairs(){{{
+class ReplaceStrategy
+    static def SetLines(pair: Pair, lines: list<string>)
+        if len(lines) ==# 1
+            setline(pair.l_pos.row, lines[0])
+        elseif len(lines) ==# 2
+            setline(pair.l_pos.row, lines[0])
+            setline(pair.r_pos.row, lines[1])
+        else
+            throw len(lines) <=# 2
+        endif
+    enddef
+
+    static def DealBasicCase(pair: Pair, ProcessLeft: func(string): string, ProcessRight: func(string): string): list<string>
+        if pair.SameRow()
+            var   line    = getline(pair.l_pos.row)
+            const Process = fp.Compose(ProcessRight, ProcessLeft)
+            return [Process(line)]
+        else
+            var pair1_line = getline(pair.l_pos.row)
+            var pair2_line = getline(pair.r_pos.row)
+            return [ProcessLeft(pair1_line), ProcessRight(pair2_line)]
+        endif
+    enddef
+
+    static def DeletePairProcess(pair: Pair): list<string>
+        const ProcessRight = (line: string): string => {
+            var ans = line->split('\zs')
+            ans->remove(pair.r_pos.col - 1, pair.r_pos.col - 2 + strcharlen(pair.right))
+            return ans->join('')
+        }
+        const ProcessLeft = (line: string): string => {
+            var ans = line->split('\zs')
+            ans->remove(pair.l_pos.col - 1, pair.l_pos.col - 2 + strcharlen(pair.left))
+            return ans->join('')
+        }
+        return ReplaceStrategy.DealBasicCase(pair, ProcessLeft, ProcessRight)
+    enddef
+
+    static def DeletePair(pair: Pair)
+        # pair.Show()
+        const lines = ReplaceStrategy.DeletePairProcess(pair)
+        ReplaceStrategy.SetLines(pair, lines)
+    enddef
+
+    static def ChangePairProcess(pair: Pair, new_left: string, new_right: string): list<string>
+        var lines = ReplaceStrategy.DeletePairProcess(pair)
+        if len(lines) ==# 1
+            var line = lines[0]->split('\zs')
+            line->insert(new_left, pair.l_pos.col - 1)
+            line->insert(new_right, pair.r_pos.col - 1)
+            lines[0] = line->join('')
+        else
+            var line = lines[0]->split('\zs')
+            line->insert(new_left, pair.l_pos.col - 1)
+            lines[0] = line->join('')
+            line = lines[1]->split('\zs')
+            line->insert(new_right, pair.r_pos.col - 1)
+            lines[1] = line->join('')
+        endif
+        return lines
+    enddef
+
+    static def ChangePair(pair: Pair, new_left: string, new_right: string)
+        const lines = ReplaceStrategy.ChangePairProcess(pair, new_left, new_right)
+        ReplaceStrategy.SetLines(pair, lines)
+    enddef
+endclass
+
+def ReplacePairs()
+    const pair = PercentSign()
+    if !pair.Valid()
+        pair.Show()
+        Notify(['未发现组合对'])
+        return
+    endif
+    setcursorcharpos(pair.l_pos.row, pair.l_pos.col)
+
+    const char  = getcharstr()
+    if char ==# 'd'
+        ReplaceStrategy.DeletePair(pair)
+        Notify(['删除' .. pair.left .. pair.right], 'down', 1000)
+    elseif char ==# 'c'
+        const new_char = input('请输入一个字符')
+        ReplaceStrategy.ChangePair(pair, new_char, new_char)
+        Notify(['替换为' .. [new_char, new_char]->join(' ')], 'down', 1000)
+    else
+        const [left, right] = GetPair(char)
+        ReplaceStrategy.ChangePair(pair, left, right)
+        Notify(['替换为' .. [char, char]->join(' ')], 'down', 1000)
+    endif
+enddef
+nn gr <ScriptCmd>ReplacePairs()<CR>
+# }}}
+
+# function CheckBoxToggle(){{{
+export def CheckBoxToggle()
+    const [_, row: number, col: number, _]  = getcharpos('.')
+    const line: string = getline('.')
+    const [left: number, right: number] = [stridx(line, '['), stridx(line, ']')]
     if left ==# -1 || right ==# -1 || left >=# right
-        return Notify(['没有checkbox'])
+        Notify(['没有checkbox'])
+        return
     endif
-    let has_x = (stridx(line, 'x') < left || stridx(line, 'x') > right)? 'x':''
-    call setline(row, line[:left] . has_x . line[right:])
-endfunction
-" }}}
+    const has_x: string = (stridx(line, 'x') < left || (stridx(line, 'x') > right) ? 'x' : '')
+    setline(row, line[ : left] .. has_x .. line[right : ])
+enddef
+# }}}
 
-" function! Notify(){{{
-function! NotifyMaker()
-    let notify_queue = [0, winheight(0)]
-    function! SetDead(begin, row) closure
-        for i in range(a:row + 2)
-            let trash = notify_queue->remove(index(notify_queue, a:begin + i))
-        endfor
-    endfunction
+# function SelectBuffer(){{{
+export def SelectBuffer()
+    const names = getbufinfo({'buflisted': 1})
+            ->fp.Filter((_, val) => val["name"][0] !=# "!")
+            ->fp.Map((_, buf) => buf["name"])
+    const icon_name = names->fp.Map((_, v: string) => Icons(v) .. ' ' .. v)
+    popup_menu(icon_name, {
+        'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+        'callback': (_, result) => (result !=# -1) ? SwitchBuffer(names[result - 1]) : ''
+    })
+    # DeleteBuffer()
+enddef
+# }}}
 
-    function! AddInfo(begin, row) closure
-        for i in range(a:row + 2)
-            let notify_queue = notify_queue->add(a:begin + i)
-        endfor
-        let notify_queue = notify_queue->sort({a, b -> a > b})
-    endfunction
-
-    function! GetInfo() closure
-        return notify_queue
-    endfunction
-
-    function! SpareRow(lease_space) closure abort
-        function! GetIndex(space_between_list, n) abort
-            if a:n ==# 0
-                return 1
-            else
-                return GetIndex(a:space_between_list, a:n - 1) + a:space_between_list[a:n - 1] + 1
-            endif
-        endfunction
-        let without_car    = notify_queue[1:]
-        let space_between  = range(len(without_car))->map({n -> without_car[n] - notify_queue[n] - 1})
-        let possible_index = copy(space_between)->filter({idx, val -> val > a:lease_space + 2})
-        if len(possible_index) ==# 0
-            return notify_queue[-1] + 1
-        else
-            return GetIndex(space_between, space_between->index(possible_index[0]))
-        endif
-    endfunction
-
-    function! SpareRowDown(lease_space) closure abort
-        function! GetIndex(space_between_list, n) abort closure
-            if a:n ==# -1
-                return notify_queue[-1]
-            else
-                return GetIndex(a:space_between_list, a:n + 1) -  a:space_between_list[a:n + 1] - 1
-            endif
-        endfunction
-        let without_car    = notify_queue[1:]
-        let space_between  = range(len(without_car))->map({n -> without_car[n] - notify_queue[n] - 1})
-        let possible_index = copy(space_between)->filter({idx, val -> val > a:lease_space + 2})
-        if len(possible_index) ==# 0
-            return notify_queue[-1] - a:lease_space
-        else
-            return GetIndex(space_between, space_between->index(possible_index[0]) - len(space_between)) - a:lease_space
-        endif
-    endfunction
-    return [funcref('SetDead'), funcref('AddInfo'), funcref('GetInfo'), funcref('SpareRow')]
-endfunction
-
-let [s:SetNotifyDead, s:AddNotifyInfo, s:GetNotifyInfo, s:SpareRow] = NotifyMaker()
-
-function! Notify(texts, location='down', time=800) abort
-    hi clear Pmenu
-    hi Pmenu ctermfg=145
-    let width = winwidth(0)
-    let shift = max(a:texts->Map('len(v:val)'))
-    let notify_queue = s:GetNotifyInfo()
-
-    let col = width / 2 - shift / 2
-    if a:location ==# 'down'
-        let row = SpareRowDown(len(a:texts) + 2)
+# function SwitchBuffer(file){{{
+def SwitchBuffer(file: string)
+    Notify(['跳转 ' .. file])
+    if isdirectory(file)
+        Notify([file .. ' 是目录，不能打开'])
     else
-        let row = SpareRow(len(a:texts) + 2)
+        silent execute 'buf ' .. file
     endif
-    " echom row
+enddef
+# }}}
 
-    call s:AddNotifyInfo(row, len(a:texts))
-    call popup_notification(a:texts, {
-        \'col'         : col,
-        \'line'        : row,
-        \'minwidth'    : shift,
-        \'time'        : a:time,
-        \'zindex'      : 200,
-        \'borderchars' : ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
-        \'callback'    : {...->  s:SetNotifyDead(row, len(a:texts))}
-        \ })
-    return 0
-endfunction
-" }}}
-
-function! Test()
-    for i in range(10)
-        call Notify(['   ' . - i, ''], 'down')
-        " call Notify(['   ' . i, '', ''], 'up')
-    endfor
-endfunction
-" function! Icons(){{{
-function! Icons(filename)
-    return system('exa --icons=always ' . shellescape(a:filename))->split()[0]
-endfunction
-" }}}
-
-" function! SelectBuffer(){{{
-function! SelectBuffer()
-    let names = getbufinfo({'buflisted': 1})
-            \->filter('v:val["name"][0] !=# "!"')
-            \->map({i, buf->buf["name"]})
-    let icon_name = names->Map({k, v->Icons(v) . ' ' . v})
-
-    call popup_menu(icon_name, {'borderchars' : ['─', '│', '─', '│', '╭', '╮', '╯', '╰'], 'callback': {id, result->(result !=# -1)? SwitchBuffer(names[result-1]):''}})
-    call DeleteBuffer()
-endfunction
-" }}}
-nn <leader>e :call SelectBuffer()<CR>
-
-" function! SwitchBuffer(file){{{
-function! SwitchBuffer(file)
-    call Notify(['跳转 ' . a:file])
-    if isdirectory(a:file)
-        call Notify([a:file . ' 是目录，不能打开'])
-        " silent execute 'Explore ' . a:file
-        " 似乎vim不能在pop_window打开的时候使用Explore
+# function OpenBuffer(file){{{
+def OpenBuffer(file: string)
+    Notify(['跳转 ' .. file])
+    if isdirectory(file)
+        Notify([file .. ' 是目录，不能打开'])
+        # silent execute 'Explore ' . file " 似乎vim不能在pop_window打开的时候使用Explore
     else
-        silent execute 'buf ' . a:file
+        silent execute 'vsplit ' .. file
     endif
-endfunction
-" }}}
+enddef
+# }}}
 
-" function! OpenBuffer(file){{{
-function! OpenBuffer(file)
-    call Notify(['跳转 ' . a:file])
-    if isdirectory(a:file)
-        call Notify([a:file . ' 是目录，不能打开'])
-        " silent execute 'Explore ' . a:file " 似乎vim不能在pop_window打开的时候使用Explore
-    else
-        silent execute 'vsplit ' . a:file
-    endif
-endfunction
-" }}}
 
-" function! JoshutoSelectFile(){{{
-function! JoshutoSelectFile()
-    function! Rest_work(id, result, filename)
+# function JoshutoSelectFile(){{{
+export def JoshutoSelectFile()
+    def Rest_work(id: number, result: number, filename: string)
         silent! normal! `J
         delmarks J
-        let content    = readfile(a:filename)
+        const content = readfile(filename)
         if len(content) ==# 0
-            return Notify(['取消跳转'], 'up')
+            Notify(['取消跳转'], 'up')
+            return
         endif
-        let content = content->map({idx, file->OpenBuffer(file)})
-        call system("rm -rf " . a:filename)
-    endfunction
+        fp.Map(content, (_, file: string) => OpenBuffer(file))
+        system("rm -rf " .. filename)
+    enddef
 
-    hi clear Pmenu
-    hi Pmenu ctermfg=145
-    let tmp         = tempname()
+    const tmp = tempname()
     normal! mJ
-    let term_buffer = term_start('/home/rongzi/.config/scripts/joshuto_for_vim.sh ' . tmp, {'hidden': 1, 'term_finish': 'close', 'norestore':1})
-    let pop_window  = popup_create(term_buffer, {'minwidth': 90, 'minheight': 25, 'border': [1, 1, 1, 1], 'borderchars':['─', '│', '─', '│', '╭', '╮', '╯', '╰'], 'callback': {id, result -> Rest_work(id, result, tmp)}})
-endfunction
-" }}}
-nn <leader><c-j> <CMD>call JoshutoSelectFile()<CR>
+    const term_buffer = term_start('/home/rongzi/.config/scripts/joshuto_for_vim.sh ' .. tmp, { 'hidden': 1, 'term_finish': 'close', 'norestore': 1 })
+    const pop_window  = popup_create(term_buffer, {
+        'minwidth': 90,
+        'minheight': 25,
+        'border': [1, 1, 1, 1],
+        'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+        'highlight': 'Notify',
+        'callback': (id, result) => Rest_work(id, result, tmp)
+    })
+enddef
+# }}}
 
-" function! SelectFile(){{{
-" use fzf to select files quickly
-function! SelectFile()
-    function! Rest_work(id, result, filename)
-        let content    = readfile(a:filename)
+# function SelectFile(){{{
+# use fzf to select files quickly
+export def SelectFile()
+    def Rest_work(filename: string)
+        const content = readfile(filename)
         if len(content) ==# 0
-            return Notify(['取消跳转'], 'up')
+            Notify(['取消跳转'], 'up')
         endif
-        let content = content->map({idx, file->OpenBuffer(file)})
-        call system("rm -rf " . a:filename)
-    endfunction
+        fp.Map(content, (_, file: string) => OpenBuffer(file))
+        system("rm -rf " .. filename)
+    enddef
 
-    hi clear Pmenu
-    hi Pmenu ctermfg=145
-    let tmp         = tempname()
-    let term_buffer = term_start('/home/rongzi/.config/scripts/fzf_for_vim.sh ' . tmp, {'hidden': 1, 'term_finish': 'close', 'norestore' : 1})
-    let pop_window  = popup_create(term_buffer, {'minwidth': 130, 'minheight': 20, 'maxheight': 35, 'border': [1, 1, 1, 1], 'borderchars':['─', '│', '─', '│', '╭', '╮', '╯', '╰'], 'callback': {id, result -> Rest_work(id, result, tmp)}})
-endfunction
-" }}}
-nn <leader><c-f> <CMD>call SelectFile()<CR>
+    const tmp         = tempname()
+    const term_buffer = term_start('/home/rongzi/.config/scripts/fzf_for_vim.sh ' .. tmp, {'hidden': 1, 'term_finish': 'close', 'norestore': 1})
+    const pop_window  = popup_create(term_buffer, {
+        'minwidth': 130,
+        'minheight': 20,
+        'maxheight': 35,
+        'border': [1, 1, 1, 1],
+        'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+        'highlight': 'Notify',
+        'callback': (_, _) => Rest_work(tmp)
+    })
+enddef
+# }}}
 
-" function! DeleteBuffer(){{{
-function! DeleteBuffer()
-    redir => buf_list
+# function DeleteBuffer(){{{
+def DeleteBuffer()
+    var ls_out: string
+    redir => ls_out
     silent! ls
-    redir end
-    for buf in buf_list->split('\n')
-        let tokens = buf->split(' ')
+    redir END
+    for buf in ls_out->split('\n')
+        var tokens: list<string> = buf->split(' ')
         if tokens[4] =~# '"!/home/rongzi/.config/scripts/.*'
-            silent! execute 'bdelete ' . tokens[0]
+            silent! execute 'bdelete ' .. tokens[0]
         endif
     endfor
-endfunction
-" }}}
+enddef
+# }}}
 
-" use another way to show chars when in console{{{
-if $DISPLAY == ''
-    set notermguicolors
-    set fillchars=vert:\|
-    set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
-    color zellner
-endif
-"}}}
+# use another way to show chars when in console{{{
+# if $DISPLAY == ''
+    # set notermguicolors
+    # set fillchars=vert:\|
+    # set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
+    # color zellner
+# endif
+# }}}
 
-"function! ShowLastStatus() unknow{{{
-function! ShowLastStatus()
+# function ShowLastStatus() unknow{{{
+def ShowLastStatus()
     if @% =~# '!.*'
         set laststatus=0
     else
         set laststatus=2
     endif
-endfunction
-"}}}
+enddef
+# }}}
 
-"function! ChangeDirectory()    quickly change to the directory the buffer lies in{{{
-
-function! ChangeDirectory()
-    if expand("%") ==# '' || system("cd " . expand("%")) =~# '.*没有.*' || system("cd " . expand("%")) =~# '.*No such.*'
+# function ChangeDirectory()    quickly change to the directory the buffer lies in{{{
+def ChangeDirectory()
+    if expand("%") ==# '' || system("cd " .. expand("%")) =~# '.*没有.*' || system("cd " .. expand("%")) =~# '.*No such.*'
         return
     endif
-    execute "cd" expand('%:p:h')
-endfunction
+    execute "cd" .. expand('%:p:h')
+enddef
 
-function! ChangeSrc()
-    if expand("%") ==# '' || system("cd " . expand("%")) =~# '.*没有.*' || system("cd " . expand("%")) =~# '.*No such.*' || expand('%') ==# 'popup'
+def ChangeSrc()
+    if expand("%") ==# '' || system("cd " .. expand("%")) =~# '.*没有.*' || system("cd " .. expand("%")) =~# '.*No such.*' || expand('%') ==# 'popup'
         return
     endif
-    execute "let $src = " . shellescape(expand('%:p'))
-endfunction
-"}}}
+    execute "let $src = " .. shellescape(expand('%:p'))
+enddef
+# }}}
 
-"function! ToggleConcealLevel()   toggle conceal chars{{{
+# function ToggleConcealLevel()   toggle conceal chars{{{
 
-function! ToggleConcealLevelOutter()
-    let conceal_level = 1
-    let level = {'0': 0, '1': 1, '2': 3}
-    function! ToggleConcealLevel() closure
-        let conceal_level = (conceal_level + 1) % 3
-        exe 'setlocal conceallevel=' . level[string(conceal_level)]
-    endfunction
-    return funcref('ToggleConcealLevel')
-endfunction
-"}}}
-
-call ToggleConcealLevelOutter()
-nnoremap <silent> <C-c><C-y> <CMD>call ToggleConcealLevel()<CR>
-
-"function! Fcitx5pinyin(){{{
-function! Fcitx5pinyin()
-    call system('fcitx5-remote -s 拼音')
-endfunction
-function! Fcitx5keyboard()
-    call system('fcitx5-remote -s keyboard')
-endfunction
-
-func! Eatchar(pat)
-    let c = nr2char(getchar(0))
-    return (c =~ a:pat) ? '' : c
-endfunc
-" iabbrev  if if ()<Left><C-R>=Eatchar('\s')<CR>
-"}}}
-
-" useful expample in help doc :h <expr>{{{
-
-let counter = 0
-func! ListItem()
-  let g:counter += 1
-  return g:counter .. '. '
-endfunc
-
-func! ListReset()
-  let g:counter = 0
-  return ''
-endfunc
-
-" inoremap <expr> <C-L> ListItem()
-" inoremap <expr> <C-R> ListReset()
-" iunmap <c-r>
-"}}}
+export def ToggleConcealLevel()
+    const level = {'0': '1', '1': '3', '2': '3', '3': '0'}
+    exe 'setlocal conceallevel=' .. level[string(&conceallevel)]
+enddef
+# }}}
 
 
-" ███████╗████████╗██████╗ ██╗███╗   ██╗ ██████╗
-" ██╔════╝╚══██╔══╝██╔══██╗██║████╗  ██║██╔════╝
-" ███████╗   ██║   ██████╔╝██║██╔██╗ ██║██║  ███╗
-" ╚════██║   ██║   ██╔══██╗██║██║╚██╗██║██║   ██║
-" ███████║   ██║   ██║  ██║██║██║ ╚████║╚██████╔╝
-" ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝
-"String related functions{{{
+# useful expample in help doc :h <expr>{{{
 
-function! Print(text, ...)
-    if a:0 ==# 0
-        echom a:text
-    elseif a:0 ==# 1
-        exe 'echohl ' . a:000[0]
-        echom a:text
-        echohl None
-    endif
-endfunction
 
-"function! SearchSelectedText(){{{
-function! SearchSelectedText()
+# ███████╗████████╗██████╗ ██╗███╗   ██╗ ██████╗
+# ██╔════╝╚══██╔══╝██╔══██╗██║████╗  ██║██╔════╝
+# ███████╗   ██║   ██████╔╝██║██╔██╗ ██║██║  ███╗
+# ╚════██║   ██║   ██╔══██╗██║██║╚██╗██║██║   ██║
+# ███████║   ██║   ██║  ██║██║██║ ╚████║╚██████╔╝
+# ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝
+# String related functions{{{
+
+def Print(text: string, Hl: string)
+    exe 'echohl ' .. Hl
+    echom text
+    echohl None
+enddef
+
+# function SearchSelectedText(){{{
+export def SearchSelectedText()
+    @/ = '\M' .. substitute(@", '\', '\\\\', 'g')
+                ->substitute('\$', '\\$', 'g')
+                ->substitute('\n', '\\n', 'g')
+    Notify(["模式:" .. strpart(@/, 0, winwidth(0) - 30)])
     setl hlsearch
-    let @/ = '\M' . substitute(@", '\', '\\\\', 'g')
-        \->substitute('\$', '\\$', 'g')
-        \->substitute('\n', '\\n', 'g')
-    call Notify(["模式:" . strpart(@/, 0, winwidth(0) - 30)])
-endfunction
+enddef
 
-function! SearchArgumentText(string)
+def SearchArgumentText(text: string)
+    @/ = '\M' .. substitute(text, '\', '\\\\', 'g')
+                ->substitute('\$', '\\$', 'g')
+                ->substitute('\n', '\\n', 'g')
+    Notify(["模式:" .. strpart(@/, 0, winwidth(0) - 30)])
     setl hlsearch
-    let @/ = '\M' . substitute(a:string, '\', '\\\\', 'g')
-        \->substitute('\$', '\\$', 'g')
-        \->substitute('\n', '\\n', 'g')
-    call Notify([ "模式:" . strpart(@/, 0, winwidth(0) - 30)])
-endfunction
-"}}}
+enddef
 
-"function! InsertString(string, row, col){{{
-function! InsertString(string, row, col)
-    " insert a string to (row, col), by default in the current buffer
-    let line = getline(a:row)
-    let line = line
-        \->split('\zs')
-        \->insert(a:string, min([a:col - 1, len(line)]))
-        \->join('')
-        \->setline(a:row)
-endfunction
-"}}}
+# }}}
 
-"function! MoveCursor(row, col){{{
-function! MoveCursor(row, col)
-    call setcursorcharpos(a:row, a:col)
-endfunction
-"}}}}}}
+# function InsertString(string, row, col){{{
+def InsertString(content: string, row: number, col: number)
+    # insert a string to (row, col), by default in the current buffer
+    var line = getline(row)
+    line->split('\zs')
+        ->insert(content, min([col - 1, len(line)]))
+        ->join('')
+        ->setline(row)
+enddef
+# }}}
+# }}}}}}
 
 
-"  ██████╗ ██████╗ ███████╗██████╗  █████╗ ████████╗ ██████╗ ██████╗
-" ██╔═══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗╚══██╔══╝██╔═══██╗██╔══██╗
-" ██║   ██║██████╔╝█████╗  ██████╔╝███████║   ██║   ██║   ██║██████╔╝
-" ██║   ██║██╔═══╝ ██╔══╝  ██╔══██╗██╔══██║   ██║   ██║   ██║██╔══██╗
-" ╚██████╔╝██║     ███████╗██║  ██║██║  ██║   ██║   ╚██████╔╝██║  ██║
-"  ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
-" self defined operators {{{
-"function! VisualWrapper(left, ...)  wrap the selected text with char{{{
-function! VisualWrapper()
-    let start_pos = getcharpos("'<")
-    let end_pos   = getcharpos("'>")
+#  ██████╗ ██████╗ ███████╗██████╗  █████╗ ████████╗ ██████╗ ██████╗
+# ██╔═══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗╚══██╔══╝██╔═══██╗██╔══██╗
+# ██║   ██║██████╔╝█████╗  ██████╔╝███████║   ██║   ██║   ██║██████╔╝
+# ██║   ██║██╔═══╝ ██╔══╝  ██╔══██╗██╔══██║   ██║   ██║   ██║██╔══██╗
+# ╚██████╔╝██║     ███████╗██║  ██║██║  ██║   ██║   ╚██████╔╝██║  ██║
+#  ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
+# self defined operators {{{
+# function VisualWrapper(left, ...)  wrap the selected text with char{{{
+export def VisualWrapper()
+    const start_pos = getcharpos("'<")
+    const end_pos   = getcharpos("'>")
 
     echohl Function
-    let left  = input("左侧分隔符: ")
-    let right = input("右侧分隔符: ")
+    var left  = input("左侧分隔符: ")
+    var right = input("右侧分隔符: ")
     echohl none
-    let right = (strcharlen(right) ==# 0)? left : right
+    right = (strcharlen(right) ==# 0) ? left : right
 
-    call InsertString(right, end_pos[1],   end_pos[2] + 1)
-    call InsertString(left,  start_pos[1], start_pos[2])
-    call MoveCursor(start_pos[1], start_pos[2])
-endfunction
+    InsertString(right, end_pos[1],   end_pos[2] + 1)
+    InsertString(left,  start_pos[1], start_pos[2])
+    setcursorcharpos(start_pos[1], start_pos[2])
+enddef
 
-aug VisualWrapper
-autocmd!
-au vimenter * vn <leader>w y<CMD>call SearchSelectedText()<CR><CMD>call VisualWrapper()<CR>
-aug end
-"}}}ksdfh;
-
-"function! MakeWrapper(left = "(", right = ")")     {{{
-function! s:MakeWrapper(left = "(", right = ")", stop = 1)
+# }}}
+export function MakeWrapper(left = "(", right = ")", stop = 1)
     function! OperatorWrapper(type) closure
         let start_pos =  getcharpos("'[")
         let end_pos   =  getcharpos("']")
@@ -517,412 +996,347 @@ function! s:MakeWrapper(left = "(", right = ")", stop = 1)
             if a:line ==# ''
                 return ''
             endif
-            call InsertString(a:right, a:line_number, (a:type == 'line')? strcharlen(a:line) + 1 : end_col + 1)
-            call InsertString(a:left,  a:line_number, (a:type == 'line')? 1 : start_col)
+            vim9cmd InsertString(a:right, a:line_number, (a:type == 'line') ? strcharlen(a:line) + 1 : end_col + 1)
+            vim9cmd InsertString(a:left,  a:line_number, (a:type == 'line') ? 1 : start_col)
         endfunction
 
         if a:type ==# 'char'
-            call InsertString(a:right, end_row,   end_col + 1)
-            call InsertString(a:left,  start_row, start_col)
+            vim9cmd InsertString(a:right, end_row,   end_col + 1)
+            vim9cmd InsertString(a:left,  start_row, start_col)
         else
             call getline(start_row, end_row)->map('WrapLine(v:val, v:key + start_row)')
         endif
 
         if a:stop ==# 1
-            return MoveCursor(start_row, start_col)
+            call setcursorcharpos(start_row, start_col)
+            return
         endif
         " where stop == 2 case
         if a:type ==# 'char'
-            call MoveCursor(end_row, end_col + 1 + (start_row ==# end_row))
+            call setcursorcharpos(end_row, end_col + 1 + (start_row ==# end_row))
         elseif a:type ==# 'block'
-            call MoveCursor(end_row, end_col + 2)
+            call setcursorcharpos(end_row, end_col + 2)
         elseif a:type ==# 'line'
-            call MoveCursor(end_row, 2147483647)
+            call setcursorcharpos(end_row, 2147483647)
         endif
     endfunction
     return funcref('OperatorWrapper')
 endfunction
 
-" = ((¬p ∨ q) ∧ ¬q) (∨) ((¬p ∨ (q)) ∧ r)
-aug OperatorWrapper
-autocmd!
-au VimEnter * no    (  <CMD>let &operatorfunc=<SID>MakeWrapper('(', ')', 2)<CR>g@
-au VimEnter * no    {  <CMD>let &operatorfunc=<SID>MakeWrapper('{', '}', 2)<CR>g@
-au VimEnter * no    [  <CMD>let &operatorfunc=<SID>MakeWrapper('[', ']', 1)<CR>g@
-au VimEnter * no    "  <CMD>let &operatorfunc=<SID>MakeWrapper('"', '"', 1)<CR>g@
-au VimEnter * no    '  <CMD>let &operatorfunc=<SID>MakeWrapper("'", "'", 1)<CR>g@
+# function SendKeys(type)  {{{
+export def SendKeys(type: string)
+    const [_, start_row, start_col, _] = getcharpos("'[")
+    const [_, end_row,   end_col,   _] = getcharpos("']")
+    if type ==# 'line'
+        getline(start_row, end_row)
+            ->fp.Filter((_, v: string): bool => len(v) ># 0)
+            ->fp.Map((_, v: string): string => system('tmux send-keys -t {next} ' .. shellescape(v) .. "\r"))
+    elseif type ==# 'block'
+        getline(start_row, end_row)
+            ->fp.Filter((_, v: string): bool => len(v) ># 0)
+            ->fp.Map((_, a: string): string => a[start_col - 1 : end_col - 1])
+            ->fp.Map((_, v: string): string => system('tmux send-keys -t {next} ' .. shellescape(v) .. "\r"))
+    else
+        const content = getline(start_row)[start_col - 1 : end_col - 1]
+        system('tmux send-keys -t {next} ' .. shellescape(content) .. "\r")
+    endif
+enddef
+# }}}
 
-au VimEnter * nno  ((  0<CMD>let &operatorfunc=<SID>MakeWrapper('(', ')', 1)<CR>g@$
-au VimEnter * nno  {{  0<CMD>let &operatorfunc=<SID>MakeWrapper('{', '}', 2)<CR>g@$
-au VimEnter * nno  [[  0<CMD>let &operatorfunc=<SID>MakeWrapper('[', ']', 1)<CR>g@$
-au VimEnter * nno  ""  0<CMD>let &operatorfunc=<SID>MakeWrapper('"', '"', 1)<CR>g@$
-au VimEnter * nno  ''  0<CMD>let &operatorfunc=<SID>MakeWrapper("'", "'", 1)<CR>g@$
-aug end
+def AddOrDelComment(line: string, comment: string): string
+    if comment ==# ''
+        return line
+    elseif line ==# ''
+        return ''
+    elseif line[0] ==# ' '
+        return ' ' .. AddOrDelComment(line[1 : ], comment)
+    elseif line[0] ==# comment[0]
+        const comment_len = strcharlen(comment)
+        const line_len    = strcharlen(line)
+        if line[ : comment_len - 1] ==# comment
+            const has_space = (line_len > comment_len  && line[comment_len] ==# ' ') ? 1 : 0
+            return line[comment_len + has_space : ]
+        endif
+    endif
+    return comment .. ' ' .. line
+enddef
 
 
-"function! SendKeys(type)  {{{
-function! SendKeys(type)
-    let start_row = getcharpos("'[")[1]
-    let end_row   = getcharpos("']")[1]
-    let line      = getline(start_row, end_row)->Filter({k, v -> len(v)})->Map({k, v -> system('tmux send-keys -t {next} ' . shellescape(v) . "\r")})
-endfunction
-"}}}
-nno <c-g> <CMD>set operatorfunc=funcref('SendKeys')<CR>g@$
-vn  <c-g> <CMD>set operatorfunc=funcref('SendKeys')<CR>g@
+# function CommentToggle()  {{{
+export def CommentToggleMaker(comment: string): void
+    &operatorfunc = CommentToggle
+enddef
 
-" function! CommentToggle()  {{{
-function! CommentToggleMaker(comment)
-    function! CommentToggle(type) closure
-        function! AddOrDelComment(line, comment)
-            if a:line ==# []
-                return []
-            elseif a:line[0] ==# ' '
-                return AddOrDelComment(a:line[1:], a:comment)->insert(' ', 0)
-            elseif a:line[0] ==# a:comment[0]
-                let comment_len = strcharlen(a:comment)
-                let line_len    = len(a:line)
-                if a:line[:comment_len - 1]->join('') ==# a:comment
-                    let has_space = line_len > comment_len  && a:line[comment_len] ==# ' '
-                    return a:line[comment_len + has_space:]
-                endif
+def CommentToggle(type: string): void
+    const [pos, min_number, max_number] = [getcharpos("']"), getcharpos("'[")[1], getcharpos("']")[1]]
+    getline(min_number, max_number)
+        ->fp.Map((key, val) => AddOrDelComment(val, g:comment))
+        ->fp.Map((key, val) => setline(key + min_number, val))
+enddef
+# }}}
+
+
+# function AddSeprator(){{{
+export def BracketIndent(): void
+    const [_, row, col, _]  = getcharpos('.')
+    const line = getline(row)->Rstrip(' ')
+    Notify(["call once"])
+    if line[-1] ==# '{'
+
+    else
+        if line ==# '' && row == 1
+            setline(row, repeat(' ', indent(row)) .. '{')
+        elseif line ==# '' && row != 1
+            const need_indent = getline(row - 1)[-1] ==# '{'
+            if need_indent
+                setline(row, repeat(' ', indent(row - 1) + &tabstop) .. '{')
             else
-                return (a:comment . ' ')->split('\zs')->extend(a:line)
+                setline(row, repeat(' ', indent(row - 1)) .. '{')
             endif
-        endfunction
-
-        let [pos, min_number, max_number] = [getcharpos("']"), getcharpos("'[")[1], getcharpos("']")[1]]
-        let content = getline(min_number, max_number)
-            \->map('split(v:val, ''\zs'')')
-            \->map('AddOrDelComment(v:val, a:comment)')
-            \->map('setline(v:key + min_number, (v:val)->join(""))')
-    endfunction
-    return funcref('CommentToggle')
-endfunction
-"}}}}}}}}}
-
-
-"function! AddSeprator(){{{
-function! AddSeprator()
-    exe 'normal! $'
-    let pos  = getcharpos(".")
-    if getline(pos[1])[pos[2] - 1] !=# ' '
-        exe "normal! a \e"
-    endif
-    return ''
-endfunction
-"}}}
-
-"function! AddSuffix(){{{
-function! AddSuffix(char)
-    let line = getline('.')
-    for index in range(strcharlen(line)-1, 0, -1)
-        if line[index] ==# ' '
-            let line =  line[:-2]
         else
-            break
+            setline(row, line .. ' {')
         endif
-    endfor
-    if line[-1:-1] ==# a:char
-        return Notify(['该位置已有 ' . a:char, ''])
     endif
+    put = repeat(' ', indent(row)) .. '}'
+    normal! k
+    CR()
+    feedkeys("\<tab>")
+enddef
+# }}}
 
-    call setline('.', line . a:char)
-    normal! mS
-    redir => message
-    silent! marks S
-    redir end
-    call Notify(['添加分号至', '']->extend(message->split("\n")))
-endfunction
-"}}}
+# nn <buffer> <silent> ; mqA;<Esc>`q
 
-" nn <buffer> <silent> ; mqA;<Esc>`q
-
-"function! Quick_CD(){{{
-function! Quick_CD()
-    echohl keyword
-    let input = expand(input("要跳转的目录:  "))
-    echohl None
-    let cmd = 'locate  -l 1 ' . shellescape(input)
-    let path = system(cmd)->substitute('\n', '', 'g')
+# function Quick_CD(){{{
+export def Quick_CD(): void
+    const input = expand(input("要跳转的目录:  "))
+    const cmd   = 'locate -l 1 ' .. shellescape(input)
+    const path  = system(cmd)->Rstrip('\n')
     if path ==# ''
-        return Print('没找到', 'Error')
+        Print('没找到', 'Error')
+        return
     endif
 
-    if system('[[ -d ' . shellescape(path) . ' ]] && echo 1')
-        exe "cd " . path
-        return Print("当前处在 " . substitute(system('pwd'), '\n', '', 'g'), 'Preproc')
-    elseif system('[[ -f ' . path . ' ]] && echo 1')
-        let get_file_cmd = system('echo ' . path . ' | awk -F / -v OFS=/ ''{$NF="";print}''')
-        exe "cd " . get_file_cmd
-        exe "bo vsplit " . path
+    if isdirectory(path)
+        chdir(path)
+        Print("当前处在 " .. substitute(system('pwd'), '\n', '', 'g'), 'Preproc')
+    else
+        const dir = path->split('/')[ : - 2]->join('/')
+        if isdirectory(dir)
+            chdir(dir)
+        endif
+        exe "bo vsplit " .. path
     endif
-    return
-endfunction
-nn cd <CMD>call Quick_CD()<CR>
-"}}}
+enddef
+# }}}
 
-"  ███╗   ███╗ ██████╗ ██████╗ ███████╗███████╗
-"  ████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔════╝
-"  ██╔████╔██║██║   ██║██║  ██║█████╗  ███████╗
-"  ██║╚██╔╝██║██║   ██║██║  ██║██╔══╝  ╚════██║
-"  ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗███████║
-"  ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚══════╝
-"self defined modes {{{
-function! ModeInit()
-    " jump to last M mark if there already have M, otherwise set the M mark here
-    let s:origin_winid = win_getid()
+#  ███╗   ███╗ ██████╗ ██████╗ ███████╗███████╗
+#  ████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔════╝
+#  ██╔████╔██║██║   ██║██║  ██║█████╗  ███████╗
+#  ██║╚██╔╝██║██║   ██║██║  ██║██╔══╝  ╚════██║
+#  ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗███████║
+#  ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚══════╝
+# self defined modes {{{
+var origin_winid: number
+var ExitModeFunc: func = () => 1
+
+def ModeInit()
+    # jump to last M mark if there already have M, otherwise set the M mark here
     execute 'normal! mM'
-    nn <c-n> :cnext<CR>
-    nn <c-p> :cprev<CR>
-    return 1
-endfunction
+    origin_winid = win_getid()
+    nn q <CMD>call <SID>ExitModeFunc() <CR>
+enddef
 
-function! ExitMode()
-    let origin_winnr = getwininfo(s:origin_winid)[0]['winnr']
-    execute origin_winnr . ' wincmd w'
-    if getcharpos("'M") !=# [0, 0, 0, 0]
-        exe 'normal! `Mzz'
-        delmarks M
+def ExitMode()
+    if len(getwininfo(origin_winid)) ==# 1
+        const origin_winnr = getwininfo(origin_winid)[0]['winnr']
+        execute ':' .. origin_winnr .. ' wincmd w'
     endif
-    " silent! only
-    " callee save :-)
-    nn <c-n> :bnext<CR>
-    nn <c-p> :bprev<CR>
+    if getcharpos("'M") !=# [0, 0, 0, 0]
+        execute 'normal! `Mzz'
+    endif
+    delmarks M
     silent! execute 'nunmap q'
-    return 1
-endfunction
+    ExitModeFunc = () => {
+        echom 'wtf'
+        return 1
+    }
+enddef
 
-function! GrepOperator(type)
-    let last_buffer_number = 'None'
-    let save_reg           = 'None'
-    function! SaveReg() closure
-       let save_reg = @@
-    endfunction
-    function! RestoreReg() closure
-       let @@ = save_reg
-    endfunction
-    function! Copen(text)
-        call SearchArgumentText(a:text)
+var last_bufnr: number = -1
+def Cnext()
+    const curr_buffer_number = bufnr()
+    if last_bufnr !=# -1 && curr_buffer_number !=# last_bufnr
+        silent! execute "bdelete " ..  last_bufnr
+    endif
+    last_bufnr = curr_buffer_number
+    silent! cnext
+enddef
+def Cprev()
+    const curr_buffer_number = bufnr()
+    if last_bufnr !=# -1 && curr_buffer_number !=# last_bufnr
+        silent! exe "bdelete " ..  last_bufnr
+    endif
+    last_bufnr = curr_buffer_number
+    silent! cprev
+enddef
+
+export def GrepOperator(type: string)
+    var save_reg:   string
+    def SaveReg()
+       save_reg = @Y
+    enddef
+    def RestoreReg()
+       @Y = save_reg
+    enddef
+    def Copen(text: string)
+        SearchArgumentText(text)
         copen
-        " redraw!
         setlocal nolist nonu nornu
-        exe "normal! \<c-w>k"
-    endfunction
-    function! Cnext() closure
-        if last_buffer_number ==# 'None'
-            let last_buffer_number = bufnr()
-            " call Notify([$"did not find s:last_buffer_number"])
-            silent! cnext
-            return
-        endif
-        let curr_buffer_number = bufnr()
-        if curr_buffer_number != last_buffer_number
-            silent! exe "bdelete " .  last_buffer_number
-            " call Notify(["delete buffer!"])
-        endif
-        let last_buffer_number = curr_buffer_number
-        silent! cnext
-    endfunction
-    function! Cprev() closure
-        if last_buffer_number ==# 'None'
-            let last_buffer_number = bufnr()
-            " call Notify([$"did not find last_buffer_number"])
-            silent! cnext
-            return
-        endif
-        let curr_buffer_number = bufnr()
-        if curr_buffer_number != last_buffer_number
-            silent! exe "bdelete " .  last_buffer_number
-            " call Notify(["delete buffer!"])
-        endif
-        let last_buffer_number = curr_buffer_number
-        silent! cprev
-    endfunction
-    function! ExitOperatorMode()
+        execute "normal! \<c-w>k"
+        redraw!
+    enddef
+    def ExitOperatorMode()
         silent! cclose
-        call RestoreReg()
-        call ExitMode()
-    endfunction
-    function! GrepOperatorInit()
-        if exists('s:ExitModeFunc')
-            call s:ExitModeFunc()
-        endif
-        let s:ExitModeFunc=funcref('ExitOperatorMode')
-        call SaveReg()
-        call ModeInit()
-        nn <c-n> <CMD>call Cnext()<CR>
-        nn <c-p> <CMD>call Cprev()<CR>
-    endfunction
+        RestoreReg()
+        ExitMode()
+        nn <c-n> <Cmd>bnext<CR>
+        nn <c-p> <Cmd>bprev<CR>
+    enddef
+    def GrepOperatorInit()
+        silent! ExitModeFunc()
+        ModeInit()
+        ExitModeFunc = ExitOperatorMode
+        SaveReg()
+        nn <c-n> <ScriptCmd> Cnext()<CR>
+        nn <c-p> <ScriptCmd> Cprev()<CR>
+    enddef
 
-    " init the mode
-    call GrepOperatorInit()
-    silent! normal! `[v`]y
+    # init the mode
+    GrepOperatorInit()
+    silent! normal! `<"ay`>
 
-    call Notify(["正在查找：" . @@])
-    silent! exe  'grep -Rsi ' . shellescape(@@) . " ."
-    call Copen(@@)
+    Notify(["正在查找：" .. @a])
+    silent! exe  'grep -Rsi ' .. shellescape(@a) .. " ."
     redraw!
+    Copen(@a)
+enddef
+# }}}
 
-    " set the exit of the mode
-    nn q <CMD>call ExitOperatorMode() <CR>
-endfunction
-"}}}
-
-"function! DebugMode(){{{
-function! DebugMode()
-    function! ExitDebugMode()
+# function DebugMode(){{{
+export def DebugMode()
+    def ExitDebugMode()
         silent! cclose
-        call ExitMode()
-        unlet s:ExitModeFunc
-    endfunction
+        ExitMode()
+        # unlet ExitModeFunc
+    enddef
 
-    function! DebugModeInit()
-        silent! call s:ExitModeFunc()
+    def DebugModeInit(): bool
+        silent! ExitModeFunc()
         if expand('%') !~# '\v.*\.c(pp)='
-            call Notify(['不进入debug模式'])
-            return 0
+            Notify(['不进入debug模式'])
+            return false
         endif
 
-        let s:ExitModeFunc = funcref('ExitDebugMode')
-        return ModeInit()
-    endfunction
+        ModeInit()
+        ExitModeFunc = ExitDebugMode
+        return true
+    enddef
 
-    function! Copen()
+    def Copen()
         silent copen 13
         setlocal nonumber norelativenumber nolist
-        exe "normal! \<c-w>k"
-    endfunction
+        execute "normal! \<c-w>k"
+    enddef
 
     if DebugModeInit()
         silent! execute 'make -f /home/rongzi/.Lectures/term1/hw/program_design/makefile'
-        call Copen()
-        nn q <CMD>call <SID>ExitModeFunc() <CR>
+        Copen()
+    endif
+enddef
+# }}}
+
+# function RunMode(){{{
+def MakeTimeStamp(): func(bool): float
+    var last_run_time = reltimefloat(reltime())
+    def TimeStampInner(mkstamp: bool = true): float
+        const old_time = last_run_time
+        const new_time = reltimefloat(reltime())
+        if mkstamp ==# true
+            last_run_time = new_time
+        endif
+        return new_time - old_time
+    enddef
+    return TimeStampInner
+enddef
+var TimeStamp = MakeTimeStamp()
+var term_bufnr: number = -1
+
+export def RunMode()
+    def ExitRunMode()
+        if bufnr(term_bufnr) !=# -1
+            execute 'bd! ' .. term_bufnr
+        endif
+        ExitMode()
+    enddef
+
+    def RunModeInit(): bool
+        ExitModeFunc()
+        if ['java', 'cpp', 'c', 'python']->index(FileType(expand('%'))) ==# -1
+            Notify(['只能运行C/Cpp/Python/Java文件'])
+            return false
+        endif
+        ModeInit()
+        ExitModeFunc = ExitRunMode
+        return true
+    enddef
+
+    if RunModeInit() ==# false
+        Notify(['ModeInit失败，不进入RunMode'])
         return
     endif
-endfunction
-" }}}
 
-let s:time_passby   = 0
-function! MakeTimeStamp()
-    let last_run_time = reltimefloat(reltime())
-    function! TimeStampInner() closure
-        let old_time      = last_run_time
-        let last_run_time = reltimefloat(reltime())
-        let s:time_passby   = last_run_time - old_time
-    endfunction
-    return funcref('TimeStampInner')
-endfunction
-let s:TimeStamp = MakeTimeStamp()
+    var   run_only     = false
+    const script_path  = expand('%')
+    const filetype     = FileType(script_path)
+    const run_cmds     = {'c': 'io -q ', 'cpp': 'io -q ', 'java': 'io -q ', 'python': 'python3 -i '}
+    const term_options = {'term_finish': 'open'}
+    const time_passby  = TimeStamp(false)
 
-let A = {->s:TimeStamp()}
-"function! RunMode(){{{
-function! RunMode()
-    function! ExitRunMode()
-        if exists('s:term_bufnr') && bufnr(s:term_bufnr) !=# -1
-            exe 'bd! ' . s:term_bufnr
-        endif
-        call ExitMode()
-        unlet s:ExitModeFunc
-    endfunction
-
-    function! RunModeInit()
-        silent! call s:ExitModeFunc()
-        if ['java', 'cpp', 'c', 'python']->index(FileType(expand('%'))) ==# -1
-            call Notify(['只能运行C/Cpp/Python/Java文件'])
-            return 0
-        endif
-        let s:ExitModeFunc = funcref('ExitRunMode')
-        return ModeInit()
-    endfunction
-
-    if RunModeInit() !=# 1
-        return Notify(['ModeInit失败，不进入RunMode'])
+    if time_passby <# 1.5
+        run_only = 1
+        Notify(['运行过快,据上一次运行只有 ' .. time_passby .. 's'], 'up', float2nr((1.5 - time_passby) * 1000))
     endif
 
-    let run_only     = 0
-    let script_path  = expand('%')
-    let filetype     = FileType(script_path)
-    let run_cmds     = {'c': 'io -q ', 'cpp': 'io -q ', 'java': 'io -q ', 'python': 'python3 -i '}
-    let term_options = {'term_finish':'open'}
+    const cmd = run_cmds[filetype] .. script_path .. (run_only ? ' -r' : '')
+    belowright term_bufnr = term_start(cmd, term_options)
+    TimeStamp(!run_only)
+    execute 'normal! ' .. "\<c-w>k" .. "zz" .. "\<c-w>j"
+enddef
+# }}}
 
-    if s:time_passby <# 1.5
-        let run_only = 1
-        call Notify(['运行过快,据上一次运行只有 ' . s:time_passby . 's'], 'up')
-    endif
+# aug mode
+# au!
+# au User GrepModeTrigger  normal! g@iw
+# au User DebugModeTrigger call DebugMode()
+# au User RunModeTrigger   call RunMode()
+# nn <leader>r :doautocmd User RunModeTrigger<CR>
+# nn <silent> <leader>r <CMD>call RunMode()<CR>
+# nn <silent> <leader>d :doautocmd User DebugModeTrigger<CR>
+# nn <silent> <leader>g :let &operatorfunc=funcref("GrepOperator")<CR>:doautocmd User GrepModeTrigger<CR>
+# vn <silent> <leader>g <CMD>let &operatorfunc=funcref("GrepOperator")<CR>g@
 
-    let cmd = run_cmds[filetype] . script_path . (run_only ? ' -r' : '')
-    belowright let s:term_bufnr = term_start(cmd, term_options)
-    execute   'normal! ' . "\<c-w>k" . "zz" . "\<c-w>j"
-    call s:TimeStamp()
-    nn q <CMD>call <SID>ExitModeFunc()<CR>
-endfunction
-" }}}
 
-"function! RunMode(){{{
-function! LintMode()
-    " silent! exe 'make -f /home/rongzi/.Lectures/term1/hw/program_design/makefile'
-    call RunModeInit()
-    " let result = system('g++ -o $bin ' . expand('%'))
-    " if len(getqflist()) ==# 1
-    if 1 ># 0
-        " this is where no compile error occurrs
-        " setl termwinsize=10*0
-        " silent! exe 'bo term ' . $bin
-        silent! exe 'bo term io -q ' . expand('%')
-        redraw!
-    else
-        call DebugMode()
-    endif
-
-    nn q <CMD>call ExitMode() <CR>
-    return 1
-endfunction
-" }}}
-"
-" {{{
-aug mode
-au!
-au User GrepModeTrigger  normal! g@iw
-au User DebugModeTrigger call DebugMode()
-" au User RunModeTrigger   call RunMode()
-" nn <leader>r :doautocmd User RunModeTrigger<CR>
-nn <silent> <leader>r <CMD>call RunMode()<CR>
-nn <silent> <leader>d :doautocmd User DebugModeTrigger<CR>
-nn <silent> <leader>g :let &operatorfunc=funcref("GrepOperator")<CR>:doautocmd User GrepModeTrigger<CR>
-aug end
-" }}}
-
-" function! FoldColumnToggle(){{{
-function! FoldColumnToggle()
-    if &foldcolumn
-        let &foldcolumn = 0
-    else
-        let &foldcolumn = 4
-    endif
-    return Notify(["foldcolumn = " . &foldcolumn])
-endfunction
-
-nn <leader>f <CMD>call FoldColumnToggle()<CR>
-"}}}
-
-" quickfix-window-function {{{
-" 从 v:oldfiles 来建立快速修复列表
-" call setqflist([], ' ', {'lines' : v:oldfiles, 'efm' : '%f', 'quickfixtextfunc' : 'QfOldFiles'})
-" func QfOldFiles(info)
-    " 获取一段快速修复项目范围的相关信息
-    " let items = getqflist({'id' : a:info.id, 'items' : 1}).items
-    " let l = []
-    " for idx in range(a:info.start_idx - 1, a:info.end_idx - 1)
-        " 使用简化的文件名
-      " call add(l, fnamemodify(bufname(items[idx].bufnr), ':p:.'))
-    " endfor
-    " return l
-" endfunc
-" }}}
-
-function! Outter()
-    function! s:Inner()
-        call Notify(["nihao"])
-    endfunction
-    call s:Inner()
-endfunction
+# quickfix-window-function {{{
+# 从 v:oldfiles 来建立快速修复列表
+# call setqflist([], ' ', {'lines' : v:oldfiles, 'efm' : '%f', 'quickfixtextfunc' : 'QfOldFiles'})
+# func QfOldFiles(info)
+    # 获取一段快速修复项目范围的相关信息
+    # let items = getqflist({'id' : info.id, 'items' : 1}).items
+    # let l = []
+    # for idx in range(info.start_idx - 1, info.end_idx - 1)
+        # 使用简化的文件名
+      # call add(l, fnamemodify(bufname(items[idx].bufnr), ':p:.'))
+    # endfor
+    # return l
+# endfunc
+#block }}}
