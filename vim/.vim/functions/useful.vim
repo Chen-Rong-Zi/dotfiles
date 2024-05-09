@@ -1,0 +1,1 @@
+/home/rongzi/.dotfiles/vim/functions/useful.vim

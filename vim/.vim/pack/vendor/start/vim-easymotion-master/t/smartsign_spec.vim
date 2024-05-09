@@ -1,0 +1,1 @@
+/home/rongzi/.dotfiles/vim/pack/vendor/start/vim-easymotion-master/t/smartsign_spec.vim

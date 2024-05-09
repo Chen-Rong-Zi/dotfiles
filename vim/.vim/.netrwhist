@@ -1,0 +1,12 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =6
+let g:netrw_dirhist_6='/home/rongzi/.vim/functions'
+let g:netrw_dirhist_5='/home/rongzi/.vim'
+let g:netrw_dirhist_4='/home/rongzi'
+let g:netrw_dirhist_3='/'
+let g:netrw_dirhist_2='/home'
+let g:netrw_dirhist_1='/home/rongzi'
+let g:netrw_dirhist_0='/home/rongzi/.vim'
+let g:netrw_dirhist_9='/home/rongzi/.vim/dictionary'
+let g:netrw_dirhist_8='/home/rongzi/.vim'
+let g:netrw_dirhist_7='/home/rongzi/Downloads/Compressed'

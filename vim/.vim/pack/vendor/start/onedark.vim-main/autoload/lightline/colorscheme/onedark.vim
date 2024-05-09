@@ -1,0 +1,1 @@
+/home/rongzi/.dotfiles/vim/pack/vendor/start/onedark.vim-main/autoload/lightline/colorscheme/onedark.vim
