@@ -2,9 +2,10 @@
 preview() {
     if [[ -f $1 ]]; then
         # head -n 50 $2
-        head -n 50 $1 | bat
+        bat --color always $1 | head -n 50
     else
-        tree -L 2 $1
+        # exa --color='always' -l $1
+        tree -C $1 | head -n 50
     fi
 }
 preview $1

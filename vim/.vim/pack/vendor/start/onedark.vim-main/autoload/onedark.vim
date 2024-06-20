@@ -1,1 +1,0 @@
-/home/rongzi/.dotfiles/vim/pack/vendor/start/onedark.vim-main/autoload/onedark.vim

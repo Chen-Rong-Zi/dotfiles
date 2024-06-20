@@ -1,1 +1,0 @@
-/home/rongzi/.dotfiles/vim/pack/vendor/start/vim-easymotion-master/autoload/EasyMotion/command_line.vim

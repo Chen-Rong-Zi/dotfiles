@@ -1,5 +1,307 @@
 vim9script
 import "./higherorder.vim" as fp
+# def BlankIndent(){{{
+
+class BlankIndentDrawer
+    static const indent_range: number = g:indent_range
+    static const indentHl: dict<string> = {
+        '1': 'Green',
+        '2': 'Blue',
+        '3': 'Purple',
+        '4': 'Yellow',
+        '5': 'modemsg',
+        '6': 'VertSplit'
+    }
+    var nr_lst:  list<number> = []
+    var row_lst: list<number> = []
+    var win_id: number = -1
+    var last_indent_num: number = -1
+
+    def new(nr_lst: list<number>, win_id: number)
+        this.nr_lst = nr_lst
+        this.win_id = win_id
+        this.row_lst = []
+        this.last_indent_num = -1
+    enddef
+
+    def ClearPrevHl()
+        this.nr_lst->fp.Map((_, nr: number) => {
+            matchdelete(nr, this.win_id)
+            # redraw
+            # sleep 10m
+        })
+        this.nr_lst = []
+        this.row_lst = []
+    enddef
+
+    def DrawCurrIndentLine(row: number, indent_num: number)
+        if indent_num / 4 <= 0 || indent_num / 4 > 6
+            return
+        endif
+        const indent_level = indent_num / 4
+        const start_col    = (indent_num % 4 == 0) ? indent_num - 3 : (indent_level * 4 + 1)
+        const hlgroup      = (indent_num % 4 == 0) ? BlankIndentDrawer.indentHl[indent_level] : 'Red'
+        const nrs = range(max([1, row - BlankIndentDrawer.indent_range]), min([row + BlankIndentDrawer.indent_range, line('$')]))
+        ->fp.Filter((_, linenr: number) => indent(linenr) >=# indent_num)
+        ->fp.Reduce((pre: list<list<number>>, curr: number): list<list<number>> => {
+            if len(pre[-1]) ==# 0
+                return [[curr]]
+            elseif curr - pre[-1][-1] >=# 2
+                return pre->add([curr])
+            else
+                pre[-1]->add(curr)
+                return pre
+            endif
+            }, [[]])
+        ->fp.Reduce((pre: list<number>, curr: list<number>): list<number> => {
+            if pre->index(row) ==# -1
+                return curr
+            else
+                return pre
+            endif
+        }, [])
+        ->fp.Map((_, nr: number): number => {
+            this.nr_lst->add(matchaddpos(hlgroup, [[nr, start_col]]))
+            return nr
+            # redraw
+            # sleep 10m
+        })
+        this.row_lst->extend(nrs)
+    enddef
+
+    def Draw()
+        const [_, row, col, _] = getcharpos('.')
+        const indent_num = indent('.')
+        if this.row_lst->index(row) !=# -1 && indent_num ==# this.last_indent_num
+            return
+        endif
+        this.ClearPrevHl()
+        this.DrawCurrIndentLine(row, indent_num)
+        this.last_indent_num = indent_num
+    enddef
+endclass
+
+export class BlankIndentDrawerManager
+    static var drawer_book: dict<BlankIndentDrawer> = {}
+
+    static def Draw()
+        const winid = win_getid()
+        if keys(BlankIndentDrawerManager.drawer_book)->index(string(winid)) ==# -1
+            BlankIndentDrawerManager.drawer_book[winid] = BlankIndentDrawer.new([], winid)
+        endif
+        BlankIndentDrawerManager.drawer_book[winid].Draw()
+    enddef
+endclass
+
+# }}}
+
+export def MakeSession()
+    const dir  = "~/.cache/vim/session/"
+    const filename = system("date +'%Y-%m-%T' \| tr -d '\n'") .. '.vim'
+    if finddir('session', expand('~') .. '/.cache/vim') ==# ''
+        mkdir(expand('~') .. '/.cache/vim/session', 'p')
+    endif
+    execute 'mksession! ' .. dir .. filename
+    Notify(['保存session到', dir .. filename])
+enddef
+
+
+
+export def RecoverSession()
+    const dir = '~/.cache/vim/session/'
+    const cmd = '/usr/bin/ls --sort time '
+    const sessions = system(cmd .. dir)->split('\n')
+    popup_menu(sessions, {
+        'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+        'highlight': 'Notify',
+        'title': 'Session List',
+        'callback': (_, result: number): void => {
+            if result !=# -1
+                execute 'source ' .. dir .. sessions[result - 1]
+            endif
+        }
+    })
+enddef
+
+def GetcWORD(waste: string): string
+    const [_, row, col, _] = getcharpos('.')
+    const line = getline('.')
+    return CwordHelper(col - 3, line, '[[:ident:].]')
+enddef
+
+
+def SplitByDot(cword: string): list<string>
+    if cword !~# '\.'
+        return [cword]
+    else
+        return cword->split('\.')
+    endif
+enddef
+
+def GetFuncname(waste: number, str: string): dict<dict<dict<any>>>
+    const funcname = matchstr(str, '\v\i*\ze\(')
+    return {[funcname]: {[str]: {}}}
+enddef
+
+class MethodBase
+    static var file: dict<any> = json_decode(readfile("/home/rongzi/.vim/dictionary/method.json")->fp.Reduce((pre, curr) => pre .. curr, ''))
+
+    static def AddToFile(keys_: list<string>, result: dict<any>)
+        def Helper(sofar_keys: list<string>, sofar: dict<any>)
+            if len(sofar_keys) ==# 1
+                sofar[sofar_keys[0]] = result
+            else
+                if has_key(sofar, sofar_keys[0]) ==# 0
+                    sofar[sofar_keys[0]] = {}
+                endif
+                Helper(sofar_keys[1 : ], sofar[sofar_keys[0]])
+            endif
+        enddef
+        def GetKeys(packtree: dict<any>): list<string>
+            if len(packtree) ==# 0
+                return []
+            else
+                final keywords = []
+                # var key: string
+                # var value: dict<any>
+                for [key, value] in packtree->items()
+                    keywords->extend(GetKeys(value))
+                    keywords->add(key)
+                endfor
+                return keywords
+            endif
+        enddef
+        Helper(keys_, MethodBase.file)
+        writefile([json_encode(MethodBase.file)], '/home/rongzi/.vim/dictionary/method.json')
+        writefile(GetKeys(MethodBase.file), '/home/rongzi/.vim/dictionary/methods.txt')
+    enddef
+
+    static def Query(keys_: list<string>): dict<any>
+        const result1 = MethodBase.Prop(keys_, MethodBase.file)
+        if len(result1) !=# 0
+            return result1
+        endif
+        # Notify(['跳过， 没有'])
+        const result2 = MethodBase.Prop(['java', 'lang'] + keys_, MethodBase.file)
+        if len(result2) !=# 0
+            return result2
+        endif
+        return {}
+    enddef
+
+    static def Prop(keys_: list<string>, sofar: dict<any>): dict<any>
+        # echom sofar
+        if len(keys_) ==# 0
+            return {}
+        elseif sofar->has_key(keys_[0]) ==# 0
+            return {}
+        elseif len(keys_) ==# 1
+            return sofar[keys_[0]]
+        else
+            return MethodBase.Prop(keys_[1 : ], sofar[keys_[0]])
+        endif
+    enddef
+endclass
+
+export def UpdateToDataBase()
+    const package_name = input("包名: ")
+    const methods = Javap(package_name)
+    if len(methods) !=# 0
+        MethodBase.AddToFile(package_name->split('\.'), methods)
+    endif
+enddef
+# func ShowCompleteInfo(info)
+    # let id = popup_findinfo()
+    # if id
+        # call popup_settext(id, 'async info: ' .. a:info)
+        # call popup_show(id)
+    # endif
+# endfunction
+
+def Javap(class: string): dict<any>
+    const GetOrigin   = (waste: string) => system('javap -cp ~/cProgram/java ' .. class .. ' 2>&1 | grep -Pv "错误|Compiled|[{}]" | sed "s/^ *//g"')->split('\n')
+    const ParseLine   = fp.Mapped(GetFuncname)
+    const MakeDict    = fp.Reduced((pre: dict<any>, curr: dict<any>) => {
+        const key = keys(curr)[0]
+        if keys(pre)->index(key) !=# -1
+            pre[key] = pre[key]->extend(curr[key])
+        else
+            pre->extend(curr)
+        endif
+        return pre
+    }, {})
+    const MakeNewDict = fp.Compose(GetOrigin, ParseLine, MakeDict)
+    return MakeNewDict(class)
+enddef
+
+def ExtractCompletionItem(query_result: dict<any>): list<dict<any>>
+    return query_result
+        ->items()
+        ->fp.Map((_, item: list<any>): dict<any> => {
+        return { word: item[0],
+            icase: 1,
+            menu: item[1]
+                ->keys()
+                ->fp.Reduce((pre: string, curr: string): string => pre .. ' ' .. curr, '')}
+            # kind: typename(item[1]) ==# 'dict<dict<any>>' ? fp.Reduce(keys(item[1])[0]->split(' '), GetType, "public") : ""
+        })
+enddef
+
+
+def MethodCompletion(): dict<any>
+    const ParseCurrClass    = fp.Compose(GetcWORD, SplitByDot)
+    const keys_under_cursor = ParseCurrClass('')
+    const withoutPrefix     = MethodBase.Query(keys_under_cursor)
+    if withoutPrefix !=# {}
+        return withoutPrefix
+    endif
+    const lines = getline(1, &lines)
+    const GetInclude = (...wastes): list<list<string>> => {
+        return lines
+            ->fp.Map((_, v: string): string => matchstr(v, '\vimport +\zs[[:ident:].]*\ze\..*;'))
+            ->fp.Filter((_, v: string): bool => len(v) !=# 0)
+            ->fp.Map((_, v: string): list<string> => SplitByDot(v))
+    }
+
+    return GetInclude()
+        ->fp.Map((_, v: list<string>): list<string> => v + keys_under_cursor)
+        ->fp.Map((_, v: list<string>): dict<any> => MethodBase.Query(v))
+        ->fp.Reduce(fp.ExtendDict, {})
+enddef
+
+def GetType(sig_pre: string, sig_curr: string): string
+    if ["public", "static", "protected"]->index(sig_pre) !=# -1
+        return sig_curr
+    else
+        try
+            return {
+            'int':              '𝗜',
+            'Integer':          '𝗜',
+            'char':             'ℂ',
+            'java.lang.String': '𝖲',
+            'float':            '𝔽',
+            'double':           '𝔻',
+            'void':             '∅',
+            'boolean':          '𝔹',
+            'long':             '𝕃'
+            }[sig_pre]
+        catch /.*/
+            return sig_pre
+        endtry
+        return sig_pre
+    endif
+enddef
+
+
+export def DisplayComplete(findstart: number, base: string): any
+    if findstart ==# 1
+        return col('.')
+    else
+        return {
+            words: ExtractCompletionItem(MethodCompletion()),
+            refresh: 1}
+    endif
+enddef
 
 # function FileType(file){{{
 export def FileType(file: string): string
@@ -11,6 +313,12 @@ export def FileType(file: string): string
         return 'cpp'
     elseif file =~# '\v.*\.java$'
         return 'java'
+    elseif file =~# '\v.*\.rs$'
+        return 'rust'
+    elseif file =~# '\v.*\.sh$'
+        return 'sh'
+    elseif file =~# '\v.*\.bash$'
+        return 'bash'
     else
         return 'else'
     endif
@@ -19,34 +327,98 @@ enddef
 
 # function Icons(){{{
 def Icons(filename: string): string
-    return system('exa --icons=always ' .. shellescape(filename))->split()[0]
+    return system('exa --icons=always ' .. shellescape(resolve(filename)))->split()[0]
 enddef
 # }}}
 
 # function Complete() {{{
-def Cword(): string
-    def CwordHelper(index: number, sofar: string, line: string): string
-        if index <# 0
-            return sofar
-        elseif line[index] !~# '[[:keyword:]]'
-            return sofar
-        else
-            return CwordHelper(index - 1, line[index] .. sofar, line)
-        endif
-    enddef
-
-    const [_, row: number, col: number, _] = getcharpos('.')
-    const line: string = getline('.')[ : col - 2] .. v:char
-    return CwordHelper(col - 1, '', line)
-enddef
-
-export def Complete()
-    if  pumvisible() ==# 0 && strcharlen(Cword()) >=# 2
-        feedkeys("\<c-x>\<c-z>")
-        feedkeys("\<c-n>")
+export def CwordHelper(index: number, line: string, regex: string = '[[:keyword:].]'): string
+    if index <# 0
+        return ''
+    elseif line[index] !~# regex
+        return ''
+    else
+        return CwordHelper(index - 1, line, regex) .. line[index]
     endif
 enddef
 
+def Cword(): string
+    const [_, row, col, _] = getcharpos('.')
+    const line = getline('.')
+    return CwordHelper(col - 2, line, '[[:ident:]]')
+enddef
+
+export def Complete()
+    # Notify([string(complete_info(['mode', 'items', 'pum_visible', 'selected']))])
+    # Notify([string(g:HaveCompletion)])
+    # Notify([string(Cword())])
+    if g:autocomplete ==# 0
+        return
+    elseif strcharlen(Cword()) <= 1
+        g:HaveCompletion = 1
+        return
+    elseif g:HaveCompletion ==# 0
+        return
+    else
+        const [popupvisiable, mode] = values(complete_info(['mode', 'pum_visible']))
+        if popupvisiable ==# 1
+            return
+        elseif mode ==# 'keyword'
+            g:HaveCompletion = 0
+            return
+        elseif mode ==# 'function'
+            # feedkeys("\<c-x>\<c-z>\<c-n>")
+        elseif mode ==# ''
+            feedkeys("\<c-n>")
+        endif
+    endif
+enddef
+
+export def DotComplete()
+    set completefunc=DisplayComplete
+    feedkeys("\<c-x>\<c-u>")
+enddef
+
+# }}}
+
+# {{{ rust type
+def RustType(findstart: number, base: string): any
+    if findstart ==# 1
+        return col('.')
+    else
+        return {
+            words: [
+            {'word': 'f32',
+             'kind': 'f32',
+             'abbr': '𝔽'
+            },
+            {'word': 'f64',
+             'kind': 'f64',
+             'abbr': '𝔻'
+            },
+            {'word': 'char',
+             'kind': 'char',
+             'abbr': 'ℂ'
+            },
+            {'word': 'i32',
+             'kind': 'i32',
+             'abbr': '𝗜'
+            },
+            {'word': 'i64',
+             'kind': 'i64',
+             'abbr': '𝕃'
+            },
+            {'word': 'bool',
+             'kind': 'bool',
+             'abbr': '𝔹'
+            }],
+            refresh: 1}
+    endif
+enddef
+export def RustTypeCompletion()
+    set completefunc=RustType
+    feedkeys("\<c-x>\<c-u>")
+enddef
 # }}}
 
 # function Strip() {{{
@@ -130,8 +502,8 @@ class Queue
 
     def _HoldPlace(base: number, size: number)
         Queue.queue = Queue.queue
-                        ->extend(range(base, base + size - 1))
-                        ->fp.Sort((a: number, b: number): number => a - b)
+                    ->extend(range(base, base + size - 1))
+                    ->fp.Sort((a: number, b: number): number => a - b)
 
         const half: number = Queue.queue[- 1] / 2
     enddef
@@ -164,6 +536,7 @@ class Queue
 
     def Allocate(size: number, location: string): number
         # find the postion
+        Queue.queue[-1] = &lines
         const base: number = {
             'up':   this.SearchSpace(size),
             'down': this.SearchSpaceReverse(size)
@@ -234,7 +607,7 @@ enddef
 
 # function AddTableRow(){{{
 export def AddTableRow(): string
-    const pos:     list<number> = getpos('.')
+    const pos:     list<number> = getcharpos('.')
     const columns: number = max([getline(pos[1])->count('|') - 1, 2])
     const column:  string    = ' <++> |'
     return range(columns)->reduce((old, new) => old .. column, '|')
@@ -243,9 +616,9 @@ enddef
 
 
 export class SearchStrategy
-    static def Search(texts: list<any>, part: string, row: number, col: number, step: number, nest_level: number, FoundOther: func(string, string): bool): list<number>
+    static def Search(texts: list<list<string>>, part: string, row: number, col: number, step: number, nest_level: number, FoundOther: func(string, string): bool): list<number>
         const next_step = step ==# 0 ? 1 : - 1
-        const Next_row  = (txts) => step ==# 0 ? 1 : len(txts[step])
+        const Next_col  = (txts: list<list<string>>): number => step ==# 0 ? 1 : len(txts[step])
         var myrow   = row
         var mycol   = col
         var mylevel = nest_level
@@ -256,10 +629,10 @@ export class SearchStrategy
             if texts[step] ==# []
                 texts->remove(step)
                 myrow += next_step
-                mycol =  Next_row(texts)
+                mycol =  Next_col(texts)
                 continue
             endif
-            # echom 'texts = ' .. string(texts[step]->join('')) .. " |myrow = " .. myrow .. "  mycol = " .. mycol .. "   mylevel = " .. mylevel .. '   part = ' .. part .. "   step = " .. step .. "  FoundOther(texts[step][step]) = " ..  FoundOther(texts[step][step])
+            # echom 'texts = ' .. string(texts[step]->join('')) .. " |myrow = " .. myrow .. "  mycol = " .. mycol .. "   mylevel = " .. mylevel .. '   part = ' .. part .. "   step = " .. step .. "  FoundOther(texts[step][step]) = " ..  FoundOther(texts[step][step], part)
             if FoundOther(texts[step][step], part)
                 mylevel += 1
                 texts[step]->remove(step)
@@ -372,19 +745,29 @@ export class SearchStrategy
 
     # SearchStrategy7
     static def LeftSingleStrategy(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool): list<number>
-        var [r_row, r_col] = SearchStrategy.SearchRight(start_row, start_col, right, FoundOther)
-        return Position.new(r_row, r_col)
+        var [r_row, r_col] = SearchStrategy.SearchRight(start_row, start_col + 1, right, FoundOther)
+        return [r_row, r_col]
     enddef
 
     # SearchStrategy8
     static def RightSingleStrategy(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool): list<number>
-        var [l_row, l_col] = SearchStrategy.SearchRight(start_row, start_col, right, FoundOther)
-        return Position.new(l_row, l_col)
+        var [l_row, l_col] = SearchStrategy.SearchLeft(start_row, start_col - 1, left, FoundOther)
+        return [l_row, l_col]
     enddef
 
-    # SearchStrategy9
+    # SearchStrategy10
     static def GiveUp(left: string, right: string, start_row: number, start_col: number, FoundOther: func(string, string): bool = (x: string, y: string) => false): list<number>
         return [-1, -1, -1, -1]
+    enddef
+endclass
+
+class PositionMaker
+    var row: number
+    var col: number
+    def new(expr: string)
+        const [_, row, col, _] = getpos(expr)
+        this.row = row
+        this.col = col
     enddef
 endclass
 
@@ -396,7 +779,7 @@ export class Position
         this.row = row
         this.col = col
     enddef
-    def Distance(anchor = Position.new(1, 1)): number
+    def Distance(anchor: Position): number
         const big_bit   = abs(anchor.row - this.row)
         const small_bit = abs(anchor.col - this.col)
         return big_bit * 10 + small_bit
@@ -404,80 +787,95 @@ export class Position
     def Valid(): bool
         return this.row >= 1 && this.col >= 1
     enddef
-    static def Compare(anchor = Position.new(1, 1), pos1 = Position.new(1, 1), pos2 = Position.new(1, 1)): number
+    static def Compare(anchor: Position, pos1: Position, pos2: Position): number
         return pos1.Distance(anchor) - pos2.Distance(anchor)
     enddef
 endclass
 
 export class Pair
-    static const range: number = 10
+    static const range: number = g:pair_range
     var left:  string
     var right: string
     var l_pos: Position
     var r_pos: Position
-    var start_pos: Position
+    var hightlightnrs: list<number> = []
 
     def new(left: string, right: string, start_row: number, start_col: number, SearchS: func = SearchStrategy.InnerStrategy)
         this.left      = left
         this.right     = right
-        this.start_pos = Position.new(start_row,  start_col)
-        if !this.start_pos.Valid()
-            this.Empty()
+        const start_pos = Position.new(start_row, start_col)
+        if !start_pos.Valid()
+            throw "Pair: new: start_pos is not valid!"
             return
         endif
-        const [l_row, l_col, r_row, r_col] = this.Search(SearchS)
+        const [l_row, l_col, r_row, r_col] = SearchS(left, right, start_row, start_col, this.GetFoundOther())
         this.l_pos     = Position.new(l_row, l_col)
         this.r_pos     = Position.new(r_row, r_col)
+    enddef
+
+    def newByPos(left: string, right: string, l_pos: Position, r_pos: Position)
+        this.left = left
+        this.right = right
+        if !l_pos.Valid() || !r_pos.Valid()
+            throw "Pair: newByPos: l_pos or r_pos is not valid!"
+        endif
+        this.l_pos = l_pos
+        this.r_pos = r_pos
     enddef
 
     def newLeftSingle(left: string, right: string, l_pos: Position)
         this.left  = left
         this.right = right
         this.l_pos = l_pos
-        if !l_pos.Valid()
-            this.Empty()
-            return
-        endif
-        this.r_pos = SearchStrategy.LeftSingleStrategy(left, this.l_pos.row, this.l_pos.col, this.GetFoundOther())
+        const [row, col] = SearchStrategy.LeftSingleStrategy(left, right, this.l_pos.row, this.l_pos.col, this.GetFoundOther())
+        this.r_pos = Position.new(row, col)
     enddef
-    def newEmpty()
-        this.l_pos = Position.new(-1, -1)
-        this.r_pos = Position.new(-1, -1)
-        this.start_pos  = Position.new(-1, -1)
-        this.left  = ''
-        this.right  = ''
-    enddef
-    def Empty()
-        this.l_pos = Position.new(-1, -1)
-        this.r_pos = Position.new(-1, -1)
-        this.start_pos  = Position.new(-1, -1)
-        this.left  = ''
-        this.right  = ''
-    enddef
+
     def newRightSingle(left: string, right: string, r_pos: Position)
         this.left  = left
         this.right = right
         this.r_pos = r_pos
-        this.l_pos = SearchStrategy.RightSingleStrategy(right, this.l_pos.row, this.l_pos.col, this.GetFoundOther())
+        const [row, col] = SearchStrategy.RightSingleStrategy(left, right, this.r_pos.row, this.r_pos.col, this.GetFoundOther())
+        this.l_pos = Position.new(row, col)
+    enddef
+
+    def newEmpty()
+        this.l_pos = Position.new(-1, -1)
+        this.r_pos = Position.new(-1, -1)
+        this.left  = ''
+        this.right  = ''
+    enddef
+
+    def Empty()
+        this.l_pos = Position.new(-1, -1)
+        this.r_pos = Position.new(-1, -1)
+        this.left  = ''
+        this.right  = ''
     enddef
 
     def Valid(): bool
-        return this.l_pos.Valid() && this.r_pos.Valid() && this.start_pos.Valid()
+        return this.l_pos.Valid() && this.r_pos.Valid()
     enddef
 
     def Show()
         echom [[this.l_pos.row, this.l_pos.col], [this.r_pos.row, this.r_pos.col]]
     enddef
 
+    def Highlight()
+        this.hightlightnrs->add(matchaddpos('MatchParen', [[this.r_pos.row, getline(this.r_pos.row)->stridx(this.right, this.r_pos.col - 1) + 1]]))
+        this.hightlightnrs->add(matchaddpos('MatchParen', [[this.l_pos.row, getline(this.l_pos.row)->stridx(this.left,  this.l_pos.col - 1) + 1]]))
+    enddef
+
+    def HighlightClear()
+        this.hightlightnrs->fp.Map((_, nr: number) => matchdelete(nr))
+        this.hightlightnrs = []
+    enddef
+
     def SameRow(): bool
         return this.l_pos.row ==# this.r_pos.row
     enddef
 
-    def Search(Strateg: func): list<number>
-        return Strateg(this.left, this.right, this.start_pos.row, this.start_pos.col, this.GetFoundOther())
-    enddef
-
-    def Distance(anchor = Position.new(0, 0)): number
+    def Distance(anchor: Position): number
         return min([this.l_pos.Distance(anchor), this.r_pos.Distance(anchor)])
     enddef
 
@@ -489,9 +887,10 @@ export class Pair
         return this.l_pos.row <=# pos.row && pos.row <=# this.r_pos.row && this.l_pos.col <=# pos.col && pos.col <=# this.r_pos.col
     enddef
 
-    def ContainsStart(): bool
-        return this.l_pos.row <=# this.start.row && this.start.row <=# this.r_pos.row && this.l_pos.col <=# this.start.col && this.start.col <=# this.r_pos.col
+    def Equal(other: Pair): bool
+        return this.left ==# other.left && this.right ==# other.right && this.l_pos.Distance(other.l_pos) ==# this.r_pos.Distance(other.r_pos) && this.l_pos.Distance(other.l_pos) ==# 0
     enddef
+
     def GetFoundOther(): func(string, string): bool
         def FoundOther(other: string, part: string): bool
             if this.left ==# this.right
@@ -508,32 +907,27 @@ export class Pair
     enddef
 endclass
 
-const MATCHPAIRS = [
-    ['{', '}'],
-    ['<', '>'],
-    ['[', ']'],
-    ['(', ')'],
-    ["'", "'"],
-    ['"', '"'],
-    ['`', '`'],
-    ['def', ")"]
-]
+const part_dict = g:MATCHPAIRS
+    ->fp.Map((_, partlist: list<string>): dict<list<string>> => {
+        if ( partlist[0] == partlist[1] )
+            return { [partlist[0]]: partlist}
+        else
+            return { [partlist[0]]: partlist, [partlist[1]]: partlist }
+        endif
+    })->reduce((pre: dict<list<any>>, curr: dict<list<any>>): dict<list<any>> => {
+        pre->extend(curr)
+        return pre
+    })
 
+const part_list = g:MATCHPAIRS
+    ->fp.Reduce((pre, curr) => pre + curr, [])
 
 const GetPair = (char: string): list<string> => {
-    return {
-        '{': ['{', '}'],
-        '}': ['{', '}'],
-        '(': ['(', ')'],
-        ')': ['(', ')'],
-        '<': ['<', '>'],
-        '>': ['<', '>'],
-        '[': ['[', ']'],
-        ']': ['[', ']'],
-        '"': ['"', '"'],
-        '`': ['`', '`'],
-        'def': ['def', ')'],
-        "'": ["'", "'"]}[char]
+    if ( keys(part_dict)->index(char) != -1 )
+        return part_dict[char]
+    else
+        return []
+    endif
 }
 
 const GetOther = (char: string): string => {
@@ -550,24 +944,58 @@ const GetOther = (char: string): string => {
         "'": ""}[char]
 }
 
+class PairMotionStrategyFactory
+    static def MakeStrategy(char: string): func(Pair)
+        if char ==# 'd'
+            return (_pair: Pair) => {
+                PairMotionStrategy.DeletePair(_pair)
+                Notify(['删除' .. _pair.left .. _pair.right], 'down', 1000)
+            }
+        elseif char ==# 'c'
+            const new_char = input('请输入一个字符')
+            return (_pair: Pair) => {
+                PairMotionStrategy.ChangePair(_pair, new_char, new_char)
+                Notify(['替换为' .. [new_char, new_char]->join(' ')], 'down', 1000)
+            }
+        elseif GetPair(char) != []
+            const [left, right] = GetPair(char)
+            return (_pair: Pair) => {
+                PairMotionStrategy.ChangePair(_pair, left, right)
+                Notify(['替换为' .. [char, char]->join(' ')], 'down', 1000)
+            }
+        else
+            return (_pair: Pair): void => {
+                Notify(['未表示的motion'], 'down', 2000)
+            }
+        endif
+    enddef
+endclass
+
 
 export def Match(): list<Pair>
-    const line = getline('.')->split('\zs')
+    final line = getline('.')->split('\zs')
     const [_, row, col, _] = getcharpos('.')
-    const pos = Position.new(row, col)
     const GetPossibleIndexs = fp.Compose(
                     fp.Mapped((_, v: string): list<number> =>
                         fp.IndexAll(line, v)),
                     fp.Reduced((pre: list<number>, curr: list<number>) =>
                         (pre + curr), []),
-                    fp.Filtered((_, v: number): bool => v !=# -1))
+                    fp.Filtered((_, v: number): bool => v !=# -1),
+                    fp.Sorted((a: number, b: number): number => {
+                        return abs(1 + a - col) - abs(1 + b - col)
+                    })
+                )
 
     const MakePair = (_, v: number): Pair => {
-                        const a_pair = GetPair(line[v])
-                        return Pair.new(a_pair[0], a_pair[1], row, v + 1, SearchStrategy.Mix1)
+                        const a_pair     = GetPair(line[v])
+                        const a_pair_pos = Position.new(row, v + 1)
+                        if line[v] ==# a_pair[0]
+                            return Pair.newLeftSingle(a_pair[0], a_pair[1], a_pair_pos)
+                        else
+                            return Pair.newRightSingle(a_pair[0], a_pair[1], a_pair_pos)
+                        endif
                     }
-
-    const SortPair = (a: Pair, b: Pair, target_pos: Position) => {
+    const SortPair = (a: Pair, b: Pair, target_pos: Position): number => {
         const closest = a.Distance(target_pos) - b.Distance(target_pos)
         if ! a.Contains(target_pos) && ! b.Contains(target_pos)
             return closest
@@ -582,32 +1010,154 @@ export def Match(): list<Pair>
 
     const GuessPairs = fp.Compose(
                     GetPossibleIndexs,
-                    fp.Mapped(MakePair),
-                    fp.Filtered((_, v: Pair): bool => v.Valid()),
-                    fp.Sorted((a: Pair, b: Pair): number => SortPair(a, b, pos)))
-    return GuessPairs(fp.Reduce(MATCHPAIRS, (pre, curr) => pre + curr, []))
+                    (index_list: list<number>): list<Pair> => {
+                        for i in index_list
+                            const pair = MakePair('', i)
+                            if pair.Valid()
+                                return [pair]
+                            endif
+                        endfor
+                        return []
+                    })
+    return GuessPairs(part_list)
 enddef
 
-export def PercentSign(order: number = -1): Pair
-    const pairs = Match()
-    if len(pairs) <=# 0
-        return Pair.new('_', '_', -1, -1, SearchStrategy.GiveUp)
-    endif
-    const pair = pairs[0]
-    const [_, row, col, _] = getpos('.')
-    const pos = Position.new(row, col)
+class PairStack
+    static const MATCHPAIRS = g:MATCHPAIRS
+    static final stack: list<Pair> = []
+    static var length: number = 0
 
-    if pair.l_pos.Distance(pos) !=# 0 && order ==# -1
+    static def Top(): Pair
+        if PairStack.length ==# 0
+            return Pair.newEmpty()
+        else
+            return PairStack.stack[PairStack.length - 1]
+        endif
+    enddef
+
+    # static def Pop(pair: Pair): Pair
+        
+    # enddef
+
+    static def Push(pair: Pair)
+        const top = PairStack.Top()
+        if PairStack.->index(pair.left) != -1
+            PairStack.stack[PairStack.length] = pair
+            PairStack.length += 1
+        elseif PairStack.MATCHPAIRS->index([top.left, pair.right]) !=# -1
+            return Pair.new(top.left, pair.right, top.l_pos, pair.r_pos)
+
+        endif
+    enddef
+endclass
+
+class PairParser
+endclass
+
+
+export class MatchPairManager
+    static var pairs_book: dict<list<Pair>> = {}
+
+    static def GetPairByWinid(winid: number): list<Pair>
+        if MatchPairManager.pairs_book->keys()->index(string(winid)) == -1
+            return []
+        else
+            return MatchPairManager.pairs_book[winid]
+        endif
+    enddef
+
+    static def ClearPairByWinid(winid: number)
+        MatchPairManager.pairs_book[winid] = []
+    enddef
+
+    static def PairHighlightClear(winid: number)
+        MatchPairManager.GetPairByWinid(winid)
+            ->fp.Map((_, pair: Pair) => pair.HighlightClear())
+        MatchPairManager.ClearPairByWinid(winid)
+    enddef
+
+    static def AddHighLightPair(winid: number, pair: Pair)
+        pair.Highlight()
+        MatchPairManager.pairs_book[winid]->add(pair)
+    enddef
+
+    static def LastPair(winid: number): Pair
+        if len(MatchPairManager.GetPairByWinid(winid)) ==# 0
+            throw "no more pair in manager"
+        endif
+        return MatchPairManager.pairs_book[winid][-1]
+    enddef
+
+    static def GotoLeft()
+        const winid = win_getid()
+        if len(MatchPairManager.GetPairByWinid(winid)) == 0
+            return
+        endif
+        const pair = MatchPairManager.pairs_book[winid][0]
         setcursorcharpos(pair.l_pos.row, pair.l_pos.col)
-    elseif pair.l_pos.Distance(pos) ==# 0 && order ==# -1
+    enddef
+
+    static def GotoRight()
+        const winid = win_getid()
+        if len(MatchPairManager.GetPairByWinid(winid)) == 0
+            return
+        endif
+        const pair = MatchPairManager.pairs_book[winid][0]
         setcursorcharpos(pair.r_pos.row, pair.r_pos.col)
-    elseif order ==# 0
-        setcursorcharpos(pair.l_pos.row, pair.l_pos.col)
-    else
-        setcursorcharpos(pair.r_pos.row, pair.r_pos.col)
-    endif
-    return pair
-enddef
+    enddef
+
+    static def GotoAnther()
+        const winid = win_getid()
+        if len(MatchPairManager.GetPairByWinid(winid)) == 0
+            return
+        endif
+        const [_, row, col, _] = getcharpos('.')
+        const pos = Position.new(row, col)
+        if MatchPairManager.GetPairByWinid(winid)[0].l_pos.Distance(pos) ==# 0
+            MatchPairManager.GotoRight()
+        else
+            MatchPairManager.GotoLeft()
+        endif
+    enddef
+
+    static def PercentSign(order: number = -1)
+        const [_, row, col, _] = getcharpos('.')
+        const line = getline('.')
+        const winid = win_getid()
+        const pairs = Match()
+
+        if keys(MatchPairManager.pairs_book)->index(string(winid)) ==# -1
+            MatchPairManager.pairs_book[winid] = []
+        endif
+        if ( len(pairs) ==# 0 )
+            MatchPairManager.PairHighlightClear(winid)
+            return
+        endif
+        if len(MatchPairManager.GetPairByWinid(winid)) !=# 0 && MatchPairManager.LastPair(winid).Equal(pairs[0])
+            return
+        endif
+
+        MatchPairManager.PairHighlightClear(winid)
+        MatchPairManager.AddHighLightPair(winid, pairs[0])
+        # if len(line) == 0
+            # return
+        # elseif MatchPairManager.part_list->index(line[col - 1]) ==# -1
+            # return
+        # endif
+
+        # const a_pair     = GetPair(line[col - 1])
+        # const a_pair_pos = Position.new(row, col)
+        # if line[col - 1] ==# a_pair[0]
+            # const pair = Pair.newLeftSingle(a_pair[0], a_pair[1], a_pair_pos)
+            # pair.Highlight()
+            # MatchPairManager.pairs_book[winid]->add(pair)
+        # else
+            # const pair = Pair.newRightSingle(a_pair[0], a_pair[1], a_pair_pos)
+            # pair.Highlight()
+            # MatchPairManager.pairs_book[winid]->add(pair)
+        # endif
+    enddef
+endclass
 
 export def PercentSign1()
     const pairs = Match()
@@ -652,7 +1202,7 @@ export def PercentSign2()
 enddef
 
 ## function ReplacePairs(){{{
-class ReplaceStrategy
+class PairMotionStrategy
     static def SetLines(pair: Pair, lines: list<string>)
         if len(lines) ==# 1
             setline(pair.l_pos.row, lines[0])
@@ -687,17 +1237,17 @@ class ReplaceStrategy
             ans->remove(pair.l_pos.col - 1, pair.l_pos.col - 2 + strcharlen(pair.left))
             return ans->join('')
         }
-        return ReplaceStrategy.DealBasicCase(pair, ProcessLeft, ProcessRight)
+        return PairMotionStrategy.DealBasicCase(pair, ProcessLeft, ProcessRight)
     enddef
 
     static def DeletePair(pair: Pair)
         # pair.Show()
-        const lines = ReplaceStrategy.DeletePairProcess(pair)
-        ReplaceStrategy.SetLines(pair, lines)
+        const lines = PairMotionStrategy.DeletePairProcess(pair)
+        PairMotionStrategy.SetLines(pair, lines)
     enddef
 
     static def ChangePairProcess(pair: Pair, new_left: string, new_right: string): list<string>
-        var lines = ReplaceStrategy.DeletePairProcess(pair)
+        var lines = PairMotionStrategy.DeletePairProcess(pair)
         if len(lines) ==# 1
             var line = lines[0]->split('\zs')
             line->insert(new_left, pair.l_pos.col - 1)
@@ -715,35 +1265,25 @@ class ReplaceStrategy
     enddef
 
     static def ChangePair(pair: Pair, new_left: string, new_right: string)
-        const lines = ReplaceStrategy.ChangePairProcess(pair, new_left, new_right)
-        ReplaceStrategy.SetLines(pair, lines)
+        const lines = PairMotionStrategy.ChangePairProcess(pair, new_left, new_right)
+        PairMotionStrategy.SetLines(pair, lines)
     enddef
 endclass
 
-def ReplacePairs()
-    const pair = PercentSign()
-    if !pair.Valid()
-        pair.Show()
+export def ReplacePairs()
+    const winid = win_getid()
+    if len(MatchPairManager.GetPairByWinid(winid)) ==# 0
         Notify(['未发现组合对'])
         return
     endif
+    const pair = MatchPairManager.LastPair(winid)
     setcursorcharpos(pair.l_pos.row, pair.l_pos.col)
-
+    pair.Highlight()
+    redraw
     const char  = getcharstr()
-    if char ==# 'd'
-        ReplaceStrategy.DeletePair(pair)
-        Notify(['删除' .. pair.left .. pair.right], 'down', 1000)
-    elseif char ==# 'c'
-        const new_char = input('请输入一个字符')
-        ReplaceStrategy.ChangePair(pair, new_char, new_char)
-        Notify(['替换为' .. [new_char, new_char]->join(' ')], 'down', 1000)
-    else
-        const [left, right] = GetPair(char)
-        ReplaceStrategy.ChangePair(pair, left, right)
-        Notify(['替换为' .. [char, char]->join(' ')], 'down', 1000)
-    endif
+    PairMotionStrategyFactory.MakeStrategy(char)(pair)
+    pair.HighlightClear()
 enddef
-nn gr <ScriptCmd>ReplacePairs()<CR>
 # }}}
 
 # function CheckBoxToggle(){{{
@@ -768,9 +1308,9 @@ export def SelectBuffer()
     const icon_name = names->fp.Map((_, v: string) => Icons(v) .. ' ' .. v)
     popup_menu(icon_name, {
         'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+        'highlight': 'Notify',
         'callback': (_, result) => (result !=# -1) ? SwitchBuffer(names[result - 1]) : ''
     })
-    # DeleteBuffer()
 enddef
 # }}}
 
@@ -789,91 +1329,74 @@ enddef
 def OpenBuffer(file: string)
     Notify(['跳转 ' .. file])
     if isdirectory(file)
-        Notify([file .. ' 是目录，不能打开'])
-        # silent execute 'Explore ' . file " 似乎vim不能在pop_window打开的时候使用Explore
+        silent execute 'Lex ' .. file
     else
         silent execute 'vsplit ' .. file
     endif
 enddef
 # }}}
 
+# function SelectFile() {{{
+def g:CreatePopup(buf_nr: number)
+    popup_create(buf_nr, {
+        'minwidth':    130,
+        'minheight':   30,
+        'border':      [1, 1, 1, 1],
+        'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
+        'highlight':   'Notify'
+    })
+enddef
 
-# function JoshutoSelectFile(){{{
-export def JoshutoSelectFile()
-    def Rest_work(id: number, result: number, filename: string)
-        silent! normal! `J
-        delmarks J
-        const content = readfile(filename)
-        if len(content) ==# 0
-            Notify(['取消跳转'], 'up')
+# use fzf to select files quickly
+def PopupTerm(cmd: string, RestWork: func(job, number, dict<any>): void): void
+    final buf_info: dict<any> = {}
+    autocmd TerminalOpen * ++once call g:CreatePopup(str2nr(expand('<abuf>')))
+    buf_info['bufnr'] = term_start(cmd, {
+        'hidden': 1,
+        'norestore': 1,
+        'exit_cb': (job: job, result: number) => RestWork(job, result, buf_info)})
+enddef
+
+export def FZFfile()
+    def SelectFile(fzf_job: job, result: number, buf_info: dict<any>)
+        term_wait(buf_info['bufnr'])
+        const lines = getline(1, &lines)
+        close
+        execute 'bdelete! ' .. buf_info['bufnr']
+        if lines ==# ['']
             return
         endif
-        fp.Map(content, (_, file: string) => OpenBuffer(file))
-        system("rm -rf " .. filename)
+        fp.Map(lines, (_, filepath) => OpenBuffer(filepath))
     enddef
-
-    const tmp = tempname()
-    normal! mJ
-    const term_buffer = term_start('/home/rongzi/.config/scripts/joshuto_for_vim.sh ' .. tmp, { 'hidden': 1, 'term_finish': 'close', 'norestore': 1 })
-    const pop_window  = popup_create(term_buffer, {
-        'minwidth': 90,
-        'minheight': 25,
-        'border': [1, 1, 1, 1],
-        'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
-        'highlight': 'Notify',
-        'callback': (id, result) => Rest_work(id, result, tmp)
-    })
+    PopupTerm($HOME .. '/.config/scripts/fzf_for_vim.sh', SelectFile)
 enddef
 # }}}
-
-# function SelectFile(){{{
-# use fzf to select files quickly
-export def SelectFile()
-    def Rest_work(filename: string)
-        const content = readfile(filename)
+#
+# function JoshutoSelectFile(){{{
+export def JoshutoSelectFile()
+    const tmp = tempname()
+    def Rest_work(joshuto_job: job, result: number, buf_info: dict<any>)
+        close
+        execute 'bd! ' .. buf_info['bufnr']
+        const content = readfile(tmp)
         if len(content) ==# 0
             Notify(['取消跳转'], 'up')
         endif
         fp.Map(content, (_, file: string) => OpenBuffer(file))
-        system("rm -rf " .. filename)
+        system("rm -rf " .. tmp)
     enddef
-
-    const tmp         = tempname()
-    const term_buffer = term_start('/home/rongzi/.config/scripts/fzf_for_vim.sh ' .. tmp, {'hidden': 1, 'term_finish': 'close', 'norestore': 1})
-    const pop_window  = popup_create(term_buffer, {
-        'minwidth': 130,
-        'minheight': 20,
-        'maxheight': 35,
-        'border': [1, 1, 1, 1],
-        'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
-        'highlight': 'Notify',
-        'callback': (_, _) => Rest_work(tmp)
-    })
-enddef
-# }}}
-
-# function DeleteBuffer(){{{
-def DeleteBuffer()
-    var ls_out: string
-    redir => ls_out
-    silent! ls
-    redir END
-    for buf in ls_out->split('\n')
-        var tokens: list<string> = buf->split(' ')
-        if tokens[4] =~# '"!/home/rongzi/.config/scripts/.*'
-            silent! execute 'bdelete ' .. tokens[0]
-        endif
-    endfor
+    const cmd = $HOME .. '/.config/scripts/joshuto_for_vim.sh ' .. tmp
+    PopupTerm(cmd, Rest_work)
 enddef
 # }}}
 
 # use another way to show chars when in console{{{
-# if $DISPLAY == ''
-    # set notermguicolors
-    # set fillchars=vert:\|
-    # set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
-    # color zellner
-# endif
+if $DISPLAY == ''
+    set notermguicolors
+    set fillchars=vert:\|
+    set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
+    color zellner
+endif
 # }}}
 
 # function ShowLastStatus() unknow{{{
@@ -933,7 +1456,7 @@ export def SearchSelectedText()
     @/ = '\M' .. substitute(@", '\', '\\\\', 'g')
                 ->substitute('\$', '\\$', 'g')
                 ->substitute('\n', '\\n', 'g')
-    Notify(["模式:" .. strpart(@/, 0, winwidth(0) - 30)])
+    # Notify(["模式:" .. strpart(@/, 0, winwidth(0) - 30)])
     setl hlsearch
 enddef
 
@@ -941,8 +1464,8 @@ def SearchArgumentText(text: string)
     @/ = '\M' .. substitute(text, '\', '\\\\', 'g')
                 ->substitute('\$', '\\$', 'g')
                 ->substitute('\n', '\\n', 'g')
-    Notify(["模式:" .. strpart(@/, 0, winwidth(0) - 30)])
-    setl hlsearch
+    # Notify(["模式:" .. strpart(@/, 0, winwidth(0) - 30)])
+    setl nohlsearch
 enddef
 
 # }}}
@@ -1097,8 +1620,12 @@ export def BracketIndent(): void
             setline(row, line .. ' {')
         endif
     endif
-    put = repeat(' ', indent(row)) .. '}'
-    normal! k
+    if getline(row + 1) =~# '^ *$'
+        setline(row + 1, repeat(' ', indent(row)) .. '}')
+    else
+        put = repeat(' ', indent(row)) .. '}'
+        normal! k
+    endif
     CR()
     feedkeys("\<tab>")
 enddef
@@ -1128,203 +1655,6 @@ export def Quick_CD(): void
     endif
 enddef
 # }}}
-
-#  ███╗   ███╗ ██████╗ ██████╗ ███████╗███████╗
-#  ████╗ ████║██╔═══██╗██╔══██╗██╔════╝██╔════╝
-#  ██╔████╔██║██║   ██║██║  ██║█████╗  ███████╗
-#  ██║╚██╔╝██║██║   ██║██║  ██║██╔══╝  ╚════██║
-#  ██║ ╚═╝ ██║╚██████╔╝██████╔╝███████╗███████║
-#  ╚═╝     ╚═╝ ╚═════╝ ╚═════╝ ╚══════╝╚══════╝
-# self defined modes {{{
-var origin_winid: number
-var ExitModeFunc: func = () => 1
-
-def ModeInit()
-    # jump to last M mark if there already have M, otherwise set the M mark here
-    execute 'normal! mM'
-    origin_winid = win_getid()
-    nn q <CMD>call <SID>ExitModeFunc() <CR>
-enddef
-
-def ExitMode()
-    if len(getwininfo(origin_winid)) ==# 1
-        const origin_winnr = getwininfo(origin_winid)[0]['winnr']
-        execute ':' .. origin_winnr .. ' wincmd w'
-    endif
-    if getcharpos("'M") !=# [0, 0, 0, 0]
-        execute 'normal! `Mzz'
-    endif
-    delmarks M
-    silent! execute 'nunmap q'
-    ExitModeFunc = () => {
-        echom 'wtf'
-        return 1
-    }
-enddef
-
-var last_bufnr: number = -1
-def Cnext()
-    const curr_buffer_number = bufnr()
-    if last_bufnr !=# -1 && curr_buffer_number !=# last_bufnr
-        silent! execute "bdelete " ..  last_bufnr
-    endif
-    last_bufnr = curr_buffer_number
-    silent! cnext
-enddef
-def Cprev()
-    const curr_buffer_number = bufnr()
-    if last_bufnr !=# -1 && curr_buffer_number !=# last_bufnr
-        silent! exe "bdelete " ..  last_bufnr
-    endif
-    last_bufnr = curr_buffer_number
-    silent! cprev
-enddef
-
-export def GrepOperator(type: string)
-    var save_reg:   string
-    def SaveReg()
-       save_reg = @Y
-    enddef
-    def RestoreReg()
-       @Y = save_reg
-    enddef
-    def Copen(text: string)
-        SearchArgumentText(text)
-        copen
-        setlocal nolist nonu nornu
-        execute "normal! \<c-w>k"
-        redraw!
-    enddef
-    def ExitOperatorMode()
-        silent! cclose
-        RestoreReg()
-        ExitMode()
-        nn <c-n> <Cmd>bnext<CR>
-        nn <c-p> <Cmd>bprev<CR>
-    enddef
-    def GrepOperatorInit()
-        silent! ExitModeFunc()
-        ModeInit()
-        ExitModeFunc = ExitOperatorMode
-        SaveReg()
-        nn <c-n> <ScriptCmd> Cnext()<CR>
-        nn <c-p> <ScriptCmd> Cprev()<CR>
-    enddef
-
-    # init the mode
-    GrepOperatorInit()
-    silent! normal! `<"ay`>
-
-    Notify(["正在查找：" .. @a])
-    silent! exe  'grep -Rsi ' .. shellescape(@a) .. " ."
-    redraw!
-    Copen(@a)
-enddef
-# }}}
-
-# function DebugMode(){{{
-export def DebugMode()
-    def ExitDebugMode()
-        silent! cclose
-        ExitMode()
-        # unlet ExitModeFunc
-    enddef
-
-    def DebugModeInit(): bool
-        silent! ExitModeFunc()
-        if expand('%') !~# '\v.*\.c(pp)='
-            Notify(['不进入debug模式'])
-            return false
-        endif
-
-        ModeInit()
-        ExitModeFunc = ExitDebugMode
-        return true
-    enddef
-
-    def Copen()
-        silent copen 13
-        setlocal nonumber norelativenumber nolist
-        execute "normal! \<c-w>k"
-    enddef
-
-    if DebugModeInit()
-        silent! execute 'make -f /home/rongzi/.Lectures/term1/hw/program_design/makefile'
-        Copen()
-    endif
-enddef
-# }}}
-
-# function RunMode(){{{
-def MakeTimeStamp(): func(bool): float
-    var last_run_time = reltimefloat(reltime())
-    def TimeStampInner(mkstamp: bool = true): float
-        const old_time = last_run_time
-        const new_time = reltimefloat(reltime())
-        if mkstamp ==# true
-            last_run_time = new_time
-        endif
-        return new_time - old_time
-    enddef
-    return TimeStampInner
-enddef
-var TimeStamp = MakeTimeStamp()
-var term_bufnr: number = -1
-
-export def RunMode()
-    def ExitRunMode()
-        if bufnr(term_bufnr) !=# -1
-            execute 'bd! ' .. term_bufnr
-        endif
-        ExitMode()
-    enddef
-
-    def RunModeInit(): bool
-        ExitModeFunc()
-        if ['java', 'cpp', 'c', 'python']->index(FileType(expand('%'))) ==# -1
-            Notify(['只能运行C/Cpp/Python/Java文件'])
-            return false
-        endif
-        ModeInit()
-        ExitModeFunc = ExitRunMode
-        return true
-    enddef
-
-    if RunModeInit() ==# false
-        Notify(['ModeInit失败，不进入RunMode'])
-        return
-    endif
-
-    var   run_only     = false
-    const script_path  = expand('%')
-    const filetype     = FileType(script_path)
-    const run_cmds     = {'c': 'io -q ', 'cpp': 'io -q ', 'java': 'io -q ', 'python': 'python3 -i '}
-    const term_options = {'term_finish': 'open'}
-    const time_passby  = TimeStamp(false)
-
-    if time_passby <# 1.5
-        run_only = 1
-        Notify(['运行过快,据上一次运行只有 ' .. time_passby .. 's'], 'up', float2nr((1.5 - time_passby) * 1000))
-    endif
-
-    const cmd = run_cmds[filetype] .. script_path .. (run_only ? ' -r' : '')
-    belowright term_bufnr = term_start(cmd, term_options)
-    TimeStamp(!run_only)
-    execute 'normal! ' .. "\<c-w>k" .. "zz" .. "\<c-w>j"
-enddef
-# }}}
-
-# aug mode
-# au!
-# au User GrepModeTrigger  normal! g@iw
-# au User DebugModeTrigger call DebugMode()
-# au User RunModeTrigger   call RunMode()
-# nn <leader>r :doautocmd User RunModeTrigger<CR>
-# nn <silent> <leader>r <CMD>call RunMode()<CR>
-# nn <silent> <leader>d :doautocmd User DebugModeTrigger<CR>
-# nn <silent> <leader>g :let &operatorfunc=funcref("GrepOperator")<CR>:doautocmd User GrepModeTrigger<CR>
-# vn <silent> <leader>g <CMD>let &operatorfunc=funcref("GrepOperator")<CR>g@
-
 
 # quickfix-window-function {{{
 # 从 v:oldfiles 来建立快速修复列表

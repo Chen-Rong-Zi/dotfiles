@@ -1,1 +1,2 @@
-alacrittyal -t joshuto -e "joshuto"
+# dex $HOME/.local/share/applications/joshuto.desktop
+alacritty -t 'joshuto' -e 'joshuto'

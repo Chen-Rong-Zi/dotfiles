@@ -1,1 +1,0 @@
-/home/rongzi/.dotfiles/vim/autoload/airline/themes/onedark.vim

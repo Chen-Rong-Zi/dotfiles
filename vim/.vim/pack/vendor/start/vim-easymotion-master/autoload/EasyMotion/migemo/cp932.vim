@@ -1,1 +1,0 @@
-/home/rongzi/.dotfiles/vim/pack/vendor/start/vim-easymotion-master/autoload/EasyMotion/migemo/cp932.vim

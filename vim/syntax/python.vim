@@ -384,13 +384,14 @@ syntax keyword Identifier self
 syntax keyword keyword lambda   conceal cchar=λ
 syntax keyword keyword None     conceal cchar=∅
 syntax keyword Keyword yield    conceal cchar=⇇
-syntax keyword Keyword return   conceal cchar=▶
+syntax keyword Keyword return   conceal cchar=⌲
 syntax keyword Keyword continue conceal cchar=↺
 syntax keyword Keyword assert   conceal cchar=𝔸
 syntax keyword Keyword break    conceal cchar=✖
 syntax keyword Keyword if       conceal cchar=𝘐
 syntax keyword Keyword elif     conceal cchar=ℰ
 syntax keyword Keyword else     conceal cchar=𝘌
+" syntax keyword Keyword return   conceal cchar=▶
 " syntax keyword Keyword and      conceal cchar=•
 " syntax keyword Keyword or       conceal cchar=＋
 " syntax keyword Keyword not      conceal cchar=¬

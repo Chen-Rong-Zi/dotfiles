@@ -1,1 +1,0 @@
-/home/rongzi/.dotfiles/vim/functions/higherorder.vim

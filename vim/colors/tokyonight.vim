@@ -44,7 +44,7 @@ if s:configuration.style ==# 'night'
         \ 'diff_green': ['#618041',   '22',   'DarkGreen'],
         \ 'bg_blue':    ['#7da6ff',   '110',  'Blue'],
         \ 'diff_blue':  ['#3e5380',   '17',   'DarkBlue'],
-        \ 'fg':         ['#a9b1d6',   '250',  'White'],
+        \ 'fg':         ['#a9b1d6',   '250',  'white'],
         \ 'red':        ['#F7768E',   '203',  'Red'],
         \ 'orange':     ['#FF9E64',   '215',  'Orange'],
         \ 'yellow':     ['#E0AF68',   '179',  'Yellow'],
@@ -214,7 +214,7 @@ call s:HL('NonText', s:palette.bg4, s:palette.none)
 call s:HL('Whitespace', s:palette.bg4, s:palette.none)
 call s:HL('SpecialKey', s:palette.bg4, s:palette.none)
 call s:HL('Notify', s:palette.fg, s:palette.none)
-call s:HL('Pmenu', s:palette.fg, s:palette.bg2, 'reverse')
+call s:HL('Pmenu', s:palette.fg, s:palette.bg3, 'italic,bold,reverse')
 call s:HL('PmenuSbar', s:palette.none, s:palette.bg2)
 if s:configuration.menu_selection_background ==# 'blue'
   call s:HL('PmenuSel', s:palette.bg0, s:palette.bg_blue)

@@ -1,1 +1,0 @@
-/home/rongzi/.dotfiles/vim/pack/vendor/start/vim-easymotion-master/plugin/EasyMotion.vim

@@ -1,1 +1,0 @@
-/home/rongzi/.dotfiles/vim/autoload/tokyonight//lightline/colorscheme/tokyonight.vim

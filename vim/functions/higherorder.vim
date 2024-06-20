@@ -52,6 +52,9 @@ export def Reduce(data: list<any>, Expr: func, initial: any): any
     return data->deepcopy()->reduce(Expr, initial)
 enddef
 
+export def ReduceWithoutInitial(data: list<any>, Expr: func): any
+    return data->deepcopy()->reduce(Expr)
+enddef
 
 export def Prop(key: string): any
     return (data: dict<any>) => data[key]
@@ -76,8 +79,7 @@ enddef
 export def Compose(...func_list: list<func>): any
     return Reduce(func_list,
              (Pre: func, Curr: func ) =>
-                (arg: any) => Curr(Pre(arg)),
-             Identity)
+                (arg: any) => Curr(Pre(arg)), Identity)
 enddef
 
 export def Trace(x: any): any
@@ -91,6 +93,10 @@ export def Sum(x: list<number>): number
 enddef
 
 export def IndexAll(lst: list<any>, x: any): list<number>
-    return lst->Map((i, v) => [i, v])->Filter((_, v) => v[1] ==# x)->Map((_, v) => v[0])
+    return lst->Map((i, v) => [i, v])->filter((_, v) => v[1] ==# x)->map((_, v) => v[0])
+enddef
+
+export def ExtendDict(a: dict<any>, b: dict<any>): dict<any>
+    return a->deepcopy()->extend(b)
 enddef
 defcompile

@@ -1,1 +1,0 @@
-/home/rongzi/.dotfiles/vim/autoload/tokyonight//airline/themes/tokyonight.vim
