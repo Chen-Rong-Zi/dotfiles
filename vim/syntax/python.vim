@@ -109,8 +109,8 @@ syn keyword pythonAsync		async await
 " See https://docs.python.org/3/reference/lexical_analysis.html#soft-keywords
 " for more on this.
 " <++>
-" syn match   pythonConditional   "^\s*\zscase\%(\s\+.*:.*$\)\@="
-" syn match   pythonConditional   "^\s*\zsmatch\%(\s\+.*:\s*\%(#.*\)\=$\)\@="
+syn match   pythonConditional   "^\s*\zscase\%(\s\+.*:.*$\)\@="
+syn match   pythonConditional   "^\s*\zsmatch\%(\s\+.*:\s*\%(#.*\)\=$\)\@="
 
 " Decorators
 " A dot must be allowed because of @MyClass.myfunc decorators.
@@ -362,6 +362,7 @@ syntax match   Preproc        /\v\s([%\+\-\*\/]{1,2}|[>\=<!]\=?)\s/   contains=k
 syntax match   purple        /\v [\+\-\*\/%]{0,2}\= /                                  " += -= *= /= =
 syntax match   keyword        /,[ \n]/                                  " ,
 " syntax match   Constant       /\v\.@1<=%(\w+)@>\(@!/                  contains=Identifier,Nothing
+syntax match   Type          /\v<\u\w{-}>/         contains=Function
 syntax match   Comment        /\v-\>/              contains=Identifier,Nothing
 " syntax match   Function       /\v\h+: {0,2}\zs\h*/
 

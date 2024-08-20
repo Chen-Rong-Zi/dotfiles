@@ -5,62 +5,15 @@
 "                ██║ ╚═╝ ██║   ██║    ╚████╔╝ ██║██║ ╚═╝ ██║██║  ██║╚██████╗
 "                ╚═╝     ╚═╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝
 
-func! Eatchar(pat)
-    let c = nr2char(getchar(0))
-    return (c =~ a:pat) ? '' : c
-endfunction
 
-function! Expand(pat)
-    let [_, row, col, _] = getcharpos('.')
-    let line = getline('.')
-    if s:util.CwordHelper(col - 2, line, '[^[:space:]]') ==# ''
-        return a:pat .. "\<space>"
-    else
-        return "\<space>" .. a:pat .. "\<space>"
-    endif
-endfunction
-
-" Leader map
-let mapleader = ","
-if !exists("g:colorscheme")
-    set termguicolors
-    set encoding=utf-8
-    syntax off
-    colorscheme tokyonight
-    let g:tokyonight_style = 'night'
-    let g:colorscheme      = 'tokyonight'
-    let g:airline_theme    = 'tokyonight'
-    let g:autocomplete     = 1
-    let g:HaveCompletion   = 1
-    let g:pair_range       = &lines
-    let g:indent_range     = &lines
-    let g:debug_buffer_limit = 1000
-    let g:loaded_matchparen  = 0
-    let g:MATCHPAIRS = [
-        \ ['{', '}'],
-        \ ['<', '>'],
-        \ ['[', ']'],
-        \ ['(', ')'],
-        \ ["'", "'"],
-        \ ['"', '"'],
-        \ ['`', '`'] ]
-endif
-
-
-" call call airline update_statusLIne()
-
-function! PasteScreenShot()
-    let path = system("ls /home/rongzi/Pictures/screenshot | tail -n 1 | xargs -I _  realpath _")
-    put = path
-endfunction
-
-" call airline#update_statusline()
 set nocp
 set concealcursor=ni
 set conceallevel=2
 
 " set smartindent tabline
+set cedit=<c-o>
 set eventignore+=FocusGained
+set viewoptions=options,cursor,curdir,localoptions,
 set confirm
 set nocursorline
 set dictionary+=/home/rongzi/.vim/dictionary/methods.txt
@@ -81,7 +34,7 @@ set showcmd
 set smoothscroll
 " set smarttab tablinae
 set softtabstop=4
-set sessionoptions=blank,buffers,curdir,folds,help,tabpages,winsize,terminal
+set sessionoptions=blank,buffers,curdir,help,tabpages,winsize,resize,globals
 set synmaxcol=256
 set autochdir
 set tabstop=4
@@ -90,7 +43,7 @@ set ignorecase
 " set path+=
 " set include+=/usr/lib/python3.12/site-packages/
 set nowrap
-set timeoutlen=250
+" set timeoutlen=250
 set matchpairs=(:),{:},[:],\":\",':',<:>
 set makeprg=io\ -q\ %
 " set previewpopup=height:10,width:60
@@ -99,7 +52,7 @@ set pumheight=10
 set completeopt=menuone,popup,noinsert,noselect
 set completepopup=height:10,width:10,highlight:CompletePopup
 " set complete=.,w,t,k,b
-set complete=.,w,b,u,t
+set complete=.,w,t,kspell
 
 
 " set shortmess=acOtT
@@ -116,6 +69,36 @@ set termwinsize=10*0
 set foldcolumn=0
 set foldmethod=indent
 set nu ru ai si ts=4 sw=4
+
+" Leader map
+let mapleader = ","
+if !exists("g:colorscheme")
+    set termguicolors
+    set encoding=utf-8
+    " syntax off
+    if !exists('g:colorscheme')
+        colorscheme tokyonight
+    endif
+    let g:tokyonight_style   = 'night'
+    let g:colorscheme        = 'tokyonight'
+    " let g:airline_theme      = 'tokyonight'
+    let g:autocomplete       = 1
+    let g:HaveCompletion     = 1
+    let g:pair_range         = &lines
+    let g:indent_range       = &lines
+    let g:debug_buffer_limit = 1000
+    let g:loaded_matchparen  = 0
+    let g:grep_buffer_limit  = 200
+    let g:MATCHPAIRS = [
+        \ ['{', '}'],
+        \ ['<', '>'],
+        \ ['[', ']'],
+        \ ['(', ')'],
+        \ ["'", "'"],
+        \ ['"', '"'],
+        \ ['`', '`'] ]
+endif
+
 " vim buffer tab open-tab
 "    " <c-[np]> <c-[ey]> <c-t>
 "" tmux buffer tab open-tab
@@ -141,8 +124,8 @@ au filetype rust ino <buffer> { <ScriptCmd>call s:util.BracketIndent()<CR>
 "au filetype rust ino <silent> <buffer> { <right>{<CR>}<Esc>O
 "au filetype rust ino <buffer> { <esc>A{<CR><++>}<ESC>O
 au filetype rust ino <buffer> <leader>c /*    */<esc>4<left>a
-au filetype rust ino <buffer> <c-l> <c-r>=Expand('=')<CR>
-au filetype rust ino <buffer> <expr> <leader><leader> Expand('= 0')
+au filetype rust ino <silent> <buffer> <c-l> <c-r>=GuessExand()<CR>
+au filetype rust ino <silent> <buffer> <expr> <leader><leader> Expand('= 0')
 au filetype rust ino <buffer> <leader>d ::
 au filetype rust ino <buffer> <leader>sd std::
 au filetype rust ino <buffer> <leader>tmp template <typename T><C-R>=Eatchar('\s')<CR>
@@ -157,29 +140,28 @@ au filetype rust nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
 au filetype rust nn <buffer> ;    <ScriptCmd>call s:util.AddSuffix(';')<CR>
 
 " ABBREVIATION
-au filetype rust inorea <silent> <buffer> lambda   [=] (auto <++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
-au filetype rust inorea <silent> <buffer> llambda   [=] (auto <++>) {<CR>return <++>;<CR>}<Esc>2kf<ca<<C-R>=Eatchar('\s')<CR>
-au filetype rust inorea <silent> <buffer> lamdba   [=] (auto <++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
+au filetype rust inorea <silent> <buffer> ll \| \| <++><Esc>2F\|a
 au filetype rust inorea <silent> <buffer> pu      public
 au filetype rust inorea <silent> <buffer> sc      static
 au filetype rust inorea <silent> <buffer> pr      private
 au filetype rust inorea <silent> <buffer> pt      protected
 au filetype rust inorea <silent> <buffer> itn      int
-au filetype rust inorea <silent> <buffer> ao      auto
-au filetype rust inorea <silent> <buffer> var      auto
-au filetype rust inorea <silent> <buffer> val      const
+au filetype rust inorea <silent> <buffer> vec     vec!()
+au filetype rust inorea <silent> <buffer> vector     Vec
+" au filetype rust inorea <silent> <buffer> ao      auto
+" au filetype rust inorea <silent> <buffer> var      auto
+" au filetype rust inorea <silent> <buffer> val      const
 au filetype rust inorea <silent> <buffer> vectro   vector<><left><C-R>=Eatchar('\s')<CR>
 au filetype rust inorea <silent> <buffer> retrun   return
 au filetype rust inorea <silent> <buffer> retunr   return
 au filetype rust inorea <silent> <buffer> reutrn   return
 au filetype rust inorea <silent> <buffer> for      for i in 0..<c-r>=Eatchar('\s')<CR>
-au filetype rust inorea <silent> <buffer> ffor     for ( auto &it :<++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<ca>
 " au filetype rust inorea <silent> <silent> <buffer> while  while ( )<left><left>
 " au filetype rust inorea <silent> <silent> <buffer> while  while
-au filetype rust inorea <silent> <buffer> self     this-><C-R>=Eatchar('\s')<CR>
+" au filetype rust inorea <silent> <buffer> self     this-><C-R>=Eatchar('\s')<CR>
 au filetype rust inorea <silent> <buffer> #i       # include <><left><C-R>=Eatchar('\s')<CR>
 au filetype rust inorea <silent> <buffer> #I       # include <><left><C-R>=Eatchar('\s')<CR>
-au filetype rust inorea <silent> <buffer> mm       main(const int arg_number, const char **arg_value)
+au filetype rust inorea <silent> <buffer> mm       main()
 au filetype rust inorea <silent> <buffer> pp       println!("", <++>);<c-o>F"<C-R>=Eatchar('\s')<CR>
 " au filetype rust inorea <silent> <buffer> ss       scanf("",  <++>);<c-o>F"<C-R>=Eatchar('\s')<CR>
 au filetype rust inorea <silent> <buffer> kd       %d<C-R>=Eatchar('\s')<CR>
@@ -226,8 +208,8 @@ au filetype c,cpp ino <buffer> { <ScriptCmd>call s:util.BracketIndent()<CR>
 "au filetype c,cpp ino <silent> <buffer> { <right>{<CR>}<Esc>O
 "au filetype c,cpp ino <buffer> { <esc>A{<CR><++>}<ESC>O
 au filetype c,cpp ino <buffer> <leader>c /*    */<esc>4<left>a
-au filetype c,cpp ino <buffer> <c-l> <c-r>=Expand('=')<CR>
-au filetype c,cpp ino <buffer> <expr> <leader><leader> Expand('= 0')
+au filetype c,cpp ino <silent> <buffer> <c-l> <c-r>=Expand('=')<CR>
+au filetype c,cpp ino <silent> <buffer> <expr> <leader><leader> Expand('= 0')
 au filetype c,cpp ino <buffer> <leader>d ::
 au filetype c,cpp ino <buffer> <leader>sd std::
 au filetype c,cpp ino <buffer> <leader>tmp template <typename T><C-R>=Eatchar('\s')<CR>
@@ -313,7 +295,7 @@ au filetype java ino <buffer> ; <ScriptCmd>call s:util.AddSuffix(';')<CR>
 "au filetype java ino <silent> <buffer> { <right>{<CR>}<Esc>O
 "au filetype java ino <buffer> { <esc>A{<CR><++>}<ESC>O
 au filetype java ino <buffer> <leader>c /*    */<esc>4<left>a
-au filetype java ino <buffer> <c-l> <c-r>=Expand('=')<cr>
+au filetype java ino <silent> <buffer> <c-l> <c-r>=Expand('=')<cr>
 au filetype java ino <buffer> <leader><leader> <space>= 0,<space>
 au filetype java ino <buffer> <leader>s ::
 au filetype java ino <buffer> . <ScriptCmd>call s:util.DotComplete()<CR>.
@@ -392,6 +374,7 @@ au filetype python setl errorformat=%f:%l:\ %m
 au filetype python call s:util.Notify(['', 'using python syntax'], 'up')
 au filetype python ino <buffer> ; <ScriptCmd>call s:util.AddSuffix(':')<CR>
 au filetype python ino <buffer> # #<space><left><right>
+au filetype python ino <silent> <buffer> <leader>d <c-r>=Expand('::')<CR>
 " au filetype python ino <buffer> , ,<space><left><right>
 
 
@@ -402,17 +385,19 @@ au filetype python nn <buffer> <leader>test :botright terminal python_test<CR>
 au BufEnter *.py let g:comment = '#'
 " au filetype python ono <buffer> ( :<C-u>normal!t)lvi(<cr>
 
+au filetype python ino <silent> <buffer> <c-l> <c-r>=GuessExand()<CR>
+au filetype python ino <buffer> : :<space>
 " au filetype python ia <buffer> if if:<left>
 " au filetype python ia <buffer> for for:<left>
 " au filetype python ia <buffer> else else:<left>
-au filetype python ia <buffer> while  while:<left>
-au filetype python ia <buffer> def    def:<left>
-au filetype python ia <buffer> class  class:<left>
-au filetype python ia <buffer> lambda lambda:<left>
-au filetype python ia <buffer> lamdba lambda:<left>
-au filetype python ia <buffer> ret    return
-au filetype python ia <buffer> @@     1398881912@qq.com
-au filetype python ia <buffer> pirnt  print
+au filetype python inorea <buffer> while  while:<left>
+au filetype python inorea <buffer> def    def:<left>
+au filetype python inorea <buffer> class  class:<left>
+au filetype python inorea <buffer> lambda lambda:<left>
+au filetype python inorea <buffer> lamdba lambda:<left>
+au filetype python inorea <buffer> ret    return
+au filetype python inorea <buffer> @@     1398881912@qq.com
+au filetype python inorea <buffer> pirnt  print
 
 " au BufEnter *.py highlight link Conceal Keyword
 aug end
@@ -441,7 +426,7 @@ au filetype vim call s:util.Notify(['', 'using vim syntax'], 'up')
 au filetype vim nn <silent> <buffer> <leader>c <c-v>0I" <esc>
 au filetype vim vn <silent> <buffer> <leader>c <C-v>0I" <esc>
 au filetype vim ino <buffer> { <ScriptCmd>call s:util.BracketIndent()<CR>
-au filetype vim ino <buffer> <c-l> <c-r>=Expand('=')<cr>
+au filetype vim ino <silent> <buffer> <c-l> <c-r>=GuessExand()<CR>
 " au filetype vim let  maplocalleader    = "1"
 au filetype vim setl foldmethod=marker
 au filetype vim if getline(1) =~# '.*vim9script.*'
@@ -498,9 +483,11 @@ au VimEnter * nn  <leader><tab> <CMD>let g:autocomplete = !g:autocomplete \| ech
 au VimEnter * ino <leader><tab> <CMD>let g:autocomplete = !g:autocomplete \| echom g:autocomplete<CR>
 au VimEnter * ino } {}<left>
 au VimEnter * nn  <leader>m m
+au VimEnter * call s:mode.ModeManager.Register(tabpagenr())
+au TabNew   * call s:mode.ModeManager.Register(tabpagenr())
 
-"a INSERT mode
-au DirChanged * call s:util.Notify(['当前位于' . expand('%:~')], 'up')
+" INSERT mode
+" au DirChanged * call s:util.Notify(['当前位于' . expand('%:~')], 'up')
 
 au VimEnter * let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
 au VimEnter * let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
@@ -510,9 +497,8 @@ au VimEnter * let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
 au VimEnter * let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;gray\x7"
 au VimEnter * let g:comment = "#"
 
-au VimEnter * filetype on
-au VimEnter * syntax   on
-au VimEnter * set lazyredraw
+" au VimEnter * filetype on
+" au VimEnter * syntax   on
 " au BufEnter * match Comment / /
 au QuickFixCmdpre * setl nowrap
 au QuickFixCmdpre * setl nowrap
@@ -600,20 +586,20 @@ au VimEnter * nn <C-s> :w<CR>
 au VimEnter * nn  <F2> :put=system('sed      \"s/\(.*\)/{\1}/g\" <(seq -s \", \" 0 10)')<left><left><left>
 au VimEnter * ino <F2> <Esc>:put=system('sed \"s/\(.*\)/{\1}/g\" <(seq -s \", \" 0 10)')<left><left><left>
 
-au VimEnter * ino <leader>el  <c-r>=Expand('<=')<cr>
-au VimEnter * ino <leader>eg  <c-r>=Expand('>=')<cr>
-au VimEnter * ino <leader>en  <c-r>=Expand('!=')<cr>
-au VimEnter * ino <leader>ee  <c-r>=Expand('==')<cr>
+au VimEnter * ino <silent> <leader>el  <c-r>=Expand('<=')<cr>
+au VimEnter * ino <silent> <leader>eg  <c-r>=Expand('>=')<cr>
+au VimEnter * ino <silent> <leader>en  <c-r>=Expand('!=')<cr>
+au VimEnter * ino <silent> <leader>ee  <c-r>=Expand('==')<cr>
 au VimEnter * ino <leader>yi  !
 au VimEnter * ino <leader>er  @
 au VimEnter * ino <leader>sj  #
 au VimEnter * ino <leader>si  $
-au VimEnter * ino <leader>wu  <c-r>=Expand('%')<cr>
+au VimEnter * ino <silent> <leader>wu  <c-r>=Expand('%')<cr>
 au VimEnter * ino <leader>lq  ^
 au VimEnter * ino <leader>qi  &
-au VimEnter * ino <leader>ba  <c-r>=Expand('*')<cr>
-au VimEnter * ino <leader>jq  <c-r>=Expand('-')<cr>
-au VimEnter * ino <leader>ui  <c-r>=Expand('+')<cr>
+au VimEnter * ino <silent> <leader>ba  <c-r>=Expand('*')<cr>
+au VimEnter * ino <silent> <leader>jq  <c-r>=Expand('-')<cr>
+au VimEnter * ino <silent> <leader>ui  <c-r>=Expand('+')<cr>
 au VimEnter * ino <leader>a  ()<left>
 au VimEnter * ino <leader>b {}<left>
 au VimEnter * ino <leader>c []<left>
@@ -640,7 +626,8 @@ au VimEnter * ino <c-f> <right>
 au VimEnter * ino <c-b> <left>
 au VimEnter * ino <c-a> <Esc>I
 au VimEnter * ino <c-e> <Esc>g_a
-au VimEnter * ino <C-s> <Esc>:w<CR>
+au VimEnter * ino <c-h> <BS>
+au VimEnter * ino <c-s> <Esc>:w<CR>
 
 au VimEnter * cno <c-b> <left>
 au VimEnter * cno <c-f> <right>
@@ -683,7 +670,7 @@ au VimEnter * inorea 123 {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 " Comment the line in visual mode
 " vn " <c-v>0I" <esc>
 au VimEnter * vn #    <c-v>0I#<space><esc>
-au VimEnter * vn /    <C-v>0I//<space><esc>
+" au VimEnter * vn /    <C-v>0I//<space><esc>
 au VimEnter * vn ;    <C-v>0I;<esc>
 au VimEnter * vn <CR> !copy<CR>
 au VimEnter * nn *    *N:set hlsearch<CR>
@@ -708,13 +695,14 @@ au VimEnter * ++once call ArgNumberZero()
 function! TermIsLinux()
     if $TERM ==# 'linux'
         set notermguicolors
-        color zellner
+        " color zellner
+        color industry
         set lazyredraw
     endif
 endfunction
 
 function! ArgNumberZero()
-    if argc() ==# 0 && &buftype ==# ''
+    if argc() ==# 0 && &buftype ==# '' && &modified ==# ''
         let choice = confirm('恢复之前的会话？', "&Yes\n&No\n", 2)
         if choice ==# 1
             call s:util.RecoverSession()
@@ -757,17 +745,27 @@ call plug#begin()
 "   - e.g. `call plug#begin('~/.vim/plugged')`
 "   - Avoid using standard Vim directory names like 'plugin'
 " Make sure you use single quotes
-Plug 'vim-airline/vim-airline-themes'
-Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes', { 'frozen': 1 }
+Plug 'vim-airline/vim-airline',        { 'frozen': 1 }
 
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
+Plug 'junegunn/fzf',     { 'do': { ->    fzf#install() }, 'on': 'FZF' }
+Plug 'junegunn/fzf.vim', { 'on'  : 'FZF' }
+
+Plug 'Chen-Rong-Zi/gmotion.vim', { 'do': { -> popup_notification(['Gmotion Installed'], {'time': 1000})}}
+let g:gmotion_pair = g:MATCHPAIRS
+
+Plug 'Chen-Rong-Zi/fcitx.vim', {'on': ['FcitxStart', 'FcitxStop']}
+
+Plug 'yianwillis/vimcdoc'
+
+Plug 'easymotion/vim-easymotion', {'on': '<plug>(easymotion-prefix)s', 'frozen': 1}
+
 " " If you don't have nodejs and yarn
 " use pre build, add 'vim-plug' to the filetype list so vim-plug can update this plugin
 " see: https://github.com/iamcco/markdown-preview.nvim/issues/50
 " Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 " If you have nodejs
-Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install', 'for': 'markdown' }
 " Plug 'pycqa/pylint'
 " Plug 'vim-scripts/pylint.vim'
 call plug#end()
@@ -839,40 +837,40 @@ aug markdown
 autocmd!
 " au filetype man only
 au filetype markdown nn  <buffer> <leader>op <CMD>term ++close bash -c "xdg-open %  2>/dev/null"<CR>
-au filetype markdown ino <buffer> <leader>* ******<left><left><left>
-au filetype markdown ino <buffer> g* ****<left><left>
-au filetype markdown ino <buffer> * **<left>
-au filetype markdown ino <buffer> ’ ``<left>
-au filetype markdown ino <buffer> ‘ ``<left>
-au filetype markdown ino <buffer> ' ``<left>
-au filetype markdown ino <buffer> !  ¬
-au filetype markdown ino <buffer> F  ⊥
-au filetype markdown ino <buffer> /  ·
-au filetype markdown ino <buffer> jn ∩
-au filetype markdown ino <buffer> bk ∪
-au filetype markdown ino <buffer> sum ∑
-au filetype markdown ino <buffer> pro ∏
-au filetype markdown ino <buffer> any ∃
-au filetype markdown ino <buffer> all ∀
-au filetype markdown ino <buffer> in  ∈
-au filetype markdown ino <buffer> nin ∉
-au filetype markdown ino <buffer> ziji ⊆
-au filetype markdown ino <buffer> yiho ⊕ 
-au filetype markdown ino <buffer> fuhe ∘
-au filetype markdown ino <buffer> jx ＋
-au filetype markdown ino <buffer> ～ ~~~~<left><left>
-au filetype markdown ino <buffer> <c-l> <c-r>=Expand('\|')<CR>
-au filetype markdown nn  <buffer> <leader>t <ScriptCmd>put = s:util.AddTableRow()<CR><Esc>^/<++><CR>cw
-au filetype markdown nn  <buffer> <leader><space> <ScriptCMD>call s:util.CheckBoxToggle()<CR>
-au filetype markdown nn  <buffer> <leader>c <ScriptCmd>let &operatorfunc=s:util.IntoLatex<CR>g@l
-au filetype markdown vn  <buffer> <leader>c <ScriptCmd>let &operatorfunc=s:util.IntoLatex<CR>g@
-au filetype markdown abbrev <buffer> void ∅
-au filetype markdown abbrev <buffer> <>  ↔
-au filetype markdown abbrev <buffer> ->  →
-au filetype markdown abbrev <buffer> <-  ←
-au filetype markdown abbrev <buffer> ===  ≡
-au filetype markdown abbrev <buffer> or  ∨
-au filetype markdown abbrev <buffer> and ∧
+" au filetype markdown ino <buffer> <leader>* ******<left><left><left>
+" au filetype markdown ino <buffer> g* ****<left><left>
+" au filetype markdown ino <buffer> * **<left>
+" au filetype markdown ino <buffer> ’ ``<left>
+" au filetype markdown ino <buffer> ‘ ``<left>
+" au filetype markdown ino <buffer> ' ``<left>
+" au filetype markdown ino <buffer> !  ¬
+" au filetype markdown ino <buffer> F  ⊥
+" au filetype markdown ino <buffer> /  ·
+" au filetype markdown ino <buffer> jn ∩
+" au filetype markdown ino <buffer> bk ∪
+" au filetype markdown ino <buffer> sum ∑
+" au filetype markdown ino <buffer> pro ∏
+" au filetype markdown ino <buffer> any ∃
+" au filetype markdown ino <buffer> all ∀
+" au filetype markdown ino <buffer> in  ∈
+" au filetype markdown ino <buffer> nin ∉
+" au filetype markdown ino <buffer> ziji ⊆
+" au filetype markdown ino <buffer> yiho ⊕ 
+" au filetype markdown ino <buffer> fuhe ∘
+" au filetype markdown ino <buffer> jx ＋
+" au filetype markdown ino <buffer> ～ ~~~~<left><left>
+" au filetype markdown ino <silent> <buffer> <c-l> <c-r>=Expand('\|')<CR>
+" au filetype markdown nn  <buffer> <leader>t <ScriptCmd>put = s:util.AddTableRow()<CR><Esc>^/<++><CR>cw
+" au filetype markdown nn  <buffer> <leader><space> <ScriptCMD>call s:util.CheckBoxToggle()<CR>
+" au filetype markdown nn  <buffer> <leader>c <ScriptCmd>let &operatorfunc=s:util.IntoLatex<CR>g@l
+" au filetype markdown vn  <buffer> <leader>c <ScriptCmd>let &operatorfunc=s:util.IntoLatex<CR>g@
+" au filetype markdown abbrev <buffer> void ∅
+" au filetype markdown abbrev <buffer> <>  ↔
+" au filetype markdown abbrev <buffer> ->  →
+" au filetype markdown abbrev <buffer> <-  ←
+" au filetype markdown abbrev <buffer> ===  ≡
+" au filetype markdown abbrev <buffer> or  ∨
+" au filetype markdown abbrev <buffer> and ∧
 aug end
 " }}}
 
@@ -987,7 +985,7 @@ aug end
 aug scripts
 au!
 import autoload "/home/rongzi/.vim/functions/useful.vim" as util
-import "/home/rongzi/.vim/functions/mode.vim"   as mode
+import autoload "/home/rongzi/.vim/functions/mode.vim"   as mode
 au VimEnter * nn <leader>e     <ScriptCmd>call s:util.SelectBuffer()<CR>
 au vimenter * nn <leader><c-j> <ScriptCmd>keepjumps call s:util.JoshutoSelectFile()<CR>
 au VimEnter * nn <leader><c-f> <ScriptCmd>call s:util.FZFfile()<CR>
@@ -998,58 +996,97 @@ au VimEnter * nn m  <ScriptCmd>call s:util.CommentToggleMaker(g:comment)<CR>g@
 au VimEnter * nn mm <ScriptCmd>call s:util.CommentToggleMaker(g:comment)<CR>g@$
 au VimEnter * vn m  <ScriptCmd>call s:util.CommentToggleMaker(g:comment)<CR>g@
 
-au vimenter * nn ( <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('(', ')', 2)<CR>g@
-au vimenter * nn { <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('{', '}', 2)<CR>g@
-au vimenter * nn " <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('"', '"', 2)<CR>g@
-au vimenter * nn ' <ScriptCmd>let &operatorfunc=s:util.MakeWrapper("'", "'", 2)<CR>g@
-au vimenter * nn [ <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('[', ']', 1)<CR>g@
+au vimenter * nn ( <Cmd>call MakeWrapper('(', ')', 2)<CR>g@
+au vimenter * nn { <Cmd>call MakeWrapper('{', '}', 2)<CR>g@
+au vimenter * nn " <Cmd>call MakeWrapper('"', '"', 2)<CR>g@
+au vimenter * nn ' <Cmd>call MakeWrapper("'", "'", 2)<CR>g@
+au vimenter * nn [ <Cmd>call MakeWrapper('[', ']', 1)<CR>g@
 
-au vimenter * vn ( <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('(', ')', 2)<CR>g@
-au vimenter * vn { <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('{', '}', 2)<CR>g@
-au vimenter * vn " <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('"', '"', 2)<CR>g@
-au vimenter * vn ' <ScriptCmd>let &operatorfunc=s:util.MakeWrapper("'", "'", 2)<CR>g@
-au vimenter * vn [ <ScriptCmd>let &operatorfunc=s:util.MakeWrapper('[', ']', 1)<CR>g@
+au vimenter * nn (( 0<Cmd>call MakeWrapper('(', ')', 2)<CR>g@$
+au vimenter * nn {{ 0<Cmd>call MakeWrapper('{', '}', 2)<CR>g@$
+au vimenter * nn "" 0<Cmd>call MakeWrapper('"', '"', 2)<CR>g@$
+au vimenter * nn '' 0<Cmd>call MakeWrapper("'", "'", 2)<CR>g@$
+au vimenter * nn [[ 0<Cmd>call MakeWrapper('[', ']', 1)<CR>g@$
 
-au vimenter * nn (( 0<ScriptCmd>let &operatorfunc=s:util.MakeWrapper('(', ')', 2)<CR>g@$
-au vimenter * nn {{ 0<ScriptCmd>let &operatorfunc=s:util.MakeWrapper('{', '}', 2)<CR>g@$
-au vimenter * nn "" 0<ScriptCmd>let &operatorfunc=s:util.MakeWrapper('"', '"', 2)<CR>g@$
-au vimenter * nn '' 0<ScriptCmd>let &operatorfunc=s:util.MakeWrapper("'", "'", 2)<CR>g@$
-au vimenter * nn [[ 0<ScriptCmd>let &operatorfunc=s:util.MakeWrapper('[', ']', 1)<CR>g@$
+au vimenter * vn ( <Cmd>call MakeWrapper('(', ')', 2)<CR>g@
+au vimenter * vn { <Cmd>call MakeWrapper('{', '}', 2)<CR>g@
+au vimenter * vn " <Cmd>call MakeWrapper('"', '"', 2)<CR>g@
+au vimenter * vn ' <Cmd>call MakeWrapper("'", "'", 2)<CR>g@
+au vimenter * vn [ <Cmd>call MakeWrapper('[', ']', 1)<CR>g@
+
+" au vimenter * nn (( 0<Cmd>vim9cmd &operatorfunc = util.MakeWrapper('(', ')', 2)<CR>g@$
+" au vimenter * nn {{ 0<Cmd>vim9cmd &operatorfunc = util.MakeWrapper('{', '}', 2)<CR>g@$
+" au vimenter * nn "" 0<Cmd>vim9cmd &operatorfunc = util.MakeWrapper('"', '"', 2)<CR>g@$
+" au vimenter * nn '' 0<Cmd>vim9cmd &operatorfunc = util.MakeWrapper("'", "'", 2)<CR>g@$
+" au vimenter * nn [[ 0<Cmd>vim9cmd &operatorfunc = util.MakeWrapper('[', ']', 1)<CR>g@$
 
 au VimEnter * nn <c-g> <ScriptCmd>let &operatorfunc=s:util.SendKeys<CR>g@$
 au VimEnter * vn <c-g> <ScriptCmd>let &operatorfunc=s:util.SendKeys<CR>g@
 
 au VimEnter * nn cd <ScriptCMD>call s:util.Quick_CD()<CR>
 
-au User GrepModeTrigger  normal! g@iw
 " au User RunModeTrigger   call RunMode()
 " nn <leader>r :doautocmd User RunModeTrigger<CR>
 au VimEnter * nn <silent> <leader>g <ScriptCmd>let &operatorfunc = s:mode.GrepMode.Run()<CR>g@
 au VimEnter * vn <silent> <leader>g <ScriptCmd>let &operatorfunc = s:mode.GrepMode.Run()<CR>g@
-au VimEnter * nn <silent> <leader>r <ScriptCmd>call s:mode.RunMode.Run()<CR>
-au VimEnter * nn <silent> <leader>d <ScriptCmd>call s:mode.RunMode.Debug()<CR>
-au VimEnter * nn <silent> <leader>sr <ScriptCmd>call s:mode.RunMode.Run('-s')<CR>
+au VimEnter * nn <silent> <leader>r <ScriptCmd>call s:mode.ModeManager.Run(t:tabid)<CR>
 au VimEnter * nn <silent> <leader>ir <ScriptCmd>call s:mode.RunModeWithArgs()<CR>
+au VimEnter * nn <silent> <leader>d <ScriptCmd>call s:mode.ModeManager.Debug(t:tabid)<CR>
+au VimEnter * nn <silent> <leader>sr <ScriptCmd>call s:mode.ModeManager.Run(t:tabid, '-s')<CR>
+au VimEnter * nn <silent> <leader>py <ScriptCmd>call s:mode.ModeManager.Mypy(t:tabid)<CR>
+" au VimEnter * nn <silent> <leader>ir <ScriptCmd>call s:mode.RunModeWithArgs()<CR>
 
-au VimEnter * nn  gp <ScriptCmd>call s:util.MatchPairManager.GotoAnther()<CR>
-au VimEnter * nn  gh <ScriptCmd>call s:util.MatchPairManager.GotoLeft()<CR>
-au VimEnter * nn  gl <ScriptCmd>call s:util.MatchPairManager.GotoRight()<CR>
-au VimEnter * vn  gp <ScriptCmd>call s:util.MatchPairManager.GotoAnther()<CR>
-au VimEnter * vn  gh <ScriptCmd>call s:util.MatchPairManager.GotoLeft()<CR>
-au VimEnter * vn  gl <ScriptCmd>call s:util.MatchPairManager.GotoRight()<CR>
-au VimEnter * ono  gp <ScriptCmd>call s:util.MatchPairManager.GotoAnther()<CR>
-au VimEnter * ono  gh <ScriptCmd>call s:util.MatchPairManager.GotoLeft()<CR>
-au VimEnter * ono  gl <ScriptCmd>call s:util.MatchPairManager.GotoRight()<CR>
+" au VimEnter * nn  gp <ScriptCmd>call s:util.MatchPairManager.GotoAnther()<CR>
+" au VimEnter * nn  gh <ScriptCmd>call s:util.MatchPairManager.GotoLeft()<CR>
+" au VimEnter * nn  gl <ScriptCmd>call s:util.MatchPairManager.GotoRight()<CR>
+" au VimEnter * vn  gp <ScriptCmd>call s:util.MatchPairManager.GotoAnther()<CR>
+" au VimEnter * vn  gh <ScriptCmd>call s:util.MatchPairManager.GotoLeft()<CR>
+" au VimEnter * vn  gl <ScriptCmd>call s:util.MatchPairManager.GotoRight()<CR>
+" au VimEnter * ono  gp <ScriptCmd>call s:util.MatchPairManager.GotoAnther()<CR>
+" au VimEnter * ono  gh <ScriptCmd>call s:util.MatchPairManager.GotoLeft()<CR>
+" au VimEnter * ono  gl <ScriptCmd>call s:util.MatchPairManager.GotoRight()<CR>
 " au VimEnter * nn  %  <ScriptCmd>call s:util.PercentSign()<CR>
-au VimEnter * ono ig <ScriptCmd>call s:util.PercentSign1()<CR>
-au VimEnter * ono ag <ScriptCmd>call s:util.PercentSign2()<CR>
-au VimEnter * vn  ig <ScriptCmd>call s:util.PercentSign1()<CR>
-au VimEnter * vn  ag <ScriptCmd>call s:util.PercentSign2()<CR>
-au VimEnter * nn  gr <ScriptCmd>call s:util.ReplacePairs()<CR>
+" au VimEnter * ono ig <ScriptCmd>call s:util.PercentSign1()<CR>
+" au VimEnter * ono ag <ScriptCmd>call s:util.PercentSign2()<CR>
+" au VimEnter * vn  ig <ScriptCmd>call s:util.PercentSign1()<CR>
+" au VimEnter * vn  ag <ScriptCmd>call s:util.PercentSign2()<CR>
+" au VimEnter * nn  gr <ScriptCmd>call s:util.ReplacePairs()<CR>
 
 au CursorMoved  * call s:util.BlankIndentDrawerManager.Draw()
 " au CursorMovedI * call s:util.BlankIndentDrawerManager.Draw()
-au CursorMoved  * call s:util.MatchPairManager.PercentSign()
+" au CursorMoved  * call s:util.MatchPairManager.PercentSign()
 " au CursorMovedI * call s:util.MatchPairManager.PercentSign()
 aug end
 " }}}
+
+
+func! Eatchar(pat)
+    let c = nr2char(getchar(0))
+    return (c =~ a:pat) ? '' : c
+endfunction
+
+function! Expand(pat)
+    if s:util.Cword('[^[:space:]]') ==# ''
+        return a:pat .. "\<space>"
+    else
+        return "\<space>" .. a:pat .. "\<space>"
+    endif
+endfunction
+
+function! GuessExand()
+    let token = s:util.Cword('[^[:space:]]')
+    if token =~# '\v\)$'
+        return " ->"
+    elseif token =~# '\v^\d+$'
+        return '..'
+    elseif token ==# ''
+        return '= '
+    else
+        return ' = '
+    endif
+endfunction
+
+function! MakeWrapper(left, right, stop)
+    let &operatorfunc = {type -> s:util.WrapOper(type, a:left, a:right, a:stop)}
+endfunction
+

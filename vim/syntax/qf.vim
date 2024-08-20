@@ -16,6 +16,7 @@ hi def link qfLineNr   LineNr
 hi qfError cterm=underline guifg=#E06C75
 hi def link Output     Error
 " hi def Nothing gui=bold
+syntax region SpellCap matchgroup=Nontext start=/\v`/ end=/\v`/ oneline display concealends
 
 syntax match qfError /错误/
 syntax match Preproc /附注/
@@ -25,7 +26,7 @@ syntax match Preproc /\vwarn(ing)/
 
 syntax match Nontext /\v\|/ conceal cchar=│
 syntax match Nontext /\v\|\| / conceal
-syntax match Error /\v(\^\^\^)?-{2,}/
+syntax match Error   /\v(\^\^\^)?-{2,}/
 
 syntax match Error /\v\[[[:digit:];]+m/ conceal
 syntax match Error /\v/ conceal
@@ -53,7 +54,6 @@ syntax keyword Keyword break    conceal cchar=✖
 " syntax match Nontext  /\v[{}]$|;|^%( *)@>}/                             contains=@Spell "  {  }  ;
 " 
 " syntax cluster hidden add=Preproc,Nontext,Identifier,Constant,cString,cNumbers,Keyword,constants,cCharacter,cConstant,Function,Nothing,@cStringGroup
-" syntax region Nothing matchgroup=Nontext start=/\v%(<while>|<for>|<if>)@<= \(/ end=/\v\)[^)]{-}$/ oneline contains=@hidden,@Spell keepend display
 " syntax region Nothing    matchgroup=Identifier start=/\v\h*\[/    end=/]/  oneline contains=@hidden,@Spell        display
 " syntax region diffchange matchgroup=Constant   start=/\vg[c+]{2}/ end=/$/  oneline contains=@hidden,@Spell,Output display nextgroup=Output
 " syntax region output     matchgroup=Constant   start=/\v-o\s/     end=/\s/ oneline contains=@hidden,@Spell        display contained

@@ -1,3 +1,0 @@
-source /home/rongzi/.vim/syntax/c.vim
-syntax keyword Keyword class namespace new delete concept requires throw
-syntax keyword Preproc using constexpr

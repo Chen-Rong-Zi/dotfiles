@@ -56,7 +56,7 @@ syntax region inBracket4 matchgroup=cBracket4 start=/</ end=/>/ display contains
 " syntax match Constant /\%(if\|while\|for\)\s*([^)]*)\s*{/          " Constant defined by #define or const
 syntax match cConstant /\v<[[:upper:]_]{2,}>/    " Constant defined by #define or const
 
-syntax match Keyword /\v\zs<else *if/   display conceal cchar=ℰ
+syntax match Keyword /\v\zs<else +if/   display conceal cchar=ℰ
 syntax match Keyword /\v<else>%( if)@!/ display conceal cchar=𝘌
 syntax keyword Keyword final    conceal cchar=𝙁
 syntax keyword Keyword if       conceal cchar=𝘐

@@ -219,7 +219,7 @@ enddef
 # endfunction
 
 def Javap(class: string): dict<any>
-    const GetOrigin   = (waste: string) => system('javap -cp ~/cProgram/java ' .. class .. ' 2>&1 | grep -Pv "错误|Compiled|[{}]" | sed "s/^ *//g"')->split('\n')
+    const GetOrigin   = (waste: string) => system('javap -cp ~/Program/java ' .. class .. ' 2>&1 | grep -Pv "错误|Compiled|[{}]" | sed "s/^ *//g"')->split('\n')
     const ParseLine   = fp.Mapped(GetFuncname)
     const MakeDict    = fp.Reduced((pre: dict<any>, curr: dict<any>) => {
         const key = keys(curr)[0]
@@ -329,23 +329,27 @@ enddef
 def Icons(filename: string): string
     return system('exa --icons=always ' .. shellescape(resolve(filename)))->split()[0]
 enddef
+
+def IconsBatch(args: list<string>): list<string>
+    return system('exa --icons=always ' .. args->join(' '))->split('\n')
+enddef
 # }}}
 
 # function Complete() {{{
-export def CwordHelper(index: number, line: string, regex: string = '[[:keyword:].]'): string
+def CwordHelper(index: number, line: string, regex: string = '[[:keyword:].]'): string
     if index <# 0
         return ''
-    elseif line[index] !~# regex
-        return ''
-    else
+    elseif line[index] =~# regex
         return CwordHelper(index - 1, line, regex) .. line[index]
+    else
+        return ''
     endif
 enddef
 
-def Cword(): string
+export def Cword(regex='[[:ident:]]'): string
     const [_, row, col, _] = getcharpos('.')
     const line = getline('.')
-    return CwordHelper(col - 2, line, '[[:ident:]]')
+    return CwordHelper(col - 2, line, regex)
 enddef
 
 export def Complete()
@@ -354,7 +358,7 @@ export def Complete()
     # Notify([string(Cword())])
     if g:autocomplete ==# 0
         return
-    elseif strcharlen(Cword()) <= 1
+    elseif strcharlen(Cword()) <= 0
         g:HaveCompletion = 1
         return
     elseif g:HaveCompletion ==# 0
@@ -779,13 +783,13 @@ export class Position
         this.row = row
         this.col = col
     enddef
+    def Valid(): bool
+        return this.row >= 1 && this.col >= 1
+    enddef
     def Distance(anchor: Position): number
         const big_bit   = abs(anchor.row - this.row)
         const small_bit = abs(anchor.col - this.col)
         return big_bit * 10 + small_bit
-    enddef
-    def Valid(): bool
-        return this.row >= 1 && this.col >= 1
     enddef
     static def Compare(anchor: Position, pos1: Position, pos2: Position): number
         return pos1.Distance(anchor) - pos2.Distance(anchor)
@@ -1022,39 +1026,6 @@ export def Match(): list<Pair>
     return GuessPairs(part_list)
 enddef
 
-class PairStack
-    static const MATCHPAIRS = g:MATCHPAIRS
-    static final stack: list<Pair> = []
-    static var length: number = 0
-
-    static def Top(): Pair
-        if PairStack.length ==# 0
-            return Pair.newEmpty()
-        else
-            return PairStack.stack[PairStack.length - 1]
-        endif
-    enddef
-
-    # static def Pop(pair: Pair): Pair
-        
-    # enddef
-
-    static def Push(pair: Pair)
-        const top = PairStack.Top()
-        if PairStack.->index(pair.left) != -1
-            PairStack.stack[PairStack.length] = pair
-            PairStack.length += 1
-        elseif PairStack.MATCHPAIRS->index([top.left, pair.right]) !=# -1
-            return Pair.new(top.left, pair.right, top.l_pos, pair.r_pos)
-
-        endif
-    enddef
-endclass
-
-class PairParser
-endclass
-
-
 export class MatchPairManager
     static var pairs_book: dict<list<Pair>> = {}
 
@@ -1139,23 +1110,6 @@ export class MatchPairManager
 
         MatchPairManager.PairHighlightClear(winid)
         MatchPairManager.AddHighLightPair(winid, pairs[0])
-        # if len(line) == 0
-            # return
-        # elseif MatchPairManager.part_list->index(line[col - 1]) ==# -1
-            # return
-        # endif
-
-        # const a_pair     = GetPair(line[col - 1])
-        # const a_pair_pos = Position.new(row, col)
-        # if line[col - 1] ==# a_pair[0]
-            # const pair = Pair.newLeftSingle(a_pair[0], a_pair[1], a_pair_pos)
-            # pair.Highlight()
-            # MatchPairManager.pairs_book[winid]->add(pair)
-        # else
-            # const pair = Pair.newRightSingle(a_pair[0], a_pair[1], a_pair_pos)
-            # pair.Highlight()
-            # MatchPairManager.pairs_book[winid]->add(pair)
-        # endif
     enddef
 endclass
 
@@ -1305,11 +1259,15 @@ export def SelectBuffer()
     const names = getbufinfo({'buflisted': 1})
             ->fp.Filter((_, val) => val["name"][0] !=# "!")
             ->fp.Map((_, buf) => buf["name"])
-    const icon_name = names->fp.Map((_, v: string) => Icons(v) .. ' ' .. v)
-    popup_menu(icon_name, {
+    const display_name = names
+            ->fp.Map((_, name) => shellescape(resolve(name)))
+            ->IconsBatch()
+    # echom names
+    # echom display_name
+    popup_menu(display_name, {
         'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
-        'highlight': 'Notify',
-        'callback': (_, result) => (result !=# -1) ? SwitchBuffer(names[result - 1]) : ''
+        'highlight':   'Notify',
+        'callback':    (_, result) => (result !=# -1) ? SwitchBuffer(names[result - 1]) : ''
     })
 enddef
 # }}}
@@ -1319,6 +1277,8 @@ def SwitchBuffer(file: string)
     Notify(['跳转 ' .. file])
     if isdirectory(file)
         Notify([file .. ' 是目录，不能打开'])
+    elseif !filereadable(file)
+        Notify([file .. ' 不可读，不能打开'])
     else
         silent execute 'buf ' .. file
     endif
@@ -1330,6 +1290,8 @@ def OpenBuffer(file: string)
     Notify(['跳转 ' .. file])
     if isdirectory(file)
         silent execute 'Lex ' .. file
+    elseif !filereadable(file)
+        Notify([file .. ' 不可读，不能打开'])
     else
         silent execute 'vsplit ' .. file
     endif
@@ -1395,7 +1357,7 @@ if $DISPLAY == ''
     set notermguicolors
     set fillchars=vert:\|
     set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
-    color zellner
+    color industry
 endif
 # }}}
 
@@ -1507,44 +1469,45 @@ export def VisualWrapper()
 enddef
 
 # }}}
-export function MakeWrapper(left = "(", right = ")", stop = 1)
-    function! OperatorWrapper(type) closure
-        let start_pos =  getcharpos("'[")
-        let end_pos   =  getcharpos("']")
-        let start_row =  start_pos[1]
-        let start_col =  start_pos[2]
-        let end_row   =  end_pos[1]
-        let end_col   =  end_pos[2]
-        function! WrapLine(line, line_number) closure
-            if a:line ==# ''
-                return ''
-            endif
-            vim9cmd InsertString(a:right, a:line_number, (a:type == 'line') ? strcharlen(a:line) + 1 : end_col + 1)
-            vim9cmd InsertString(a:left,  a:line_number, (a:type == 'line') ? 1 : start_col)
-        endfunction
+export def WrapOper(type: string, left: string, right: string, stop: number)
+    const start_row = line("'[")
+    const start_col = charcol("'[")
+    const end_row   = line("']")
+    const end_col   = charcol("']")
+    echom type
 
-        if a:type ==# 'char'
-            vim9cmd InsertString(a:right, end_row,   end_col + 1)
-            vim9cmd InsertString(a:left,  start_row, start_col)
+    if type ==# 'char' || type ==# 'block'
+        InsertString(right, end_row,   end_col + 1)
+        InsertString(left,  start_row, start_col)
+    elseif type ==# 'line'
+        echom "end_row " .. end_row .. " start_row " .. start_row
+        const leading_space: string = ' '->repeat(indent(start_row))
+        append(end_row,       leading_space .. right)
+        append(start_row - 1, leading_space .. left)
+        getline(start_row + 1, end_row + 1)->map((i: number, line: string): number => {
+            setline(start_row + 1 + i, repeat(' ', &shiftwidth) .. line)
+            return 1
+        })
+    endif
+
+    if stop ==# 1
+        setcursorcharpos(start_row, start_col)
+        return
+    endif
+    # where stop == 2 case
+    if type ==# 'char'
+        if start_row ==# end_row
+            setcursorcharpos(end_row, end_col + 2)
         else
-            call getline(start_row, end_row)->map('WrapLine(v:val, v:key + start_row)')
+            setcursorcharpos(end_row, end_col + 1)
         endif
+    elseif type ==# 'block'
+        setcursorcharpos(end_row, end_col + 2)
+    elseif type ==# 'line'
+        setcursorcharpos(end_row + 1, indent(end_row + 1))
+    endif
+enddef
 
-        if a:stop ==# 1
-            call setcursorcharpos(start_row, start_col)
-            return
-        endif
-        " where stop == 2 case
-        if a:type ==# 'char'
-            call setcursorcharpos(end_row, end_col + 1 + (start_row ==# end_row))
-        elseif a:type ==# 'block'
-            call setcursorcharpos(end_row, end_col + 2)
-        elseif a:type ==# 'line'
-            call setcursorcharpos(end_row, 2147483647)
-        endif
-    endfunction
-    return funcref('OperatorWrapper')
-endfunction
 
 # function SendKeys(type)  {{{
 export def SendKeys(type: string)
@@ -1670,3 +1633,9 @@ enddef
     # return l
 # endfunc
 #block }}}
+
+
+# delete ~/.viminfo when it is too big
+if exists($HOME .. "/.viminfo") && getfsize($HOME .. "/.viminfo") ># 20000
+    system('mv $HOME/.viminfo{,.$(date +%Y-%m-%dT%H:%M:%S%Z).bak} && echo >| $HOME/.viminfo')
+endif

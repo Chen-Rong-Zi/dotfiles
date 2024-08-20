@@ -5,7 +5,16 @@
 	helper = store
 [alias]
     l = log --all --graph --decorate --oneline
+    s = status
+    cl = clone --depth=1
 [http]
 	sslVerify = false
 [merge]
 	tool = vimdiff
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[init]
+	defaultBranch = master

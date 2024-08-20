@@ -8,6 +8,10 @@
 
 " Initialization: {{{
 " highlight clear
+if exists('g:colorscheme')
+  finish
+endif
+let g:colorscheme = 'tokyonight'
 if exists('syntax_on')
   syntax reset
 endif
