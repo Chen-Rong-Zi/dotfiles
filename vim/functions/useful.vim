@@ -2,6 +2,52 @@ vim9script
 import "./higherorder.vim" as fp
 # def BlankIndent(){{{
 
+
+def UpdateSearchReg()
+    if mode() !=# 'v'
+        autocmd! HLSearch
+        return
+    endif
+    const [_, row0, col0, _] = getcharpos("v")
+    const [_, row1, col1, _] = getcharpos(".")
+    var start_row: number
+    var start_col: number
+    var end_row: number
+    var end_col: number
+    if row0 * 10 + col0 < row1 * 10 + col1
+        start_row = row0
+        start_col = col0
+        end_row   = row1
+        end_col   = col1
+    else
+        start_row = row1
+        start_col = col1
+        end_row   = row0
+        end_col   = col0
+    endif
+
+    if start_row ==# end_row
+        SearchArgumentText(getline(start_row)[start_col - 1 : end_col - 1])
+    elseif end_row - start_row ==# 1
+        const first_line  = getline(start_row)
+        const second_line = getline(end_row)
+        SearchArgumentText(first_line[start_col - 1 : ] .. "\n" .. second_line[ : end_col - 1])
+    else
+        const first_line  = getline(start_row)
+        const second_line = getline(end_row)
+        const other_line  = getline(start_row  + 1, end_row - 1)
+        SearchArgumentText(first_line[start_col - 1 : ] .. "\n" .. other_line->join("\n") .. "\n" .. second_line[ : end_col - 1])
+    endif
+enddef
+
+
+export def HLSearch()
+    @/ = ''
+    aug HLSearch
+    au CursorMoved * UpdateSearchReg()
+    aug end
+enddef
+
 class BlankIndentDrawer
     static const indent_range: number = g:indent_range
     static const indentHl: dict<string> = {
@@ -331,7 +377,7 @@ def Icons(filename: string): string
 enddef
 
 def IconsBatch(args: list<string>): list<string>
-    return system('exa --icons=always ' .. args->join(' '))->split('\n')
+    return system('exa --icons=always --sort name ' .. args->join(' '))->split('\n')
 enddef
 # }}}
 
@@ -1256,18 +1302,26 @@ enddef
 
 # function SelectBuffer(){{{
 export def SelectBuffer()
-    const names = getbufinfo({'buflisted': 1})
-            ->fp.Filter((_, val) => val["name"][0] !=# "!")
-            ->fp.Map((_, buf) => buf["name"])
-    const display_name = names
-            ->fp.Map((_, name) => shellescape(resolve(name)))
+    const display_name: list<string> = getbufinfo({'buflisted': 1})
+            ->fp.Filter((_, val) => val["name"][0] !=# "!" && val["name"] !=# '' && val["name"] !=# bufname())
+            ->fp.Map((_, buf) => shellescape(buf["name"]))
             ->IconsBatch()
+            ->insert('➡️ ' .. bufname() .. ' ⬅️ You Are Here', 0)
+
+            # ->fp.Map((_, name) => shellescape(resolve(name)))
     # echom names
     # echom display_name
+    # echom name_on_menu
     popup_menu(display_name, {
         'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
         'highlight':   'Notify',
-        'callback':    (_, result) => (result !=# -1) ? SwitchBuffer(names[result - 1]) : ''
+        'callback':    (_, result) => {
+            if result !=# -1
+                return display_name
+                        ->fp.Map((_, name) => name->split( )[1])[result - 1]
+                        ->SwitchBuffer()
+            endif
+        }
     })
 enddef
 # }}}
@@ -1353,12 +1407,6 @@ enddef
 # }}}
 
 # use another way to show chars when in console{{{
-if $DISPLAY == ''
-    set notermguicolors
-    set fillchars=vert:\|
-    set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
-    color industry
-endif
 # }}}
 
 # function ShowLastStatus() unknow{{{
@@ -1427,7 +1475,6 @@ def SearchArgumentText(text: string)
                 ->substitute('\$', '\\$', 'g')
                 ->substitute('\n', '\\n', 'g')
     # Notify(["模式:" .. strpart(@/, 0, winwidth(0) - 30)])
-    setl nohlsearch
 enddef
 
 # }}}
@@ -1476,16 +1523,25 @@ export def WrapOper(type: string, left: string, right: string, stop: number)
     const end_col   = charcol("']")
     echom type
 
-    if type ==# 'char' || type ==# 'block'
+    if type ==# 'char'
         InsertString(right, end_row,   end_col + 1)
         InsertString(left,  start_row, start_col)
+    elseif type ==# 'block'
+        InsertString(right, end_row,   end_col + 1)
+        InsertString(left,  start_row, start_col)
+        setcursorcharpos(end_row, end_col + 1 + ((start_row ==# end_row) ? len(left) : 0))
+        execute "normal! i\<CR>\<Esc>l"
+        setcursorcharpos(start_row, start_col + len(left))
+        execute "normal! i\<CR>\<Esc>l"
     elseif type ==# 'line'
         echom "end_row " .. end_row .. " start_row " .. start_row
         const leading_space: string = ' '->repeat(indent(start_row))
         append(end_row,       leading_space .. right)
         append(start_row - 1, leading_space .. left)
         getline(start_row + 1, end_row + 1)->map((i: number, line: string): number => {
-            setline(start_row + 1 + i, repeat(' ', &shiftwidth) .. line)
+            if len(line) !=# 0
+                setline(start_row + 1 + i, repeat(' ', &shiftwidth) .. line)
+            endif
             return 1
         })
     endif
@@ -1639,3 +1695,138 @@ enddef
 if exists($HOME .. "/.viminfo") && getfsize($HOME .. "/.viminfo") ># 20000
     system('mv $HOME/.viminfo{,.$(date +%Y-%m-%dT%H:%M:%S%Z).bak} && echo >| $HOME/.viminfo')
 endif
+
+abstract class Result
+    var inner_value: any
+    var IsFailure: bool
+endclass
+
+class Success extends Result
+    # unit :: a -> Success a
+    def new(value: any)
+        this.inner_value = value
+        this.IsFailure = false
+    enddef
+endclass
+
+class Failure extends Result
+    # unit :: a -> Failure a
+    def new(value: any)
+        this.inner_value = value
+        this.IsFailure = true
+    enddef
+endclass
+
+def SafeGetLine(row: number): Result
+    if row < 1 || row > line('$')
+        return Failure.new("超出缓冲区范围")
+    endif
+    return Success.new(getline(row))
+enddef
+
+def SafeGetLines(start: number, end: number): Result
+    if start < 1 || end > line('$')
+        return Failure.new("超出缓冲区范围")
+    endif
+    return Success.new(getline(start, end))
+enddef
+
+
+def SearchRightCurlyBracket(row: number): Result
+    const has_right_braket = getline(row, line('$'))
+        ->filter((_, line) => line->split('\zs')->index("}") !=# -1)
+        ->len() ==# 0
+    if has_right_braket
+        return Failure.new("没有右括号")
+    endif
+    return Success.new("有右括号")
+enddef
+
+def SearchLeftCurlyBracet(row: number): Result
+    const lines_contains_bracket = getline(1, row)
+        ->map((index, line) => {
+            return line
+                ->split('\zs')
+                ->filter((_, char) => char ==# '{' || char ==# '}')
+                ->map((_, char) => [index + 1, char])
+        })
+        ->flattennew(1)
+        ->reverse()
+
+    var right_count: number = 0
+    for [line_num, char] in lines_contains_bracket
+        if char ==# '{'
+            if right_count ==# 0
+                return Success.new(line_num)
+            else
+                right_count -= 1
+            endif
+        elseif char ==# '}'
+            right_count += 1
+        endif
+    endfor
+    return Failure.new("could not find it!")
+enddef
+
+
+def SearchCurlyBraket(): bool
+    const [_, row, col, _] = getcharpos(".")
+    if SearchRightCurlyBracket(row).IsFailure
+        return false
+    endif
+    const left_bracket = SearchLeftCurlyBracet(row - 1)
+    if left_bracket.IsFailure
+        return false
+    endif
+    return matchstr(getline(left_bracket.inner_value), '\v^\s*match>') !=# ''
+enddef
+
+export def GuessExand(): string
+    const token = Cword('[^[:space:]]')
+    if token ==# ''
+        return '= '
+    else
+        return ' = '
+    endif
+enddef
+
+
+export def RustGuessExpand(): string
+    const token = Cword('[^[:space:]]')
+    if token =~# '\v^\d+$'
+        return '..'
+    elseif token =~# '\v\.\.$'
+        return '='
+    elseif SearchCurlyBraket()
+        if token ==# ''
+            return '=> '
+        else
+            return ' => '
+        endif
+    elseif token ==# ''
+        return '= '
+    elseif token[-1 : ] ==# ')'
+        return " ->"
+    else
+        return ' = '
+    endif
+enddef
+
+def CountTrailing(str: string): number
+    const count = str->len() - trim(str, ' ', 2)->len() - 1
+    echom "count = " .. count
+    return count
+enddef
+
+export def CppGuessExpand(): string
+    const token = Cword('\v.')
+    if token =~# '\v\)\s+$'
+        return "-> "
+    elseif token[-1 : ] ==# ')'
+        return " -> "
+    elseif token ==# ''
+        return '= '
+    else
+        return ' = '
+    endif
+enddef

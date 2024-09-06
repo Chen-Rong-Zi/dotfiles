@@ -176,7 +176,7 @@ export class GrepMode
         # echom GrepMode.loaded_buf_nr
         getbufinfo({"buflisted": 1})->fp.Filter(Valid)
                     ->fp.Map((_, buf) => {
-                        echom 'bdelete! ' .. buf['bufnr']
+                        # echom 'bdelete! ' .. buf['bufnr']
                         silent! execute 'bdelete! ' .. buf['name']
                         return 1
                     })
@@ -306,7 +306,7 @@ export class RunMode
     def ModeInit(): bool
         this.src_path = this._DecideSrc()
         if this.src_path ==# ''
-            echom "this.src_path = " .. string(this.src_path)
+            # echom "this.src_path = " .. string(this.src_path)
             return false
         endif
         this.mode.ModeInit()
@@ -320,7 +320,6 @@ export class RunMode
     enddef
 
     static def Copen()
-        botright copen 6
         exe 'botright copen ' .. string(float2nr(&lines * (3.0 / 14.0)))
         setlocal nonumber norelativenumber nolist
         # execute "normal! \<c-w>k"
@@ -336,18 +335,18 @@ export class RunMode
             execute 'bdelete! ' .. runmode.term_nr
         endif
 
-        if getfsize($HOME .. '/.cache/vim/error') >=# 1
-            execute 'cgetfile ' .. $HOME .. '/.cache/vim/error'
-            setqflist([], 'r',  {'title': '退出代码: ' .. string(exitval)})
-            RunMode.Copen()
-            runmode.open_term = true
-        endif
+        # if getfsize($HOME .. '/.cache/vim/error') >=# 1
+        execute 'cgetfile ' .. $HOME .. '/.cache/vim/error'
+        setqflist([], 'r',  {'title': '退出代码: ' .. string(exitval)})
+        RunMode.Copen()
+        runmode.open_term = true
+        # endif
     enddef
 
-    def Run(...args: list<any>)
+    def Run(...args: list<any>): bool
         if this.ModeInit() ==# false
             useful.Notify(['ModeInit失败，不进入RunMode'])
-            return
+            return false
         endif
 
         const winid = win_getid()
@@ -355,7 +354,7 @@ export class RunMode
         const strict      = args->index('-s') !=# -1
         const input       = args->index('--') !=# -1
         const input_args  = input ? join(args[args->index('--') : ], ' ') : ''
-        const option      = {'term_rows': &lines / 5, 'err_io': 'file', 'err_name': $HOME .. '/.cache/vim/error', 'exit_cb': (exit_job: job, id: number) => RunMode.ExitHandler(exit_job, id, this)}
+        const option      = {'term_rows': float2nr(&lines * (3.0 / 14.0)), 'err_io': 'file', 'err_name': $HOME .. '/.cache/vim/error', 'exit_cb': (exit_job: job, id: number) => RunMode.ExitHandler(exit_job, id, this)}
         const time_passby = TimeStamp(false)
         const run_cmd     = "io -eq " .. this.src_path
 
@@ -368,6 +367,7 @@ export class RunMode
         botright this.term_nr = term_start(cmd, option)
         TimeStamp(!run_only)
         WinFocusOn(winid)
+        return true
     enddef
 
     static def RunHandler(ch: channel, msg: string, runmode: RunMode)
@@ -457,19 +457,24 @@ export class ModeManager
     static def Run(tabid: number, ...args: list<any>)
         # echom 'tabid = ' .. string(tabid) .. '  keys = ' .. string(ModeManager.database->keys())
         final mode_state: TabPage = ModeManager.database[string(tabid)]
+        var result: bool
         if len(args) ==# 0
-            mode_state.run_mode.Run()
+            result = mode_state.run_mode.Run()
         else
-            mode_state.run_mode.Run(args[0], args[1 : ]->join(' '))
+            result = mode_state.run_mode.Run(args[0], args[1 : ]->join(' '))
         endif
-        mode_state.SetCurrMode('RunMode')
+        if result
+            mode_state.SetCurrMode('RunMode')
+        endif
     enddef
 
     static def Debug(tabid: number)
         # echom 'tabid = ' .. string(tabid) .. '  keys = ' .. string(ModeManager.database->keys())
         final mode_state: TabPage = ModeManager.database[string(tabid)]
-        mode_state.run_mode.Debug()
-        mode_state.SetCurrMode('RunMode')
+        final result: bool = mode_state.run_mode.Debug()
+        if result
+            mode_state.SetCurrMode('RunMode')
+        endif
     enddef
 
     static def Mypy(tabid: number)

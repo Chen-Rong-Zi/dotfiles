@@ -280,7 +280,8 @@ endif
 
 syn keyword cTypedef    typedef
 syn keyword cStructure  struct union enum
-syn keyword cStorageClass   static register auto volatile extern const
+" syn keyword cStorageClass   static register auto volatile extern const
+syn keyword cStorageClass   static register volatile extern const
 if !exists("c_no_c99") && !s:in_cpp_family
   syn keyword   cStorageClass   inline restrict
 endif
@@ -615,6 +616,8 @@ syntax keyword Keyword vector   conceal cchar=𝗏
 syntax keyword Keyword decltype conceal cchar=𝘿
 syntax keyword Keyword const    conceal cchar=𝘾
 syntax keyword Keyword catch    conceal cchar=𝔼
+syntax keyword Keyword auto     conceal cchar=𝙁
+syntax keyword Keyword fn
 syntax match   Keyword /\[=\]/  conceal cchar=λ
 " syntax keyword Keyword vector   conceal cchar=𝘷▶
 " syn region keyword  /password/ conceal cchar=*

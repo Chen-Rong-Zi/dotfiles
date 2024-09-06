@@ -5,10 +5,11 @@
 "                ██║ ╚═╝ ██║   ██║    ╚████╔╝ ██║██║ ╚═╝ ██║██║  ██║╚██████╗
 "                ╚═╝     ╚═╝   ╚═╝     ╚═══╝  ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝ ╚═════╝
 
-
+let skip_defaults_vim=1
 set nocp
 set concealcursor=ni
 set conceallevel=2
+set viminfo-=h
 
 " set smartindent tabline
 set cedit=<c-o>
@@ -26,7 +27,7 @@ set list
 
 set listchars=leadmultispace:│\ \ \ ,trail:-,precedes:>,extends:<,tab:⏐\ 
 set linebreak
-set nohlsearch
+set hlsearch
 set rnu nu
 set scrolloff=7
 set shiftwidth=4
@@ -52,11 +53,11 @@ set pumheight=10
 set completeopt=menuone,popup,noinsert,noselect
 set completepopup=height:10,width:10,highlight:CompletePopup
 " set complete=.,w,t,k,b
-set complete=.,w,t,kspell
+set complete=.,w,t,b,kspell
 
 
 " set shortmess=acOtT
-set shortmess=filnxtToOSFc
+set shortmess=filnxtToOFc
 
 " set timeoutlen=200
 " set ttimeout
@@ -67,6 +68,7 @@ set textwidth=256
 set helplang=cn
 set termwinsize=10*0
 set foldcolumn=0
+set foldlevel=100
 set foldmethod=indent
 set nu ru ai si ts=4 sw=4
 
@@ -75,13 +77,13 @@ let mapleader = ","
 if !exists("g:colorscheme")
     set termguicolors
     set encoding=utf-8
+    set fileencodings=UTF-8,gbk,usc-bom,latin1
+    colorscheme tokyonight
+    " colorscheme onedark
     " syntax off
-    if !exists('g:colorscheme')
-        colorscheme tokyonight
-    endif
     let g:tokyonight_style   = 'night'
     let g:colorscheme        = 'tokyonight'
-    " let g:airline_theme      = 'tokyonight'
+    let g:airline_theme      = 'tokyonight'
     let g:autocomplete       = 1
     let g:HaveCompletion     = 1
     let g:pair_range         = &lines
@@ -90,6 +92,7 @@ if !exists("g:colorscheme")
     let g:loaded_matchparen  = 0
     let g:grep_buffer_limit  = 200
     let g:MATCHPAIRS = [
+        \ ['|', '|'],
         \ ['{', '}'],
         \ ['<', '>'],
         \ ['[', ']'],
@@ -124,7 +127,7 @@ au filetype rust ino <buffer> { <ScriptCmd>call s:util.BracketIndent()<CR>
 "au filetype rust ino <silent> <buffer> { <right>{<CR>}<Esc>O
 "au filetype rust ino <buffer> { <esc>A{<CR><++>}<ESC>O
 au filetype rust ino <buffer> <leader>c /*    */<esc>4<left>a
-au filetype rust ino <silent> <buffer> <c-l> <c-r>=GuessExand()<CR>
+au filetype rust ino <silent> <buffer> <c-l> <c-r>=RustGuessExpand()<CR>
 au filetype rust ino <silent> <buffer> <expr> <leader><leader> Expand('= 0')
 au filetype rust ino <buffer> <leader>d ::
 au filetype rust ino <buffer> <leader>sd std::
@@ -146,7 +149,7 @@ au filetype rust inorea <silent> <buffer> sc      static
 au filetype rust inorea <silent> <buffer> pr      private
 au filetype rust inorea <silent> <buffer> pt      protected
 au filetype rust inorea <silent> <buffer> itn      int
-au filetype rust inorea <silent> <buffer> vec     vec!()
+au filetype rust inorea <silent> <buffer> vec     vec![]<left><c-r>=Eatchar('\s')<CR>
 au filetype rust inorea <silent> <buffer> vector     Vec
 " au filetype rust inorea <silent> <buffer> ao      auto
 " au filetype rust inorea <silent> <buffer> var      auto
@@ -155,7 +158,7 @@ au filetype rust inorea <silent> <buffer> vectro   vector<><left><C-R>=Eatchar('
 au filetype rust inorea <silent> <buffer> retrun   return
 au filetype rust inorea <silent> <buffer> retunr   return
 au filetype rust inorea <silent> <buffer> reutrn   return
-au filetype rust inorea <silent> <buffer> for      for i in 0..<c-r>=Eatchar('\s')<CR>
+" au filetype rust inorea <silent> <buffer> for      for i in 0..<c-r>=Eatchar('\s')<CR>
 " au filetype rust inorea <silent> <silent> <buffer> while  while ( )<left><left>
 " au filetype rust inorea <silent> <silent> <buffer> while  while
 " au filetype rust inorea <silent> <buffer> self     this-><C-R>=Eatchar('\s')<CR>
@@ -183,12 +186,12 @@ au filetype rust let $src=expand('%:p')
 " au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
 aug end
 
- " ██████╗    ██╗ ██████╗██████╗ ██████╗
+"  ██████╗    ██╗ ██████╗██████╗ ██████╗
 " ██╔════╝   ██╔╝██╔════╝██╔══██╗██╔══██╗
 " ██║       ██╔╝ ██║     ██████╔╝██████╔╝
 " ██║      ██╔╝  ██║     ██╔═══╝ ██╔═══╝
 " ╚██████╗██╔╝   ╚██████╗██║     ██║
- " ╚═════╝╚═╝     ╚═════╝╚═╝     ╚═╝
+" ╚═════╝╚═╝     ╚═════╝╚═╝     ╚═╝
 " C / CPP filetype script settings--------<++>------------{{{
 aug C
 autocmd!
@@ -208,7 +211,7 @@ au filetype c,cpp ino <buffer> { <ScriptCmd>call s:util.BracketIndent()<CR>
 "au filetype c,cpp ino <silent> <buffer> { <right>{<CR>}<Esc>O
 "au filetype c,cpp ino <buffer> { <esc>A{<CR><++>}<ESC>O
 au filetype c,cpp ino <buffer> <leader>c /*    */<esc>4<left>a
-au filetype c,cpp ino <silent> <buffer> <c-l> <c-r>=Expand('=')<CR>
+au filetype c,cpp ino <silent> <buffer> <c-l> <c-r>=CppGuessExpand()<CR>
 au filetype c,cpp ino <silent> <buffer> <expr> <leader><leader> Expand('= 0')
 au filetype c,cpp ino <buffer> <leader>d ::
 au filetype c,cpp ino <buffer> <leader>sd std::
@@ -222,9 +225,10 @@ au BufEnter *.c*,*.h let g:comment = '//'
 au filetype c,cpp nn <buffer> ;    <ScriptCmd>call s:util.AddSuffix(';')<CR>
 
 " ABBREVIATION
-au filetype   cpp inorea <silent> <buffer> lambda   [=] (auto <++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
-au filetype   cpp inorea <silent> <buffer> llambda   [=] (auto <++>) {<CR>return <++>;<CR>}<Esc>2kf<ca<<C-R>=Eatchar('\s')<CR>
-au filetype   cpp inorea <silent> <buffer> lamdba   [=] (auto <++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
+au filetype   cpp inorea <silent> <buffer> lm   [<++>] (<++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
+au filetype   cpp inorea <silent> <buffer> lambda   [=] (<++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
+au filetype   cpp inorea <silent> <buffer> llambda   [=] (<++>) {<CR>return <++>;<CR>}<Esc>2kf<ca<<C-R>=Eatchar('\s')<CR>
+au filetype   cpp inorea <silent> <buffer> lamdba   [=] (<++>) {return <++>;}<Esc>2F<ca<<C-R>=Eatchar('\s')<CR>
 au filetype   cpp inorea <silent> <buffer> pu      public
 au filetype   cpp inorea <silent> <buffer> sc      static
 au filetype   cpp inorea <silent> <buffer> pr      private
@@ -467,6 +471,63 @@ au TerminalOpen * if &buftype ==# 'terminal'
 aug end
 " }}}
 
+" ██████╗ ██╗     ██╗   ██╗ ██████╗       ██╗███╗   ██╗
+" ██╔══██╗██║     ██║   ██║██╔════╝       ██║████╗  ██║
+" ██████╔╝██║     ██║   ██║██║  ███╗█████╗██║██╔██╗ ██║
+" ██╔═══╝ ██║     ██║   ██║██║   ██║╚════╝██║██║╚██╗██║
+" ██║     ███████╗╚██████╔╝╚██████╔╝      ██║██║ ╚████║
+" ╚═╝     ╚══════╝ ╚═════╝  ╚═════╝       ╚═╝╚═╝  ╚═══╝
+" plug-in settings---------<++>-----------{{{
+" NERDTree
+" noremap <leader>t :NERDTreeToggle<CR>
+
+" " Full Screen Set
+" nn \| <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleFullscreen', 0)<CR>
+
+" "" press F12 to change the scheme of the local window
+" no <C-j>j <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleTransparency', "100,180")<CR>
+" no <C-k>k <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleTransparency', "225,255")<CR>
+
+" easymotion
+nn <c-f> <plug>(easymotion-prefix)s
+
+" filetype plugin on
+
+call plug#begin()
+" The default plugin directory will be as follows:
+"   - Vim (Linux/macOS): '~/.vim/plugged'
+"   - Vim (Windows): '~/vimfiles/plugged'
+"   - Neovim (Linux/macOS/Windows): stdpath('data') . '/plugged'
+" You can specify a custom plugin directory by passing it as the argument
+"   - e.g. `call plug#begin('~/.vim/plugged')`
+"   - Avoid using standard Vim directory names like 'plugin'
+" Make sure you use single quotes
+Plug 'vim-airline/vim-airline-themes', { 'frozen': 1 }
+Plug 'vim-airline/vim-airline',        { 'frozen': 1 }
+
+Plug 'junegunn/fzf',     { 'do': { ->    fzf#install() }, 'on': 'FZF' }
+Plug 'junegunn/fzf.vim', { 'on'  : 'FZF' }
+
+Plug 'Chen-Rong-Zi/gmotion.vim', { 'do': { -> popup_notification(['Gmotion Installed'], {'time': 1000})}}
+let g:gmotion_pair = g:MATCHPAIRS
+
+Plug 'Chen-Rong-Zi/fcitx.vim', {'on': ['FcitxStart', 'FcitxStop']}
+
+Plug 'yianwillis/vimcdoc'
+
+Plug 'easymotion/vim-easymotion', {'on': '<plug>(easymotion-prefix)s', 'frozen': 1}
+
+" " If you don't have nodejs and yarn
+" use pre build, add 'vim-plug' to the filetype list so vim-plug can update this plugin
+" see: https://github.com/iamcco/markdown-preview.nvim/issues/50
+" Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+" If you have nodejs
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install', 'for': 'markdown' }
+" Plug 'pycqa/pylint'
+" Plug 'vim-scripts/pylint.vim'
+call plug#end()
+" }}}
+
 
 " ███╗   ██╗ ██████╗ ██████╗ ███╗   ███╗ █████╗ ██╗
 " ████╗  ██║██╔═══██╗██╔══██╗████╗ ████║██╔══██╗██║
@@ -590,19 +651,19 @@ au VimEnter * ino <silent> <leader>el  <c-r>=Expand('<=')<cr>
 au VimEnter * ino <silent> <leader>eg  <c-r>=Expand('>=')<cr>
 au VimEnter * ino <silent> <leader>en  <c-r>=Expand('!=')<cr>
 au VimEnter * ino <silent> <leader>ee  <c-r>=Expand('==')<cr>
-au VimEnter * ino <leader>yi  !
-au VimEnter * ino <leader>er  @
-au VimEnter * ino <leader>sj  #
-au VimEnter * ino <leader>si  $
-au VimEnter * ino <silent> <leader>wu  <c-r>=Expand('%')<cr>
-au VimEnter * ino <leader>lq  ^
-au VimEnter * ino <leader>qi  &
-au VimEnter * ino <silent> <leader>ba  <c-r>=Expand('*')<cr>
-au VimEnter * ino <silent> <leader>jq  <c-r>=Expand('-')<cr>
-au VimEnter * ino <silent> <leader>ui  <c-r>=Expand('+')<cr>
-au VimEnter * ino <leader>a  ()<left>
-au VimEnter * ino <leader>b {}<left>
-au VimEnter * ino <leader>c []<left>
+au VimEnter * ino kyi  !
+au VimEnter * ino ker  @
+au VimEnter * ino ksj  #
+au VimEnter * ino ksi  $
+au VimEnter * ino <silent> kwu  <c-r>=Expand('%')<cr>
+au VimEnter * ino klq  ^
+au VimEnter * ino kqi  &
+au VimEnter * ino <silent> kba  <c-r>=Expand('*')<cr>
+au VimEnter * ino <silent> kjq  <c-r>=Expand('-')<cr>
+au VimEnter * ino <silent> kui  <c-r>=Expand('+')<cr>
+au VimEnter * ino ka  ()<left>
+au VimEnter * ino kb {}<left>
+au VimEnter * ino kc []<left>
 au VimEnter * ino } {}<left>
 au VimEnter * ino (  ()<left>
 au VimEnter * ino <c-o>  ()<left>
@@ -663,7 +724,8 @@ au VimEnter * vn \|    :!
 au VimEnter * vn s     :s/
 au VimEnter * vn <c-h> ^
 au VimEnter * vn <c-l> g_
-au VimEnter * vn *     y<ScriptCMD>call s:util.SearchSelectedText() \| %s///gn<CR>
+" au VimEnter * vn *     y<ScriptCMD>call s:util.SearchSelectedText() \| %s///gn<CR>
+au VimEnter * nn v     <ScriptCMD>call s:util.HLSearch()<CR>v
 au VimEnter * vn v     <Esc>
 
 au VimEnter * inorea 123 {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
@@ -694,9 +756,12 @@ au VimEnter * ++once call ArgNumberZero()
 
 function! TermIsLinux()
     if $TERM ==# 'linux'
-        set notermguicolors
-        " color zellner
-        color industry
+        if $DISPLAY == ''
+            set notermguicolors
+            set fillchars=vert:\|
+        endif
+        set listchars=leadmultispace:\|\ \ \ ,trail:-,precedes:>,extends:<,tab:\ \ 
+        color zellner
         set lazyredraw
     endif
 endfunction
@@ -711,64 +776,6 @@ function! ArgNumberZero()
 endfunction
 
 aug END
-" }}}
-
-
-" ██████╗ ██╗     ██╗   ██╗ ██████╗       ██╗███╗   ██╗
-" ██╔══██╗██║     ██║   ██║██╔════╝       ██║████╗  ██║
-" ██████╔╝██║     ██║   ██║██║  ███╗█████╗██║██╔██╗ ██║
-" ██╔═══╝ ██║     ██║   ██║██║   ██║╚════╝██║██║╚██╗██║
-" ██║     ███████╗╚██████╔╝╚██████╔╝      ██║██║ ╚████║
-" ╚═╝     ╚══════╝ ╚═════╝  ╚═════╝       ╚═╝╚═╝  ╚═══╝
-" plug-in settings---------<++>-----------{{{
-" NERDTree
-" noremap <leader>t :NERDTreeToggle<CR>
-
-" " Full Screen Set
-" nn \| <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleFullscreen', 0)<CR>
-
-" "" press F12 to change the scheme of the local window
-" no <C-j>j <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleTransparency', "100,180")<CR>
-" no <C-k>k <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleTransparency', "225,255")<CR>
-
-" easymotion
-nn <c-f> <plug>(easymotion-prefix)s
-
-" filetype plugin on
-
-call plug#begin()
-" The default plugin directory will be as follows:
-"   - Vim (Linux/macOS): '~/.vim/plugged'
-"   - Vim (Windows): '~/vimfiles/plugged'
-"   - Neovim (Linux/macOS/Windows): stdpath('data') . '/plugged'
-" You can specify a custom plugin directory by passing it as the argument
-"   - e.g. `call plug#begin('~/.vim/plugged')`
-"   - Avoid using standard Vim directory names like 'plugin'
-" Make sure you use single quotes
-Plug 'vim-airline/vim-airline-themes', { 'frozen': 1 }
-Plug 'vim-airline/vim-airline',        { 'frozen': 1 }
-
-Plug 'junegunn/fzf',     { 'do': { ->    fzf#install() }, 'on': 'FZF' }
-Plug 'junegunn/fzf.vim', { 'on'  : 'FZF' }
-
-Plug 'Chen-Rong-Zi/gmotion.vim', { 'do': { -> popup_notification(['Gmotion Installed'], {'time': 1000})}}
-let g:gmotion_pair = g:MATCHPAIRS
-
-Plug 'Chen-Rong-Zi/fcitx.vim', {'on': ['FcitxStart', 'FcitxStop']}
-
-Plug 'yianwillis/vimcdoc'
-
-Plug 'easymotion/vim-easymotion', {'on': '<plug>(easymotion-prefix)s', 'frozen': 1}
-
-" " If you don't have nodejs and yarn
-" use pre build, add 'vim-plug' to the filetype list so vim-plug can update this plugin
-" see: https://github.com/iamcco/markdown-preview.nvim/issues/50
-" Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
-" If you have nodejs
-Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install', 'for': 'markdown' }
-" Plug 'pycqa/pylint'
-" Plug 'vim-scripts/pylint.vim'
-call plug#end()
 " }}}
 
 
@@ -997,22 +1004,28 @@ au VimEnter * nn mm <ScriptCmd>call s:util.CommentToggleMaker(g:comment)<CR>g@$
 au VimEnter * vn m  <ScriptCmd>call s:util.CommentToggleMaker(g:comment)<CR>g@
 
 au vimenter * nn ( <Cmd>call MakeWrapper('(', ')', 2)<CR>g@
+au vimenter * nn ) <Cmd>call MakeWrapper('(', ')', 2, 'block')<CR>g@
 au vimenter * nn { <Cmd>call MakeWrapper('{', '}', 2)<CR>g@
+au vimenter * nn } <Cmd>call MakeWrapper('{', '}', 2, 'block')<CR>g@
+au vimenter * nn [ <Cmd>call MakeWrapper('[', ']', 1)<CR>g@
+au vimenter * nn ] <Cmd>call MakeWrapper('[', ']', 1)<CR>g@
 au vimenter * nn " <Cmd>call MakeWrapper('"', '"', 2)<CR>g@
 au vimenter * nn ' <Cmd>call MakeWrapper("'", "'", 2)<CR>g@
-au vimenter * nn [ <Cmd>call MakeWrapper('[', ']', 1)<CR>g@
 
-au vimenter * nn (( 0<Cmd>call MakeWrapper('(', ')', 2)<CR>g@$
-au vimenter * nn {{ 0<Cmd>call MakeWrapper('{', '}', 2)<CR>g@$
-au vimenter * nn "" 0<Cmd>call MakeWrapper('"', '"', 2)<CR>g@$
-au vimenter * nn '' 0<Cmd>call MakeWrapper("'", "'", 2)<CR>g@$
-au vimenter * nn [[ 0<Cmd>call MakeWrapper('[', ']', 1)<CR>g@$
+au vimenter * nn (( ^<Cmd>call MakeWrapper('(', ')', 2)<CR>g@g_
+au vimenter * nn {{ ^<Cmd>call MakeWrapper('{', '}', 2)<CR>g@g_
+au vimenter * nn "" ^<Cmd>call MakeWrapper('"', '"', 2)<CR>g@g_
+au vimenter * nn '' ^<Cmd>call MakeWrapper("'", "'", 2)<CR>g@g_
+au vimenter * nn [[ ^<Cmd>call MakeWrapper('[', ']', 1)<CR>g@g_
 
 au vimenter * vn ( <Cmd>call MakeWrapper('(', ')', 2)<CR>g@
+au vimenter * vn ) <Cmd>call MakeWrapper('(', ')', 2, 'block')<CR>g@
 au vimenter * vn { <Cmd>call MakeWrapper('{', '}', 2)<CR>g@
+au vimenter * vn } <Cmd>call MakeWrapper('{', '}', 2, 'block')<CR>g@
+au vimenter * vn [ <Cmd>call MakeWrapper('[', ']', 1)<CR>g@
+au vimenter * vn ] <Cmd>call MakeWrapper('[', ']', 1, 'block')<CR>g@
 au vimenter * vn " <Cmd>call MakeWrapper('"', '"', 2)<CR>g@
 au vimenter * vn ' <Cmd>call MakeWrapper("'", "'", 2)<CR>g@
-au vimenter * vn [ <Cmd>call MakeWrapper('[', ']', 1)<CR>g@
 
 " au vimenter * nn (( 0<Cmd>vim9cmd &operatorfunc = util.MakeWrapper('(', ')', 2)<CR>g@$
 " au vimenter * nn {{ 0<Cmd>vim9cmd &operatorfunc = util.MakeWrapper('{', '}', 2)<CR>g@$
@@ -1073,20 +1086,30 @@ function! Expand(pat)
     endif
 endfunction
 
+function! ParseLine(row)
+    if a:row <=# 1
+        return ''
+    endif
+    return getline(a:row - 1)
+endfunction
+
 function! GuessExand()
-    let token = s:util.Cword('[^[:space:]]')
-    if token =~# '\v\)$'
-        return " ->"
-    elseif token =~# '\v^\d+$'
-        return '..'
-    elseif token ==# ''
-        return '= '
+    return s:util.GuessExand()
+endfunction
+
+function! RustGuessExpand()
+    return s:util.RustGuessExpand()
+endfunction
+
+function! CppGuessExpand()
+    return s:util.CppGuessExpand()
+endfunction
+
+function! MakeWrapper(left, right, stop, force_type = '')
+    if a:force_type !=# ''
+        let &operatorfunc = {type -> s:util.WrapOper(a:force_type, a:left, a:right, a:stop)}
     else
-        return ' = '
+        let &operatorfunc = {type -> s:util.WrapOper(type, a:left, a:right, a:stop)}
     endif
 endfunction
-
-function! MakeWrapper(left, right, stop)
-    let &operatorfunc = {type -> s:util.WrapOper(type, a:left, a:right, a:stop)}
-endfunction
-
+" }}}

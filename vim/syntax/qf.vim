@@ -23,6 +23,8 @@ syntax match Preproc /附注/
 syntax match Preproc /警告/
 syntax match qfError /error/
 syntax match Preproc /\vwarn(ing)/
+syntax match Preproc /\v_+\^/ display
+
 
 syntax match Nontext /\v\|/ conceal cchar=│
 syntax match Nontext /\v\|\| / conceal

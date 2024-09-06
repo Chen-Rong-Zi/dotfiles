@@ -7,10 +7,13 @@
 " -----------------------------------------------------------------------------
 
 " Initialization: {{{
-" highlight clear
-if exists('g:colorscheme')
-  finish
-endif
+" if exists('g:loaded_tokyonight')
+  " finish
+" endif
+
+let g:loaded_tokyonight = 1
+
+highlight clear
 let g:colorscheme = 'tokyonight'
 if exists('syntax_on')
   syntax reset

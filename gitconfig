@@ -18,3 +18,5 @@
 	required = true
 [init]
 	defaultBranch = master
+[color]
+	ui = true
