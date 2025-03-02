@@ -28,7 +28,7 @@ def JumpTo(mark: string)
         useful.Notify(['JumpTo: 没有' .. mark .. ' 这个标签可以跳转'])
         return
     endif
-    execute 'normal! `' .. mark ..  'zz'
+    execute 'normal! `' .. mark
 enddef
 
 export class Mode
@@ -45,7 +45,7 @@ export class Mode
     # jump to last M mark if there already have M, otherwise set the M mark here
         execute 'normal! m' .. this.tag
         this.origin_winid = win_getid()
-        nn <c-q> <ScriptCmd>ModeManager.ExitMode(t:tabid)<CR>
+        nn <c-q> <ScriptCmd>ModeManager.ExitMode(ModeManager.GetTabID())<CR>
         return true
     enddef
 
@@ -129,6 +129,10 @@ export class GrepMode
     public static var grep_buffer_limit: number
     public static final mode = Mode.new(0)
     public static var loaded_buf_nr: list<number> = []
+    public static var GREP_BIN = 'grep'
+    public static var GREP_OPTION = '-rni'
+    public static var GREP_SEARCH_PATH = '.'
+    public static var GREP_SEARCH_CONTENT = ''
 
     static def Cnext()
         try
@@ -145,22 +149,24 @@ export class GrepMode
             useful.Notify(['没有上一项'])
         endtry
     enddef
-    static def Copen(text: string)
+    static def Copen(text: string, search_path: string)
         @/ = text
-        exe 'botright copen ' .. string(float2nr(&lines * (3.0 / 14.0)))
+        setqflist([], 'r')
+        setqflist([], 'r', {'title': '搜索目录：' .. search_path, 'lines': float2nr(&lines * (3.0 / 14.0)) })
+        botright copen
         setlocal nolist nonu nornu
         # execute "normal! \<c-w>k"
     enddef
 
     static def ModeInit(): bool
-        ModeManager.ExitMode(t:tabid)
+        ModeManager.ExitMode(ModeManager.GetTabID())
         GrepMode.mode.ModeInit()
         nn <c-n> <ScriptCmd> GrepMode.Cnext() \| normal! zR<CR>
         nn <c-p> <ScriptCmd> GrepMode.Cprev() \| normal! zR<CR>
         &errorformat = &grepformat
         GrepMode.grep_buffer_limit = g:grep_buffer_limit
         GrepMode.loaded_buf_nr = getbufinfo({'buflisted': 1})->map((_, buf) => buf['bufnr'])
-        ModeManager.database[string(t:tabid)].curr_mode = "GrepMode"
+        ModeManager.database[string(ModeManager.GetTabID())].curr_mode = "GrepMode"
         return true
     enddef
 
@@ -192,9 +198,20 @@ export class GrepMode
 
     enddef
 
+    static def Grep()
+        const winid = win_getid()
+        GrepMode.ModeInit()
+        # 清除qf列表
+        GrepMode.count = 0
+        GrepMode.job = job_start(
+            [GrepMode.GREP_BIN, GrepMode.GREP_OPTION, GrepMode.GREP_SEARCH_CONTENT, expand("%:p"), GrepMode.GREP_SEARCH_PATH],
+            {'out_cb': GrepMode.GrepHandler, 'timeout': 100})
+        GrepMode.Copen(GrepMode.GREP_SEARCH_CONTENT, GrepMode.GREP_SEARCH_PATH)
+        WinFocusOn(winid)
+    enddef
+
     static def Run(): func: void
         return (_) => {
-            const winid = win_getid()
             var searchContent: string = ""
             const [_, l_row, l_col, _] = getpos("'[")
             const [_, r_row, r_col, _] = getpos("']")
@@ -211,18 +228,12 @@ export class GrepMode
                 lines[0]  = lines[0][l_col - 1 : ]
                 lines[-1] = lines[-1][ : r_col - 1]
             endif
-            GrepMode.ModeInit()
-            # 清除qf列表
-            cgetexpr ''
-            GrepMode.count = 0
-            GrepMode.job = job_start(
-                ["grep", "-rni", searchContent, expand("%:p"), expand("%:p:h")],
-                {'out_cb': GrepMode.GrepHandler, 'timeout': 100})
-            GrepMode.Copen(searchContent)
-            WinFocusOn(winid)
+            GrepMode.GREP_SEARCH_CONTENT = searchContent
+            GrepMode.Grep()
         }
     enddef
 endclass
+nn <leader>gp <ScriptCmd>g:GrepMode_SearchPath = system('realpath ' .. input('要搜索的目录：'))->trim()<CR>
 
 # function RunMode(){{{
 def MakeTimeStamp(): func(bool): float
@@ -242,7 +253,7 @@ var term_bufnr: number = -1
 
 export def RunModeWithArgs()
     const args = input("请输入参数： ")
-    ModeManager.Run(t:tabid, '--', args)
+    ModeManager.Run(ModeManager.GetTabID(), '--', args)
 enddef
 
 def AddFlag(flag: string): any
@@ -272,41 +283,43 @@ export class RunMode
 
     def ModeExit()
         this.mode.ModeExit()
+        # echom job_status(this.run_job)
         if job_status(this.run_job) !=# 'fail'
             job_stop(this.run_job, 'kill')
         endif
-        if bufnr(this.term_nr) !=# -1 && this.term_nr !=# 0
-            execute 'bdelete! ' .. this.term_nr
+        if bufnr(this.term_nr) !=# -1
+            job_setoptions(term_getjob(this.term_nr), {'exit_cb': (exit_job: job, id: number) => 1})
+            silent! execute 'bdelete! ' .. this.term_nr
         endif
         if this.open_term
+            this.open_term = false
             cclose
         endif
     enddef
 
     def _DecideSrc(): string
         var curr_path = expand('%:p')
-        if ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']->index(useful.FileType(curr_path)) !=# -1 && &buftype ==# ''
+        const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
+        if &buftype ==# '' && types->index(useful.FileType(curr_path)) !=# -1
             this.makeprg = &makeprg
             this.mode.ModeInit()
-            ModeManager.ExitMode(t:tabid)
-            return curr_path
-        endif
-        ModeManager.ExitMode(t:tabid)
-        curr_path = expand('%:p')
-        if ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']->index(useful.FileType(curr_path)) !=# -1
-            this.makeprg = &makeprg
-            # this.mode.ModeInit()
+            ModeManager.ExitMode(ModeManager.GetTabID())
             return curr_path
         endif
 
-        useful.Notify(['只能运行Rust/C/Cpp/Python/Java文件'])
-        return ''
+        ModeManager.ExitMode(ModeManager.GetTabID())
+        curr_path = expand('%:p')
+        if types->index(useful.FileType(curr_path)) !=# -1
+            this.makeprg = &makeprg
+            return curr_path
+        else
+            return ''
+        endif
     enddef
 
     def ModeInit(): bool
         this.src_path = this._DecideSrc()
         if this.src_path ==# ''
-            # echom "this.src_path = " .. string(this.src_path)
             return false
         endif
         this.mode.ModeInit()
@@ -319,15 +332,16 @@ export class RunMode
         return true
     enddef
 
-    static def Copen()
+    static def Copen(filetype: string)
         exe 'botright copen ' .. string(float2nr(&lines * (3.0 / 14.0)))
+        # exe 'set filetype=' .. filetype
+        # source ~/.vim/syntax/qf.vim
         setlocal nonumber norelativenumber nolist
-        # execute "normal! \<c-w>k"
     enddef
 
     static def ExitHandler(exit_job: job, winid: number, runmode: RunMode)
         const exitval = job_info(exit_job)['exitval']
-        if [0, 130, -1]->index(exitval) !=# -1
+        if exitval ==# 0
             return
         endif
         useful.Notify(['编译运行错误'])
@@ -335,12 +349,11 @@ export class RunMode
             execute 'bdelete! ' .. runmode.term_nr
         endif
 
-        # if getfsize($HOME .. '/.cache/vim/error') >=# 1
-        execute 'cgetfile ' .. $HOME .. '/.cache/vim/error'
-        setqflist([], 'r',  {'title': '退出代码: ' .. string(exitval)})
-        RunMode.Copen()
-        runmode.open_term = true
-        # endif
+        if runmode.open_term
+            execute 'cgetfile ' .. $HOME .. '/.cache/vim/error'
+            setqflist([], 'r',  {'title': '退出代码: ' .. string(exitval)})
+            RunMode.Copen(&filetype)
+        endif
     enddef
 
     def Run(...args: list<any>): bool
@@ -354,9 +367,14 @@ export class RunMode
         const strict      = args->index('-s') !=# -1
         const input       = args->index('--') !=# -1
         const input_args  = input ? join(args[args->index('--') : ], ' ') : ''
-        const option      = {'term_rows': float2nr(&lines * (3.0 / 14.0)), 'err_io': 'file', 'err_name': $HOME .. '/.cache/vim/error', 'exit_cb': (exit_job: job, id: number) => RunMode.ExitHandler(exit_job, id, this)}
+        const option      = {
+            'term_rows': float2nr(&lines * (3.0 / 14.0)),
+            'err_io': 'file',
+            'err_name': $HOME .. '/.cache/vim/error',
+            'exit_cb': (exit_job: job, id: number) => RunMode.ExitHandler(exit_job, id, this)}
         const time_passby = TimeStamp(false)
-        const run_cmd     = "io -eq " .. this.src_path
+        const run_cmd     = "io -m -eq " .. this.src_path
+        this.open_term = true
 
         if time_passby <# 1.0
             run_only = 1
@@ -380,13 +398,15 @@ export class RunMode
         endif
     enddef
 
-    def Debug()
+    def Debug(): bool
         if this.ModeInit() ==# false
             useful.Notify(['ModeInit失败，不进入RunMode'])
-            return
+            return false
         endif
         const winid = win_getid()
-        const option   = {'callback': (ch: channel, msg: string) => RunMode.RunHandler(ch, msg, this),
+        const option   = {'callback': (ch: channel, msg: string) => {
+                RunMode.RunHandler(ch, msg, this)
+            },
             'exit_cb': (exit_job: job, msg: number) => {
                 const exitval = job_info(exit_job)['exitval']
                 setqflist([], 'r',  {'title': '退出代码: ' .. string(exitval)})
@@ -395,10 +415,12 @@ export class RunMode
             ->split(' ')
             ->map((_, token) => (token =~# '\v\%.*') ? this.src_path : token)
             ->join(' ')
+        cgetexpr ''
         this.run_job = job_start(run_cmd, option)
-        RunMode.Copen()
+        RunMode.Copen(&filetype)
         this.open_term = true
         WinFocusOn(winid)
+        return true
     enddef
 endclass
 # }}}
@@ -437,12 +459,21 @@ export class ModeManager
     public static var tab_num: number = 1
     public static var database: dict<any> = {}
 
-    static def Register(tabnr: number)
-        # echom "Register: tabnr = " .. string(tabnr)
+    static def GetTabID(): number
+        const id = gettabvar(0, "tabid", -1)
+        if id !=# -1
+            return id
+        else
+            return ModeManager.Register(0)
+        endif
+    enddef
+
+    static def Register(tabnr: number): number
         const tabid = ModeManager.tab_num
         settabvar(tabnr, 'tabid', tabid)
         ModeManager.database[string(tab_num)] = TabPage.new(tabid)
         ModeManager.tab_num += 1
+        return tabid
     enddef
 
     static def CheckOut(tabid: number)
@@ -484,6 +515,41 @@ export class ModeManager
     enddef
 
 endclass
+
+def ParseGrepArgs(...args: list<string>)
+    const argc = len(args)
+    if argc ==# 1
+        GrepMode.GREP_SEARCH_CONTENT = args[0]
+    elseif argc ==# 2
+        GrepMode.GREP_OPTION      = args[0]
+        GrepMode.GREP_SEARCH_PATH = args[1]
+    else
+        GrepMode.GREP_OPTION         = args[0]
+        GrepMode.GREP_SEARCH_CONTENT = args[1]
+        GrepMode.GREP_SEARCH_PATH    = args[2]
+        GrepMode.Grep()
+    endif
+enddef
+
+
+command GrepModeOper {
+    &operatorfunc = GrepMode.Run()
+}
+
+command GrepModeEdit {
+    autocmd CmdwinEnter * ++once setline('.', ["Grep", GrepMode.GREP_OPTION, GrepMode.GREP_SEARCH_PATH]->join(' '))
+}
+
+command -nargs=0 RunMode         ModeManager.Run(ModeManager.GetTabID())
+command -nargs=0 RunModeStrict   ModeManager.Run(ModeManager.GetTabID(), '-s')
+command -nargs=0 RunModeWithArgs RunModeWithArgs()
+command -nargs=0 DebugMode       ModeManager.DEBUG(ModeManager.GetTabID())
+command -nargs=0 MypyMode        ModeManager.Mypy(ModeManager.GetTabID())
+
+
+command -nargs=+ Grep ParseGrepArgs(<f-args>)
+
+
 
 # }}}
 # defcompile

@@ -1,7 +1,76 @@
 vim9script
 import "./higherorder.vim" as fp
 # def BlankIndent(){{{
+#
+abstract class MKResult
+    var inner_value: any
+    var IsFailure: bool
+endclass
 
+class MKSuccess extends MKResult
+    # unit :: a -> MKSuccess a
+    def new(value: any)
+        this.inner_value = value
+        this.IsFailure = false
+    enddef
+endclass
+
+class MKFailure extends MKResult
+    # unit :: a -> MKFailure a
+    def new(value: any)
+        this.inner_value = value
+        this.IsFailure = true
+    enddef
+endclass
+
+def ParseUnsigned(str: string): MKResult
+    if str ==# '0'
+        return MKSuccess.new(0)
+    else
+        const int = str2nr(str)
+        if int <=# 0
+            return MKFailure.new("ParseUnsigned MKFailure: 不能解析" .. str)
+        else
+            return MKSuccess.new(int)
+        endif
+    endif
+enddef
+
+def GetRowCol(): MKResult
+    const row_col = input('输入格式：行[x列]，列省略则默认为 行x行：')->split('\zs')
+    if row_col->index('x') ==# -1
+        const row = ParseUnsigned(row_col->join(''))
+        if row.IsFailure
+            return MKFailure.new(row.inner_value .. "\ngetRow fail")
+        endif
+        return MKSuccess.new([row.inner_value, row.inner_value])
+    else
+        const x_index = row_col->index('x')
+        const row     = ParseUnsigned(row_col[   : x_index]->join(''))
+        if row.IsFailure
+            return MKFailure.new(row.inner_value .. "\ngetRow fail")
+        endif
+        const col     = ParseUnsigned(row_col[x_index + 1 : ]->join(''))
+        if col.IsFailure
+            return MKFailure.new(col.inner_value .. "\ngetCol fail")
+        endif
+        return MKSuccess.new([row.inner_value, col.inner_value])
+    endif
+enddef
+
+export def MarkDownTable()
+    const row_col: MKResult = GetRowCol()
+    if row_col.IsFailure
+        echoerr row_col.inner_value
+        return
+    endif
+    const [row, col] = row_col.inner_value
+    const align_sign = repeat('| ---  ', col) .. '|'
+    const table_col  = repeat('| <++> ', col) .. '|'
+    var table: list<string> = [table_col]->repeat(row)
+    table->insert(align_sign, 1)
+    append('.', table)
+enddef
 
 def UpdateSearchReg()
     if mode() !=# 'v'
@@ -377,19 +446,26 @@ def Icons(filename: string): string
 enddef
 
 def IconsBatch(args: list<string>): list<string>
-    return system('exa --icons=always --sort name ' .. args->join(' '))->split('\n')
+    return system('2>/dev/null exa --icons=always --sort name ' .. args->join(' '))->split('\n')
 enddef
 # }}}
 
 # function Complete() {{{
 def CwordHelper(index: number, line: string, regex: string = '[[:keyword:].]'): string
-    if index <# 0
-        return ''
-    elseif line[index] =~# regex
-        return CwordHelper(index - 1, line, regex) .. line[index]
-    else
-        return ''
-    endif
+    var i      = index
+    var result = ''
+    while true
+        if i <# 0
+            return result
+        elseif line[i] =~# regex
+            result = line[i] .. result
+            i -= 1
+        else
+            return result
+        endif
+    endwhile
+    echom result
+    return result
 enddef
 
 export def Cword(regex='[[:ident:]]'): string
@@ -539,9 +615,8 @@ enddef
 class Queue
     static var queue: list<number> = [0, &lines]
     var upper: number = 0
-    var lower: number = &lines
 
-    def new(this.upper, this.lower)
+    def new(this.upper)
         Queue.queue[-1] = &lines
     enddef
 
@@ -568,7 +643,7 @@ class Queue
                 return curr
             endif
         enddef
-        return fp.Reduce(fp.Reversed(Queue.queue), SearchLower, this.lower)
+        return fp.Reduce(fp.Reversed(Queue.queue), SearchLower, &lines)
     enddef
 
     def SearchSpace(size: number): number
@@ -601,7 +676,7 @@ class Queue
     enddef
 endclass
 
-final notify_queue = Queue.new(0, &lines)
+final notify_queue = Queue.new(0)
 
 export def Notify(texts: list<string>, location ='down', time = 800)
     def GetCol(): number
@@ -1355,8 +1430,8 @@ enddef
 # function SelectFile() {{{
 def g:CreatePopup(buf_nr: number)
     popup_create(buf_nr, {
-        'minwidth':    130,
-        'minheight':   30,
+        'minwidth':    150,
+        'minheight':   float2nr(&lines * 0.75),
         'border':      [1, 1, 1, 1],
         'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],
         'highlight':   'Notify'
@@ -1384,8 +1459,11 @@ export def FZFfile()
         endif
         fp.Map(lines, (_, filepath) => OpenBuffer(filepath))
     enddef
-    PopupTerm($HOME .. '/.config/scripts/fzf_for_vim.sh', SelectFile)
+    PopupTerm($HOME .. '/.config/scripts/fzf_for_vim.sh ' .. g:fzf_search_path, SelectFile)
 enddef
+
+
+nn <leader>pf <scriptcmd>g:fzf_search_path = system('realpath ' .. input('fzf搜索路径: '))<CR>
 # }}}
 #
 # function JoshutoSelectFile(){{{
@@ -1743,29 +1821,32 @@ def SearchRightCurlyBracket(row: number): Result
 enddef
 
 def SearchLeftCurlyBracet(row: number): Result
-    const lines_contains_bracket = getline(1, row)
-        ->map((index, line) => {
-            return line
-                ->split('\zs')
-                ->filter((_, char) => char ==# '{' || char ==# '}')
-                ->map((_, char) => [index + 1, char])
-        })
-        ->flattennew(1)
-        ->reverse()
-
     var right_count: number = 0
-    for [line_num, char] in lines_contains_bracket
-        if char ==# '{'
-            if right_count ==# 0
-                return Success.new(line_num)
-            else
-                right_count -= 1
-            endif
-        elseif char ==# '}'
-            right_count += 1
+    const fail_result = Failure.new("could not find it")
+    for line_num in range(row, 1, -1)
+        const result_linenr: Result = getline(line_num)
+            ->split('\zs')
+            ->filter((_, char) => char ==# '{' || char ==# '}')
+            ->reverse()
+            ->reduce((pre: Result, curr): Result => {
+                if !pre.IsFailure
+                    return pre
+                elseif curr ==# '{'
+                    if right_count ==# 0
+                        return Success.new(line_num)
+                    else
+                        right_count -= 1
+                    endif
+                elseif curr ==# '}'
+                    right_count += 1
+                endif
+                return fail_result
+            }, fail_result)
+        if !result_linenr.IsFailure
+            return result_linenr
         endif
     endfor
-    return Failure.new("could not find it!")
+    return fail_result
 enddef
 
 
@@ -1778,7 +1859,7 @@ def SearchCurlyBraket(): bool
     if left_bracket.IsFailure
         return false
     endif
-    return matchstr(getline(left_bracket.inner_value), '\v^\s*match>') !=# ''
+    return matchstr(getline(left_bracket.inner_value), '\v<match>') !=# ''
 enddef
 
 export def GuessExand(): string
@@ -1820,11 +1901,13 @@ enddef
 
 export def CppGuessExpand(): string
     const token = Cword('\v.')
-    if token =~# '\v\)\s+$'
+    if token =~# '\v\k+$'
+        return "->"
+    elseif token =~# '\v\)\s+$'
         return "-> "
     elseif token[-1 : ] ==# ')'
         return " -> "
-    elseif token ==# ''
+    elseif token =~# '\v\s+$'
         return '= '
     else
         return ' = '

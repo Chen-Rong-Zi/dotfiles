@@ -28,13 +28,22 @@ fj() {
 }
 
 jo() {
-    if [[ $(file $1 2>/dev/null | awk  '{print $2}') == 'directory' ]];then
-        joshuto $1
-    elif [[ -z $1 ]];then
-        joshuto ./
-    else
-        joshuto $( echo $1 | awk -F / -v OFS=/ '{$NF="";print}' )
+    # JOSHUTO="/home/rongzi/Downloads/Github/joshuto/target/debug/joshuto"
+    JOSHUTO="/usr/bin/joshuto"
+    if [[ $IN_JOSHUTO ]];then
+        echo in joshuto
+        exit
+        return
     fi
+    export IN_JOSHUTO=1
+    if [[ $(file $1 2>/dev/null | awk  '{print $2}') == 'directory' ]];then
+        $JOSHUTO $1
+    elif [[ -z $1 ]];then
+        $JOSHUTO ./
+    else
+        $JOSHUTO $( echo $1 | awk -F / -v OFS=/ '{$NF="";print}' )
+    fi
+    unset IN_JOSHUTO
 }
 
 rn() {
@@ -55,7 +64,8 @@ vman() {
 #     export MANPAGER="col -b" # for FreeBSD/MacOS
 
     # Make it read-only
-    [[ -n "$(man $@ 2>/dev/null)" ]]  &&  man $@ 2>/dev/null | vim -MR +"set filetype=man" -
+    # [[ -n "$(man $@ 2>/dev/null)" ]]  &&  man $@ 2>/dev/null | vim -MR +"set filetype=man" -
+    vim --cmd 'runtime ftplugin/man.vim | Man '"$@" ' \| only'
 }
 
 export -f nopad

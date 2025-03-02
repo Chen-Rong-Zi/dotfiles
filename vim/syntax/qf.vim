@@ -16,18 +16,17 @@ hi def link qfLineNr   LineNr
 hi qfError cterm=underline guifg=#E06C75
 hi def link Output     Error
 " hi def Nothing gui=bold
-syntax region SpellCap matchgroup=Nontext start=/\v`/ end=/\v`/ oneline display concealends
+" syntax region SpellCap matchgroup=Nontext start=/\v`/ end=/\v`/ oneline display concealends
 
 syntax match qfError /错误/
 syntax match Preproc /附注/
 syntax match Preproc /警告/
 syntax match qfError /error/
 syntax match Preproc /\vwarn(ing)/
-syntax match Preproc /\v_+\^/ display
+" syntax match Preproc /\v_+\^/ display
 
 
-syntax match Nontext /\v\|/ conceal cchar=│
-syntax match Nontext /\v\|\| / conceal
+" syntax match Nontext /\v\|/ conceal cchar=│
 syntax match Error   /\v(\^\^\^)?-{2,}/
 
 syntax match Error /\v\[[[:digit:];]+m/ conceal
@@ -59,15 +58,20 @@ syntax keyword Keyword break    conceal cchar=✖
 " syntax region Nothing    matchgroup=Identifier start=/\v\h*\[/    end=/]/  oneline contains=@hidden,@Spell        display
 " syntax region diffchange matchgroup=Constant   start=/\vg[c+]{2}/ end=/$/  oneline contains=@hidden,@Spell,Output display nextgroup=Output
 " syntax region output     matchgroup=Constant   start=/\v-o\s/     end=/\s/ oneline contains=@hidden,@Spell        display contained
-" 
+
+hi def link RustCanNot Yellow
 " " A bunch of useful C keywords
-" syntax match qfFileName /\v^[^|]*/
-" syntax match Error      /\v\^\~*$/
+syntax region Yellow matchgroup=Error start=/\v(^\|\| *\|.*)@<=[-^]+\~*/ end=/$/ oneline
+
+
+syntax match Error      /\v\+*$/
+syntax match Error      /\v- cannot .*$/     contains=RustCanNot
+syntax match RustCanNot /\v(- cannot )@<=.*$/  contained
 " syntax match Nontext    /\v;/
-" syntax match LineNR   /|/ conceal cchar=│
+
+syntax match qfFileName /\v^[^|]*/
+syntax match LineNR   /|/ conceal cchar=│ contains=Nontext
+syntax match Nontext /\v^\|\|/ conceal contained
 " 
 " syntax region keyword matchgroup=Error start=/\v\[%(-Werror\=)@=/ end=/\v\]/ oneline 
 " syntax region Comment matchgroup=Nontext start=/|/ matchgroup=Nontext end=/|/ oneline concealends cchar= 
-let b:current_syntax = "qf"
-
-" vim: ts=8

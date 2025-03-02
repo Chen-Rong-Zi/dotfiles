@@ -24,12 +24,14 @@ set fillchars=vert:┃
 " set fillchars=vert:│
 set lazyredraw
 set list
+set tags+=~/.cache/vim/tags
 
 set listchars=leadmultispace:│\ \ \ ,trail:-,precedes:>,extends:<,tab:⏐\ 
 set linebreak
 set hlsearch
 set rnu nu
 set scrolloff=7
+set expandtab
 set shiftwidth=4
 set showcmd
 set smoothscroll
@@ -39,8 +41,9 @@ set sessionoptions=blank,buffers,curdir,help,tabpages,winsize,resize,globals
 set synmaxcol=256
 set autochdir
 set tabstop=4
-set redrawtime=500
+set redrawtime=700
 set ignorecase
+set smartcase
 " set path+=
 " set include+=/usr/lib/python3.12/site-packages/
 set nowrap
@@ -70,6 +73,7 @@ set termwinsize=10*0
 set foldcolumn=0
 set foldlevel=100
 set foldmethod=indent
+set tabpagemax=20
 set nu ru ai si ts=4 sw=4
 
 " Leader map
@@ -84,6 +88,8 @@ if !exists("g:colorscheme")
     let g:tokyonight_style   = 'night'
     let g:colorscheme        = 'tokyonight'
     let g:airline_theme      = 'tokyonight'
+    let g:airline#extensions#tabline#enabled = 1
+    let g:airline#extensions#tabline#formatter = 'unique_tail'
     let g:autocomplete       = 1
     let g:HaveCompletion     = 1
     let g:pair_range         = &lines
@@ -91,16 +97,22 @@ if !exists("g:colorscheme")
     let g:debug_buffer_limit = 1000
     let g:loaded_matchparen  = 0
     let g:grep_buffer_limit  = 200
+    let g:fzf_search_path    = expand('~')
+    let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
+    let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
+    let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;gray\x7"
+    let g:comment = "#"
+
     let g:MATCHPAIRS = [
-        \ ['|', '|'],
         \ ['{', '}'],
-        \ ['<', '>'],
         \ ['[', ']'],
         \ ['(', ')'],
         \ ["'", "'"],
         \ ['"', '"'],
         \ ['`', '`'] ]
 endif
+        " \ ['<', '>'],
+        " \ ['|', '|'],
 
 " vim buffer tab open-tab
 "    " <c-[np]> <c-[ey]> <c-t>
@@ -116,7 +128,8 @@ endif
 " Rust filetype script settings--------<++>------------{{{
 aug Rust
 autocmd!
-au BufEnter *.rs let g:comment = '//'
+au filetype rust let g:comment = '//'
+au BufNewFile *.rs 0r ~/.vim/template/std.rs
 au filetype rust let maplocalleader="1"
 au filetype rust let &errorformat=' --> %f:%l:%c,' .. &errorformat
 au filetype rust call s:util.Notify(['', 'using Rust syntax'], 'up')
@@ -131,7 +144,6 @@ au filetype rust ino <silent> <buffer> <c-l> <c-r>=RustGuessExpand()<CR>
 au filetype rust ino <silent> <buffer> <expr> <leader><leader> Expand('= 0')
 au filetype rust ino <buffer> <leader>d ::
 au filetype rust ino <buffer> <leader>sd std::
-au filetype rust ino <buffer> <leader>tmp template <typename T><C-R>=Eatchar('\s')<CR>
 au filetype rust ino <buffer> : :<space><ScriptCmd>call util.RustTypeCompletion()<CR>
 au filetype rust iabbr <buffer> as as<ScriptCmd>call util.RustTypeCompletion()<CR>
 au filetype rust iabbr <buffer> -> -><ScriptCmd>call util.RustTypeCompletion()<CR>
@@ -186,6 +198,8 @@ au filetype rust let $src=expand('%:p')
 " au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
 aug end
 
+" }}}
+
 "  ██████╗    ██╗ ██████╗██████╗ ██████╗
 " ██╔════╝   ██╔╝██╔════╝██╔══██╗██╔══██╗
 " ██║       ██╔╝ ██║     ██████╔╝██████╔╝
@@ -195,7 +209,10 @@ aug end
 " C / CPP filetype script settings--------<++>------------{{{
 aug C
 autocmd!
+au BufNewFile *.c 0r ~/.vim/template/std.c
+au BufNewFile *.cpp 0r ~/.vim/template/std.cpp
 au filetype c,cpp let maplocalleader="1"
+au filetype c,cpp nn <buffer> mm <ScriptCmd>call s:util.CommentToggleMaker('//')<CR>g@$
 " au filetype c,cpp call s:util.Notify(['', 'using C/Cpp syntax'], 'up')
 au filetype c,cpp ino <buffer> ; <ScriptCmd>call s:util.AddSuffix(';')<CR>
 au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
@@ -215,13 +232,13 @@ au filetype c,cpp ino <silent> <buffer> <c-l> <c-r>=CppGuessExpand()<CR>
 au filetype c,cpp ino <silent> <buffer> <expr> <leader><leader> Expand('= 0')
 au filetype c,cpp ino <buffer> <leader>d ::
 au filetype c,cpp ino <buffer> <leader>sd std::
-au filetype c,cpp ino <buffer> <leader>tmp template <typename T><C-R>=Eatchar('\s')<CR>
+au filetype c,cpp ino <buffer> <leader>tmp template <class T> struct<C-R>=Eatchar('\s')<CR>
 
 " au filetype c,cpp ino <buffer> <leader>f for ( <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<cf>
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype c,cpp nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
-au BufEnter *.c*,*.h let g:comment = '//'
+au filetype c,cpp let g:comment = '//'
 au filetype c,cpp nn <buffer> ;    <ScriptCmd>call s:util.AddSuffix(';')<CR>
 
 " ABBREVIATION
@@ -236,7 +253,6 @@ au filetype   cpp inorea <silent> <buffer> pt      protected
 au filetype   cpp inorea <silent> <buffer> itn      int
 au filetype c,cpp inorea <silent> <buffer> ao      auto
 au filetype c,cpp inorea <silent> <buffer> var      auto
-au filetype c,cpp inorea <silent> <buffer> val      const
 au filetype c,cpp inorea <silent> <buffer> vecotr   vector<><left><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> vector   vector<><left><C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> vectro   vector<><left><C-R>=Eatchar('\s')<CR>
@@ -267,7 +283,7 @@ au filetype c,cpp inorea <silent> <buffer> kllf     %llf<C-R>=Eatchar('\s')<CR>
 au filetype c,cpp inorea <silent> <buffer> fuck     Are you alright?
 
 "  <tab> and <space> visualised
-au filetype c,cpp setl smartindent
+au filetype c,cpp setl autoindent
 au filetype c,cpp let $src=expand('%:p')
 " au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
 aug end
@@ -282,6 +298,7 @@ aug end
 " java filetype script settings--------<++>------------{{{
 aug java
 autocmd!
+au BufNewFile *.java 0r! sed 's/<++>/%:r/g' ~/.vim/template/std.java
 au filetype java setl errorformat=%f:%l:\ %m
 au filetype java let maplocalleader="1"
 au filetype java call s:util.Notify(['', 'using Java syntax'], 'up')
@@ -308,7 +325,7 @@ au filetype java ino <buffer> . <ScriptCmd>call s:util.DotComplete()<CR>.
 " # au filetype java nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype java nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype java nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
-au BufEnter *.java let g:comment = '//'
+au filetype java let g:comment = '//'
 au filetype java nn <buffer> ; <ScriptCmd>call s:util.AddSuffix(';')<CR>
 au filetype java nn <buffer> <leader>j <ScriptCmd>call s:util.UpdateToDataBase()<CR>
 
@@ -371,6 +388,7 @@ autocmd!
 " au BufNewFile *.py i#date:<C-r>=strftime("20%y/%m/%d/%A")
 " au BufNewFile *.py i#coding=UTF-8<Enter>
 " au BufNewFile *.py i#time:<C-r>=strftime("%H:%m")
+au BufNewFile *.py 0r ~/.vim/template/std.py
 
 au filetype python compiler pylint
 au filetype python setl makeprg=pylint\ --reports=n\ --msg-template=\"{path}:{line}:\ {msg_id}\ {symbol},\ {obj}\ 错误：{msg}\"\ %:p
@@ -382,11 +400,12 @@ au filetype python ino <silent> <buffer> <leader>d <c-r>=Expand('::')<CR>
 " au filetype python ino <buffer> , ,<space><left><right>
 
 
+au filetype python nn <buffer> mm <ScriptCmd>call s:util.CommentToggleMaker('#')<CR>g@$
 au filetype python nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
 au filetype python nn <buffer> ; <ScriptCmd>call s:util.AddSuffix(':')<CR>
 au filetype python nn <buffer> <leader>test :botright terminal python_test<CR>
 " Comment the line
-au BufEnter *.py let g:comment = '#'
+au filetype python let g:comment = '#'
 " au filetype python ono <buffer> ( :<C-u>normal!t)lvi(<cr>
 
 au filetype python ino <silent> <buffer> <c-l> <c-r>=GuessExand()<CR>
@@ -435,13 +454,10 @@ au filetype vim ino <silent> <buffer> <c-l> <c-r>=GuessExand()<CR>
 au filetype vim setl foldmethod=marker
 au filetype vim if getline(1) =~# '.*vim9script.*'
                         \| let g:comment = "#"
+                        \| echom "vim9 comment"
                         \| else
                         \| let g:comment = '"'
-                        \| endif
-au BufEnter *.vim* if getline(1) =~# '.*vim9script.*'
-                        \| let g:comment = "#"
-                        \| else
-                        \| let g:comment = '"'
+                        \| echom "vimscript comment"
                         \| endif
 aug end
 "}}}
@@ -540,23 +556,19 @@ aug normal
 autocmd!
 
 au TextChangedI * call s:util.Complete()
+au CmdwinEnter * nn <buffer> <c-m> <CR>
+au VimEnter * nn  <c-m> <c-]>
 au VimEnter * nn  <leader><tab> <CMD>let g:autocomplete = !g:autocomplete \| echom g:autocomplete<CR>
 au VimEnter * ino <leader><tab> <CMD>let g:autocomplete = !g:autocomplete \| echom g:autocomplete<CR>
 au VimEnter * ino } {}<left>
 au VimEnter * nn  <leader>m m
-au VimEnter * call s:mode.ModeManager.Register(tabpagenr())
-au TabNew   * call s:mode.ModeManager.Register(tabpagenr())
+au VimEnter * nn  <leader>tt <CMD>botright term++close<CR>
+au VimEnter * nn  \ "
+au VimEnter * vn  \ "
 
 " INSERT mode
 " au DirChanged * call s:util.Notify(['当前位于' . expand('%:~')], 'up')
 
-au VimEnter * let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
-au VimEnter * let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
-" REPLACE mode
-
-" NORMAL mode
-au VimEnter * let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;gray\x7"
-au VimEnter * let g:comment = "#"
 
 " au VimEnter * filetype on
 " au VimEnter * syntax   on
@@ -643,6 +655,7 @@ au VimEnter * nn <leader>i :horizontal bo terminal++close python3 -q <CR>
 " au VimEnter * nn S :w<CR>
 au VimEnter * nn S     :s/
 au VimEnter * nn <C-s> :w<CR>
+au VimEnter * nn g<C-s> <CMD>:silent! w !sudo tee % >/dev/null<CR>
 
 au VimEnter * nn  <F2> :put=system('sed      \"s/\(.*\)/{\1}/g\" <(seq -s \", \" 0 10)')<left><left><left>
 au VimEnter * ino <F2> <Esc>:put=system('sed \"s/\(.*\)/{\1}/g\" <(seq -s \", \" 0 10)')<left><left><left>
@@ -655,11 +668,14 @@ au VimEnter * ino kyi  !
 au VimEnter * ino ker  @
 au VimEnter * ino ksj  #
 au VimEnter * ino ksi  $
-au VimEnter * ino <silent> kwu  <c-r>=Expand('%')<cr>
+" au VimEnter * ino <silent> kwu  <c-r>=Expand('%')<cr>
 au VimEnter * ino klq  ^
-au VimEnter * ino kqi  &
+au VimEnter * ino kq  &
+au VimEnter * ino kw  %
+au VimEnter * ino kr  $
 au VimEnter * ino <silent> kba  <c-r>=Expand('*')<cr>
-au VimEnter * ino <silent> kjq  <c-r>=Expand('-')<cr>
+au VimEnter * ino <silent> jx  <c-r>=Expand('+')<cr>
+au VimEnter * ino <silent> jm  <c-r>=Expand('-')<cr>
 au VimEnter * ino <silent> kui  <c-r>=Expand('+')<cr>
 au VimEnter * ino ka  ()<left>
 au VimEnter * ino kb {}<left>
@@ -690,6 +706,7 @@ au VimEnter * ino <c-e> <Esc>g_a
 au VimEnter * ino <c-h> <BS>
 au VimEnter * ino <c-s> <Esc>:w<CR>
 
+au VimEnter * cno <c-r> <c-o>
 au VimEnter * cno <c-b> <left>
 au VimEnter * cno <c-f> <right>
 au VimEnter * cno <c-a> <c-b>
@@ -767,12 +784,12 @@ function! TermIsLinux()
 endfunction
 
 function! ArgNumberZero()
-    if argc() ==# 0 && &buftype ==# '' && &modified ==# ''
-        let choice = confirm('恢复之前的会话？', "&Yes\n&No\n", 2)
-        if choice ==# 1
-            call s:util.RecoverSession()
-        endif
-    endif
+    " if argc() ==# 0 && &buftype ==# '' && &modified ==# ''
+        " let choice = confirm('恢复之前的会话？', "&Yes\n&No\n", 2)
+        " if choice ==# 1
+            " call s:util.RecoverSession()
+        " endif
+    " endif
 endfunction
 
 aug END
@@ -844,6 +861,7 @@ aug markdown
 autocmd!
 " au filetype man only
 au filetype markdown nn  <buffer> <leader>op <CMD>term ++close bash -c "xdg-open %  2>/dev/null"<CR>
+au filetype markdown nn  <buffer> <leader>t <ScriptCmd>call s:util.MarkDownTable()<CR>
 " au filetype markdown ino <buffer> <leader>* ******<left><left><left>
 " au filetype markdown ino <buffer> g* ****<left><left>
 " au filetype markdown ino <buffer> * **<left>
@@ -1040,14 +1058,16 @@ au VimEnter * nn cd <ScriptCMD>call s:util.Quick_CD()<CR>
 
 " au User RunModeTrigger   call RunMode()
 " nn <leader>r :doautocmd User RunModeTrigger<CR>
-au VimEnter * nn <silent> <leader>g <ScriptCmd>let &operatorfunc = s:mode.GrepMode.Run()<CR>g@
-au VimEnter * vn <silent> <leader>g <ScriptCmd>let &operatorfunc = s:mode.GrepMode.Run()<CR>g@
-au VimEnter * nn <silent> <leader>r <ScriptCmd>call s:mode.ModeManager.Run(t:tabid)<CR>
-au VimEnter * nn <silent> <leader>ir <ScriptCmd>call s:mode.RunModeWithArgs()<CR>
-au VimEnter * nn <silent> <leader>d <ScriptCmd>call s:mode.ModeManager.Debug(t:tabid)<CR>
-au VimEnter * nn <silent> <leader>sr <ScriptCmd>call s:mode.ModeManager.Run(t:tabid, '-s')<CR>
-au VimEnter * nn <silent> <leader>py <ScriptCmd>call s:mode.ModeManager.Mypy(t:tabid)<CR>
-" au VimEnter * nn <silent> <leader>ir <ScriptCmd>call s:mode.RunModeWithArgs()<CR>
+au VimEnter * nn <silent> <leader>g <CMD>GrepModeOper<CR>g@
+au VimEnter * vn <silent> <leader>g <CMD>GrepModeOper<CR>g@
+au VimEnter * nn <silent> <leader>ig <CMD>GrepModeEdit<CR>q:
+au VimEnter * nn <silent> <leader>r <CMD>RunMode<CR>
+au VimEnter * nn <silent> <leader>ir <CMD>RunModeWithArgs<CR>
+au VimEnter * nn <silent> <leader>sr <CMD>RunModeStrict<CR>
+au VimEnter * nn <silent> <leader>d <CMD>DebugMode<CR>
+au VimEnter * nn <silent> <leader>py <CMD>MypyMode<CR>
+
+au VimEnter * source ~/.vim/functions/mode.vim
 
 " au VimEnter * nn  gp <ScriptCmd>call s:util.MatchPairManager.GotoAnther()<CR>
 " au VimEnter * nn  gh <ScriptCmd>call s:util.MatchPairManager.GotoLeft()<CR>

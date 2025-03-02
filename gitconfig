@@ -5,7 +5,8 @@
 	helper = store
 [alias]
     l = log --all --graph --decorate --oneline
-    s = status
+    st = status
+    sw = switch
     cl = clone --depth=1
 [http]
 	sslVerify = false
@@ -20,3 +21,5 @@
 	defaultBranch = master
 [color]
 	ui = true
+[pull]
+	rebase = false

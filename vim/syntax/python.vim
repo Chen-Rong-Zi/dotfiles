@@ -145,13 +145,13 @@ syn keyword pythonTodo		FIXME NOTE NOTES TODO XXX contained
 
 " Triple-quoted strings can contain doctests.
 " <++>
-syn region  pythonString matchgroup=pythonQuotes
-      \ start=+[uU]\=\z(['"]\)+ end="\z1" 
+" syn region  pythonString matchgroup=pythonQuotes
+      " \ start=+[uU]\=\z(['"]\)+ end="\z1" 
       " \ start=+[uU]\=\z(['"]\)+ end="\z1" skip="\\\\\|\\\z1"
 "       \ contains=pythonEscape,@Spell
-syn region  pythonString matchgroup=pythonTripleQuotes
-      \ start=+[uU]\=\z('''\|"""\)+ end="\z1" keepend
-        \ contains=pythonDoctest
+" syn region  pythonString matchgroup=pythonTripleQuotes
+      " \ start=+[uU]\=\z('''\|"""\)+ end="\z1" keepend
+        " \ contains=pythonDoctest
 "       \ contains=pythonEscape,pythonSpaceError,pythonDoctest,@Spell
 " syn region  pythonRawString matchgroup=pythonQuotes
 "       \ start=+[uU]\=[rR]\z(['"]\)+ end="\z1" skip="\\\\\|\\\z1"
@@ -392,6 +392,8 @@ syntax keyword Keyword break    conceal cchar=✖
 syntax keyword Keyword if       conceal cchar=𝘐
 syntax keyword Keyword elif     conceal cchar=ℰ
 syntax keyword Keyword else     conceal cchar=𝘌
+syntax keyword Keyword switch
+syntax keyword Keyword default
 " syntax keyword Keyword return   conceal cchar=▶
 " syntax keyword Keyword and      conceal cchar=•
 " syntax keyword Keyword or       conceal cchar=＋

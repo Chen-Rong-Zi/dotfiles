@@ -26,8 +26,8 @@ endif
 syn keyword cStatement  goto break return continue asm
 syn keyword cLabel      case default
 " <++>
-" syn keyword   cConditional    if else switch
 syn keyword cRepeat     while for do
+syn keyword   cConditional    switch
 "syn keyword cConditional    if else switch
 syn keyword cRepeat         do
 
@@ -264,8 +264,8 @@ endif
 if !exists("c_no_c99") " ISO C99
 " <++>
 "   syn keyword cType       _Bool bool _Complex complex _Imaginary imaginary
-  syn keyword   cType       int8_t int16_t int32_t int64_t
-  syn keyword   cType       uint8_t uint16_t uint32_t uint64_t
+  syn keyword   cType       int8_t int16_t int32_t int64_t i8 i16 i32 i64
+  syn keyword   cType       uint8_t uint16_t uint32_t uint64_t u8 u16 u32 u64
   if !exists("c_no_bsd")
     " These are BSD specific.
     syn keyword cType       u_int8_t u_int16_t u_int32_t u_int64_t
@@ -565,7 +565,7 @@ syntax match cType          /\v<\u\w{-}>/                        display
 syntax match keyword        /[,|&]\|!=\@!/                       display contains=@Spell                              " | & !
 syntax match keyword        /++\|--\|&&\|>>\|<</                 display contains=@Spell                               " ++ -- && || >> <<
 syntax match purple        /\v\s[|\+\-\*\/^]?\=\s/               display contains=@Spell                                 " += -= *= /= =
-syntax match Identifier     /\v\*+\s@!\w*|[:?.]|-\>/              display contains=Function                             " array[.*] and *pointers and dereference ->
+syntax match Identifier     /\v\*+\w*|[:?.]|-\>/              display contains=Function                             " array[.*] and *pointers and dereference ->
 syntax match Nontext        /\v[{}]$|;|^%( *)@>}/                display contains=@Spell                               " { } ;
 
 " syntax cluster hidden add=cBitField,cBlock,cCharacter,cComment,cCommentL,cConstant,cCppInWrapper,cCppOutWrapper,cCppString,cDefine,cLabel,cMulti,cNumbers,cOperator,cout,cPragma,cPreCondit,cPreConditMatch,cPreProc,cRepeat,cSpecialCharacter,cStatement,cStorageClass,cString,cStructure,cType,Ctype,cTypedef,cUserCont,cWrongComTail,Function,Identifier,inBracket1,keyword,Keyword,Nontext,Nothing,Preproc
@@ -619,6 +619,8 @@ syntax keyword Keyword catch    conceal cchar=𝔼
 syntax keyword Keyword auto     conceal cchar=𝙁
 syntax keyword Keyword fn
 syntax match   Keyword /\[=\]/  conceal cchar=λ
+syntax region  cout   matchgroup=Special start=/\v<mut/ matchgroup=Nontext end=/_/ contains=@hidden,incout nextgroup=incout display oneline
+syntax region  cout   matchgroup=Special start=/\v<move/ matchgroup=Nontext end=/_/ contains=@hidden,incout nextgroup=incout display oneline
 " syntax keyword Keyword vector   conceal cchar=𝘷▶
 " syn region keyword  /password/ conceal cchar=*
 " syntax match Constant "return" conceal cchar= contains=return

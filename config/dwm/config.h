@@ -8,6 +8,10 @@ static const unsigned int tabPosY           = 1;    /* tab position on Y axis, 0
 static const unsigned int tabPosX           = 1;    /* tab position on X axis, 0 = left, 1 = center, 2 = right */
 static const unsigned int maxWTab           = 600;  /* tab menu width */
 static const unsigned int maxHTab           = 200;  /* tab menu height */
+static const double rightBorderPercent  = 0.0025;
+static const double leftBorderPercent   = 0.0025;
+static const double topBorderPercent    = 0.0025;
+static const double bottomBorderPercent = 0.0025;
 
 
 /* appearance */
@@ -42,19 +46,19 @@ static const Rule rules[] = {
      *  WM_CLASS(STRING) = instance, class
      *  WM_NAME(STRING) = title
      */
-    /* class            instance title            tags mask isfloating isfullscreen monitor */
-    {  "Gimp",          NULL,    NULL,            0,   1,   0,         -1           },
-    // {  "Firefox",       NULL,    NULL,            1    <<   8,         0,           0,      -1 },
-    {  NULL,            NULL,    "joshuto",       0,   1,   0,         1            },
-    {  NULL,            NULL,    "note",          0,   1,   0,         1            },
-    {  NULL,            NULL,    "quick",         0,   1,   0,         1            },
-    {  NULL,            NULL,    "EmojiFloatWnd", 0,   1,   0,         1            },
-    {  NULL,            NULL,    "成员",          0,   1,   0,         1            },
-    {  NULL,            NULL,    "wemeetapp",     0,   1,   0,         1            },
-    {  "Viewnior",      NULL,    NULL,            0,   1,   0,         1            },
-    {  "kdeconnectd",   NULL,    NULL,            0,   0,   1,         1            },
-    {  "Gcolor3",       NULL,    NULL,            0,   1,   0,         1            },
-    {  "xfce4-notifyd", NULL,    NULL,            0,   1,   0,         1            }
+    /* class                instance title            tags  isfloating isfullscreen monitor */
+    {  "Gimp",              NULL,    NULL,            0,    1,         0,           -1      },
+    {  "firefox",           NULL,    NULL,            1<<8, 0,         0,           9       },
+    {  NULL,                NULL,    "joshuto",       0,    1,         0,           -1      },
+    {  NULL,                NULL,    "note",          0,    1,         0,           -1      },
+    {  NULL,                NULL,    "quick",         0,    1,         0,           -1      },
+    {  NULL,                NULL,    "EmojiFloatWnd", 0,    1,         0,           -1      },
+    {  NULL,                NULL,    "成员",          0,    1,         0,           -1      },
+    {  NULL,                NULL,    "wemeetapp",     0,    1,         0,           -1      },
+    {  "Viewnior",          NULL,    NULL,            0,    1,         0,           -1      },
+    {  "kdeconnect.daemon", NULL,    NULL,            0,    0,         0,           9       },
+    {  "Gcolor3",           NULL,    NULL,            0,    1,         0,           -1      },
+    {  "xfce4-notifyd",     NULL,    NULL,            0,    1,         0,           -1      }
 };
 
 /* layout(s) */
@@ -80,12 +84,49 @@ static const Layout layouts[] = {
     { MODKEY|ControlMask|ShiftMask, KEY, toggletag,  {.ui = 1 << TAG} },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
-#define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+#define SHCMD(cmd) ((Arg) { .v = (const char*[]) { "nohup", "/bin/sh", "-c", cmd, NULL } })
+
+#define RUN_CMD(x, cmd) { \
+    Arg arg = x(cmd); \
+    spawn(&arg); \
+}
+#define NOTIFY(cmd) { \
+    printf(" dwm-debug"); \
+    printf("%s\n", cmd); \
+}
+
+// #define Log(format, ...) \
+    // printf("[%s:%d %s] " format, \
+        // __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+
+#define Red(x) "\033[34m" x "\033[0m"
+
+#define Log(fmt, ...) {                                                  \
+    char buf[1024];                                                         \
+    sprintf(buf, "echo -e '[" Red("%s:%d %s") " ]   " fmt "'" " >> /home/rongzi/.log/dwm.log",\
+                        __FILE__, __LINE__, __func__, ## __VA_ARGS__);   \
+    system(buf);                                                         \
+}
+
+#define print(expr, fmt) {                                                  \
+    Log("("# expr ")" " = " fmt, expr);                                       \
+}
+
+#define print_u16(expr) print(expr, "%016b");
+
+#define assert(x, ...) if ( !(x) ) {  \
+    Log("ASSERTION FAIL: (" #x ")   "   __VA_ARGS__); \
+    exit(1);  \
+}
+
+
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[]   = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL  };
 static const char *termcmd[]    = { "alacritty", NULL  };
+static const char scratchpadname[] = "scratchpad";
+static const char *scratchpadcmd[] = { "/home/rongzi/.config/scripts/note", NULL };
 static const char *note[]       = { "/home/rongzi/.config/scripts/note", NULL  };
 static const char *powerMenu[]  = { "/home/rongzi/.config/polybar/pwidgets/scripts/powermenu.sh", NULL  };
 static const char *drun[]       = { "rofi", "-modi", "drun", "-show", "drun", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL };
@@ -110,6 +151,7 @@ static const char *volumemute[] = { "pactl", "set-sink-mute","@DEFAULT_SINK@", "
 static const Key keys[] = {
     /* modifier                     key        function        argument */
     { MODKEY,                       XK_Return, spawn,          {.v = termcmd } },
+    { MODKEY_ALT,                   XK_Return, togglescratch,  {.v = scratchpadcmd } },
     { 0,             XF86XK_MonBrightnessUp,   spawn,          {.v = lightup } },
     { 0,             XF86XK_MonBrightnessDown, spawn,          {.v = lightdown } },
     { 0,             XF86XK_AudioRaiseVolume,     spawn,          {.v = volumeup } },
@@ -128,8 +170,8 @@ static const Key keys[] = {
     { MODKEY,                       XK_n,      spawn,          {.v = picom } },
     { MODKEY,                       XK_b,      spawn,          {.v = myPicom } },
     { ControlMask|ShiftMask,        XK_Return, spawn,          {.v = btop } },
-    { MODKEY_ALT,                   XK_Return, spawn,          {.v = note } },
     { ControlMask|ShiftMask,        XK_h,      spawn,          {.v = joshuto } },
+    // { ControlMask|ShiftMask,        XK_h,      spawn,          SHCMD("/home/rongzi/.config/scripts/joshuto") },
     { MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
     { MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
     { MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
@@ -182,7 +224,8 @@ static const Button buttons[] = {
     {  ClkTagBar,     MODKEY,           Button3, toggletag,      {0}      },
 };
 
-static const char *ipcsockpath = "/tmp/dwm.sock"; static IPCCommand ipccommands[] = {
+static const char *ipcsockpath = "/tmp/dwm.sock";
+static IPCCommand ipccommands[] = {
   IPCCOMMAND(  view,                1,      {ARG_TYPE_UINT}   ),
   IPCCOMMAND(  toggleview,          1,      {ARG_TYPE_UINT}   ),
   IPCCOMMAND(  tag,                 1,      {ARG_TYPE_UINT}   ),
