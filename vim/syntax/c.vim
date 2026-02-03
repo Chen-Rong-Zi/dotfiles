@@ -590,7 +590,7 @@ syntax region inBracket4 matchgroup=cBracket4 start=/</ end=/>/ display contains
 " syntax match LineNr /\v((for|while|if) )@<=\(/
 " match keyword /\v(<for>|<while>|<if>)/
 " syntax match Constant /\%(if\|while\|for\)\s*([^)]*)\s*{/          " Constant defined by #define or const
-syntax match cConstant /\v<[[:upper:]_]{2,}>/    " Constant defined by #define or const
+syntax match cConstant /\v<[[:upper:]_0-9]{2,}>/    " Constant defined by #define or const
 
 syntax match   Keyword /\v\zs<else *if/  display conceal cchar=ℰ
 syntax match   Keyword /\v<else>%( if)@!/     display conceal cchar=𝘌
@@ -619,8 +619,8 @@ syntax keyword Keyword catch    conceal cchar=𝔼
 syntax keyword Keyword auto     conceal cchar=𝙁
 syntax keyword Keyword fn
 syntax match   Keyword /\[=\]/  conceal cchar=λ
-syntax region  cout   matchgroup=Special start=/\v<mut/ matchgroup=Nontext end=/_/ contains=@hidden,incout nextgroup=incout display oneline
-syntax region  cout   matchgroup=Special start=/\v<move/ matchgroup=Nontext end=/_/ contains=@hidden,incout nextgroup=incout display oneline
+" syntax region  cout   matchgroup=Special start=/\v<mut/ matchgroup=Nontext end=/_/ contains=@hidden,incout nextgroup=incout display oneline
+" syntax region  cout   matchgroup=Special start=/\v<move/ matchgroup=Nontext end=/_/ contains=@hidden,incout nextgroup=incout display oneline
 " syntax keyword Keyword vector   conceal cchar=𝘷▶
 " syn region keyword  /password/ conceal cchar=*
 " syntax match Constant "return" conceal cchar= contains=return

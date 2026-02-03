@@ -16,17 +16,18 @@ set cedit=<c-o>
 set eventignore+=FocusGained
 set viewoptions=options,cursor,curdir,localoptions,
 set confirm
-set nocursorline
+set cursorline
 set dictionary+=/home/rongzi/.vim/dictionary/methods.txt
 set expandtab
+set signcolumn=yes
 " set fillchars=vert:|
 set fillchars=vert:┃
 " set fillchars=vert:│
-set lazyredraw
+set nolazyredraw
 set list
 set tags+=~/.cache/vim/tags
 
-set listchars=leadmultispace:│\ \ \ ,trail:-,precedes:>,extends:<,tab:⏐\ 
+set listchars=leadmultispace:│\ \ \ ,trail:-,precedes:>,extends:<,tab:│\ 
 set linebreak
 set hlsearch
 set rnu nu
@@ -38,16 +39,17 @@ set smoothscroll
 " set smarttab tablinae
 set softtabstop=4
 set sessionoptions=blank,buffers,curdir,help,tabpages,winsize,resize,globals
-set synmaxcol=256
+set synmaxcol=512
 set autochdir
 set tabstop=4
-set redrawtime=700
+set redrawtime=200
+set updatetime=800
 set ignorecase
 set smartcase
 " set path+=
 " set include+=/usr/lib/python3.12/site-packages/
 set nowrap
-" set timeoutlen=250
+set timeoutlen=500
 set matchpairs=(:),{:},[:],\":\",':',<:>
 set makeprg=io\ -q\ %
 " set previewpopup=height:10,width:60
@@ -101,7 +103,7 @@ if !exists("g:colorscheme")
     let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
     let &t_SI = "\<Esc>[5 q" . "\<Esc>]12;white\x8"
     let &t_EI = "\<Esc>[2 q" . "\<Esc>]12;gray\x7"
-    let g:comment = "#"
+    " let g:comment = "#"
 
     let g:MATCHPAIRS = [
         \ ['{', '}'],
@@ -110,6 +112,7 @@ if !exists("g:colorscheme")
         \ ["'", "'"],
         \ ['"', '"'],
         \ ['`', '`'] ]
+    let g:coqtail_noimap      = 0
 endif
         " \ ['<', '>'],
         " \ ['|', '|'],
@@ -128,7 +131,7 @@ endif
 " Rust filetype script settings--------<++>------------{{{
 aug Rust
 autocmd!
-au filetype rust let g:comment = '//'
+" au filetype rust let g:comment = '//'
 au BufNewFile *.rs 0r ~/.vim/template/std.rs
 au filetype rust let maplocalleader="1"
 au filetype rust let &errorformat=' --> %f:%l:%c,' .. &errorformat
@@ -212,17 +215,11 @@ autocmd!
 au BufNewFile *.c 0r ~/.vim/template/std.c
 au BufNewFile *.cpp 0r ~/.vim/template/std.cpp
 au filetype c,cpp let maplocalleader="1"
-au filetype c,cpp nn <buffer> mm <ScriptCmd>call s:util.CommentToggleMaker('//')<CR>g@$
+" au filetype c,cpp nn <buffer> mm <ScriptCmd>call s:util.CommentToggleMaker('//')<CR>g@$
+au filetype c,cpp nn <buffer> gs <Cmd>CocCommand clangd.switchSourceHeader<CR>
 " au filetype c,cpp call s:util.Notify(['', 'using C/Cpp syntax'], 'up')
 au filetype c,cpp ino <buffer> ; <ScriptCmd>call s:util.AddSuffix(';')<CR>
 au filetype c,cpp ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-
-" au filetype c ino <cr> <esc>o
-" au filetype c ino <c-h> <left>
-" au filetype c ino <c-l> <right>
-" au filetype c ino <c-j> <down>
-" au filetype c ino <c-k> <up>
-"
 
 au filetype c,cpp ino <buffer> { <ScriptCmd>call s:util.BracketIndent()<CR>
 "au filetype c,cpp ino <silent> <buffer> { <right>{<CR>}<Esc>O
@@ -238,7 +235,7 @@ au filetype c,cpp ino <buffer> <leader>tmp template <class T> struct<C-R>=Eatcha
 " # au filetype c,cpp nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype c,cpp nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype c,cpp nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
-au filetype c,cpp let g:comment = '//'
+" au filetype c,cpp let g:comment = '//'
 au filetype c,cpp nn <buffer> ;    <ScriptCmd>call s:util.AddSuffix(';')<CR>
 
 " ABBREVIATION
@@ -307,25 +304,11 @@ au filetype java ino <buffer> } {}<left>
 au filetype java ino <buffer> <F10> 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 au filetype java ino <buffer> ; <ScriptCmd>call s:util.AddSuffix(';')<CR>
 
-" au filetype c ino <cr> <esc>o
-" au filetype c ino <c-h> <left>
-" au filetype c ino <c-l> <right>
-" au filetype c ino <c-j> <down>
-" au filetype c ino <c-k> <up>
-"
-"au filetype java ino <silent> <buffer> { <right>{<CR>}<Esc>O
-"au filetype java ino <buffer> { <esc>A{<CR><++>}<ESC>O
-au filetype java ino <buffer> <leader>c /*    */<esc>4<left>a
-au filetype java ino <silent> <buffer> <c-l> <c-r>=Expand('=')<cr>
-au filetype java ino <buffer> <leader><leader> <space>= 0,<space>
-au filetype java ino <buffer> <leader>s ::
-au filetype java ino <buffer> . <ScriptCmd>call s:util.DotComplete()<CR>.
-
 " au filetype java ino <buffer> <leader>f for ( <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<cf>
 " # au filetype java nn <leader>r :w!<CR>:!cc %<CR><CR>:ter<CR>
 au filetype java nn <buffer> <F10> i0, 1, 2, 3, 4, 5, 6, 7, 8, 9<Esc>
 au filetype java nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
-au filetype java let g:comment = '//'
+" au filetype java let g:comment = '//'
 au filetype java nn <buffer> ; <ScriptCmd>call s:util.AddSuffix(';')<CR>
 au filetype java nn <buffer> <leader>j <ScriptCmd>call s:util.UpdateToDataBase()<CR>
 
@@ -383,6 +366,7 @@ aug end
 " ██║        ██║      ██║   ██║  ██║╚██████╔╝██║ ╚████║
 " ╚═╝        ╚═╝      ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝
 " python filetype script settings--------<++>------------{{{
+"
 aug python
 autocmd!
 " au BufNewFile *.py i#date:<C-r>=strftime("20%y/%m/%d/%A")
@@ -393,6 +377,7 @@ au BufNewFile *.py 0r ~/.vim/template/std.py
 au filetype python compiler pylint
 au filetype python setl makeprg=pylint\ --reports=n\ --msg-template=\"{path}:{line}:\ {msg_id}\ {symbol},\ {obj}\ 错误：{msg}\"\ %:p
 au filetype python setl errorformat=%f:%l:\ %m
+au filetype python setl cindent
 au filetype python call s:util.Notify(['', 'using python syntax'], 'up')
 au filetype python ino <buffer> ; <ScriptCmd>call s:util.AddSuffix(':')<CR>
 au filetype python ino <buffer> # #<space><left><right>
@@ -400,12 +385,12 @@ au filetype python ino <silent> <buffer> <leader>d <c-r>=Expand('::')<CR>
 " au filetype python ino <buffer> , ,<space><left><right>
 
 
-au filetype python nn <buffer> mm <ScriptCmd>call s:util.CommentToggleMaker('#')<CR>g@$
+" au filetype python nn <buffer> mm <ScriptCmd>call s:util.CommentToggleMaker('#')<CR>g@$
 au filetype python nn <buffer> <F1> :syntax clear \|\| syntax on<CR>
 au filetype python nn <buffer> ; <ScriptCmd>call s:util.AddSuffix(':')<CR>
 au filetype python nn <buffer> <leader>test :botright terminal python_test<CR>
 " Comment the line
-au filetype python let g:comment = '#'
+" au filetype python let g:comment = '#'
 " au filetype python ono <buffer> ( :<C-u>normal!t)lvi(<cr>
 
 au filetype python ino <silent> <buffer> <c-l> <c-r>=GuessExand()<CR>
@@ -413,6 +398,7 @@ au filetype python ino <buffer> : :<space>
 " au filetype python ia <buffer> if if:<left>
 " au filetype python ia <buffer> for for:<left>
 " au filetype python ia <buffer> else else:<left>
+au filetype python inorea <silent> <buffer> pp print(f"{}")<c-o>F}<C-R>=Eatchar('\s')<CR>
 au filetype python inorea <buffer> while  while:<left>
 au filetype python inorea <buffer> def    def:<left>
 au filetype python inorea <buffer> class  class:<left>
@@ -452,13 +438,13 @@ au filetype vim ino <buffer> { <ScriptCmd>call s:util.BracketIndent()<CR>
 au filetype vim ino <silent> <buffer> <c-l> <c-r>=GuessExand()<CR>
 " au filetype vim let  maplocalleader    = "1"
 au filetype vim setl foldmethod=marker
-au filetype vim if getline(1) =~# '.*vim9script.*'
-                        \| let g:comment = "#"
-                        \| echom "vim9 comment"
-                        \| else
-                        \| let g:comment = '"'
-                        \| echom "vimscript comment"
-                        \| endif
+" au filetype vim if getline(1) =~# '.*vim9script.*'
+                        " \| let g:comment = "#"
+                        " \| echom "vim9 comment"
+                        " \| else
+                        " \| let g:comment = '"'
+                        " \| echom "vimscript comment"
+                        " \| endif
 aug end
 "}}}
 "
@@ -472,7 +458,7 @@ aug end
 "terminal buffer script settings--------------<++>------------------{{{
 aug terminal
 autocmd!
-au terminalOpen * tno <buffer> jk <c-w>N
+au terminalOpen * tno <buffer> <c-[><c-[> <c-w>N
 au terminalOpen * tno <buffer> <leader>k  <c-w>k
 au terminalOpen * set nowrap
 " au TerminalOpen * nn q <ScriptCmd>:call s:util.DeleteTerminal() \| unmap q<CR>
@@ -497,17 +483,9 @@ aug end
 " NERDTree
 " noremap <leader>t :NERDTreeToggle<CR>
 
-" " Full Screen Set
-" nn \| <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleFullscreen', 0)<CR>
-
-" "" press F12 to change the scheme of the local window
-" no <C-j>j <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleTransparency', "100,180")<CR>
-" no <C-k>k <esc>:call libcallnr('gvim_fullscreen.dll', 'ToggleTransparency', "225,255")<CR>
-
 " easymotion
 nn <c-f> <plug>(easymotion-prefix)s
 
-" filetype plugin on
 
 call plug#begin()
 " The default plugin directory will be as follows:
@@ -519,19 +497,28 @@ call plug#begin()
 "   - Avoid using standard Vim directory names like 'plugin'
 " Make sure you use single quotes
 Plug 'vim-airline/vim-airline-themes', { 'frozen': 1 }
-Plug 'vim-airline/vim-airline',        { 'frozen': 1 }
+Plug 'vim-airline/vim-airline',        { 'frozen': 1, 'for': ['python', 'rust', 'c', 'cpp', 'java'], 'on': 'AirlineRefresh' }
+" if &filetype !=# 'man'
+    " au SourcePost * ++once AirlineRefresh
+" endif
 
-Plug 'junegunn/fzf',     { 'do': { ->    fzf#install() }, 'on': 'FZF' }
-Plug 'junegunn/fzf.vim', { 'on'  : 'FZF' }
+Plug 'junegunn/fzf',     { 'do': { ->    fzf#install() } }
+Plug 'junegunn/fzf.vim', { }
 
 Plug 'Chen-Rong-Zi/gmotion.vim', { 'do': { -> popup_notification(['Gmotion Installed'], {'time': 1000})}}
-let g:gmotion_pair = g:MATCHPAIRS
+" let g:gmotion_pair = g:MATCHPAIRS
 
 Plug 'Chen-Rong-Zi/fcitx.vim', {'on': ['FcitxStart', 'FcitxStop']}
 
 Plug 'yianwillis/vimcdoc'
 
+Plug 'neoclide/coc.nvim', { 'frozen': 1, 'branch': 'release', 'for': ['c', 'python', 'cpp', 'java', 'rust'] }
+
 Plug 'easymotion/vim-easymotion', {'on': '<plug>(easymotion-prefix)s', 'frozen': 1}
+
+Plug 'puremourning/vimspector', {}
+Plug 'whonore/Coqtail'
+let g:vimspector_enable_mappings = 'HUMAN'
 
 " " If you don't have nodejs and yarn
 " use pre build, add 'vim-plug' to the filetype list so vim-plug can update this plugin
@@ -555,7 +542,8 @@ call plug#end()
 aug normal
 autocmd!
 
-au TextChangedI * call s:util.Complete()
+" au TextChangedI * call s:util.Complete()
+autocmd BufRead,BufNewFile *.gms set filetype=gms
 au CmdwinEnter * nn <buffer> <c-m> <CR>
 au VimEnter * nn  <c-m> <c-]>
 au VimEnter * nn  <leader><tab> <CMD>let g:autocomplete = !g:autocomplete \| echom g:autocomplete<CR>
@@ -565,6 +553,8 @@ au VimEnter * nn  <leader>m m
 au VimEnter * nn  <leader>tt <CMD>botright term++close<CR>
 au VimEnter * nn  \ "
 au VimEnter * vn  \ "
+au VimEnter * nn  <s-h> 2zh
+au VimEnter * nn  <s-l> 2zl
 
 " INSERT mode
 " au DirChanged * call s:util.Notify(['当前位于' . expand('%:~')], 'up')
@@ -574,7 +564,7 @@ au VimEnter * vn  \ "
 " au VimEnter * syntax   on
 " au BufEnter * match Comment / /
 au QuickFixCmdpre * setl nowrap
-au QuickFixCmdpre * setl nowrap
+au filetype qf nn <buffer> <c-m> <CMD>execute string(line('.')) .. 'cc'<CR>
 au filetype qf wincmd J
 " au QuickFixCmdpre * setl numberwidth=2
 " au QuickFixCmdpre * setl nonumber
@@ -593,8 +583,8 @@ au VimEnter * nn  <c-h>      ^
 au VimEnter * nn  <c-l>      g_
 au VimEnter * nn  <c-j>      ;
 au VimEnter * nn  <c-k>      zz
-au VimEnter * nn  <silent>   <c-p>       :bnext<CR>
-au VimEnter * nn  <silent>   <c-n>       :bprev<CR>
+" au VimEnter * nn  <silent>   <c-p>       :bnext<CR>
+" au VimEnter * nn  <silent>   <c-n>       :bprev<CR>
 au VimEnter * nn  <silent>   <c-b>       :bdelete<CR>
 au VimEnter * nn  <silent>   <c-e>       :-tabnext<CR>
 au VimEnter * nn  <silent>   <c-y>       :+tabnext<CR>
@@ -669,7 +659,7 @@ au VimEnter * ino ker  @
 au VimEnter * ino ksj  #
 au VimEnter * ino ksi  $
 " au VimEnter * ino <silent> kwu  <c-r>=Expand('%')<cr>
-au VimEnter * ino klq  ^
+au VimEnter * ino kl  ^
 au VimEnter * ino kq  &
 au VimEnter * ino kw  %
 au VimEnter * ino kr  $
@@ -698,7 +688,7 @@ au VimEnter * ino <leader>< <Esc>viWA><esc>Bi<<esc>ela
 
 " shortcuts
 au VimEnter * ino jk    <esc>
-au VimEnter * ino 经  <esc>       " 使中文下可以使用<jk>退出插入模式
+" au VimEnter * ino 经  <esc>       " 使中文下可以使用<jk>退出插入模式
 au VimEnter * ino <c-f> <right>
 au VimEnter * ino <c-b> <left>
 au VimEnter * ino <c-a> <Esc>I
@@ -713,8 +703,8 @@ au VimEnter * cno <c-a> <c-b>
 
 " Transform the word to UPPER-CASE
 au VimEnter * ino <BS>     <Nop>
-au VimEnter * ino <c-u>    <esc>viwUviwA
-au VimEnter * ino <c-j>    <ScriptCmd>:call s:util.CR()<CR>
+au VimEnter * ino <silent> <c-u>    <esc>viwUviwA
+au VimEnter * ino <silent> <c-j>    <ScriptCmd>:call s:util.CR()<CR>
 au VimEnter * ino <c-c>    <Esc>
 au VimEnter * ino <c-v>    <Esc>viw
 au VimEnter * ono <c-l>      g_
@@ -771,6 +761,9 @@ au VimEnter * vn n          :silent! !~/.config/scripts/align<CR>
 au VimEnter * ++once call TermIsLinux()
 au VimEnter * ++once call ArgNumberZero()
 
+" ABBREVIATION
+au VimEnter * cnorea @u [^\x00-\x7f]+<C-R>=Eatchar('\s')<CR>
+
 function! TermIsLinux()
     if $TERM ==# 'linux'
         if $DISPLAY == ''
@@ -822,7 +815,7 @@ aug man
 autocmd!
 " au filetype man only
 au filetype man set nolist
-au filetype man set noconfirm
+au filetype man set confirm
 au filetype man set foldlevel=10
 au filetype man set laststatus=0
 au filetype man set scrolloff=15
@@ -844,7 +837,7 @@ aug help
 autocmd!
 " au filetype man only
 au filetype help setl nolist
-au filetype help setl noconfirm
+au filetype help setl confirm
 au filetype help setl scrolloff=17
 aug end
 " }}}
@@ -913,7 +906,7 @@ autocmd!
 au filetype bash,sh inorea <silent> <buffer> if  if [[<++> ]];then<CR>fi<Esc>?<++><CR>cw
 au filetype bash,sh inorea <silent> <buffer> for for<++> in <++>;do<CR>done<Esc>0kf<cw
 " Comment the line
-au BufEnter *.sh,*.bash let g:comment='#'
+" au BufEnter *.sh,*.bash let g:comment='#'
 au BufWinEnter *.sh,*.bash setl makeprg=shellcheck\ %
 au BufWinEnter *.sh,*.bash let &errorformat='In %f line %l:,' .. &errorformat
 aug end
@@ -998,6 +991,20 @@ au  filetype sql inorea <buffer> where      WHERE
 au  filetype sql inorea <buffer> with       WITH
 aug end
 " }}}
+"
+
+"   ██████╗ ██████╗  ██████╗ 
+"  ██╔════╝██╔═══██╗██╔═══██╗
+"  ██║     ██║   ██║██║   ██║
+"  ██║     ██║   ██║██║▄▄ ██║
+"  ╚██████╗╚██████╔╝╚██████╔╝
+"   ╚═════╝ ╚═════╝  ╚══▀▀═╝ 
+"
+aug coq
+autocmd!
+au  filetype coq nn <buffer> <s-n> <CMD>RocqNext\|RocqJumpToEnd<CR>
+au  filetype coq nn <buffer> <s-p> <CMD>RocqUndo\|RocqJumpToEnd<CR>
+aug end
 
 
 " ███████╗ ██████╗██████╗ ██╗██████╗ ████████╗███████╗
@@ -1011,15 +1018,16 @@ aug scripts
 au!
 import autoload "/home/rongzi/.vim/functions/useful.vim" as util
 import autoload "/home/rongzi/.vim/functions/mode.vim"   as mode
-au VimEnter * nn <leader>e     <ScriptCmd>call s:util.SelectBuffer()<CR>
 au vimenter * nn <leader><c-j> <ScriptCmd>keepjumps call s:util.JoshutoSelectFile()<CR>
 au VimEnter * nn <leader><c-f> <ScriptCmd>call s:util.FZFfile()<CR>
+au VimEnter * nn <leader>b     <ScriptCmd>call s:util.SelectBuffer()<CR>
+au VimEnter * nn <leader>e     <CMD>Buffers<CR>
 au VimEnter * nn <silent> <C-c><C-y> <ScriptCmd>call s:util.ToggleConcealLevel()<CR>
 au vimenter * vn <leader>w     y<ScriptCmd>call s:util.SearchSelectedText()<CR><ScriptCMD>call s:util.VisualWrapper()<CR>
 
-au VimEnter * nn m  <ScriptCmd>call s:util.CommentToggleMaker(g:comment)<CR>g@
-au VimEnter * nn mm <ScriptCmd>call s:util.CommentToggleMaker(g:comment)<CR>g@$
-au VimEnter * vn m  <ScriptCmd>call s:util.CommentToggleMaker(g:comment)<CR>g@
+au VimEnter * nn m  <ScriptCmd>call s:util.CommentToggleMaker()<CR>g@
+au VimEnter * nn mm <ScriptCmd>call s:util.CommentToggleMaker()<CR>g@$
+au VimEnter * vn m  <ScriptCmd>call s:util.CommentToggleMaker()<CR>g@
 
 au vimenter * nn ( <Cmd>call MakeWrapper('(', ')', 2)<CR>g@
 au vimenter * nn ) <Cmd>call MakeWrapper('(', ')', 2, 'block')<CR>g@
@@ -1133,3 +1141,47 @@ function! MakeWrapper(left, right, stop, force_type = '')
     endif
 endfunction
 " }}}
+
+function ScrollPopup(up=0)
+  if (len(popup_list()) >= 1)
+    let [row,    col]    = [screenrow(),     screencol()]
+    let [condi1, condi2] = [popup_locate(row - 1, col), popup_locate(row + 1, col)]
+    if condi1 !=# 0
+        let popid = condi1
+    elseif condi2 !=# 0
+        let popid = condi2
+    else
+        return
+    endif
+
+    let firstline = popup_getoptions(popid)['firstline']
+    if a:up
+        call popup_setoptions(popid, {'firstline': max([1, firstline-1])})
+    else
+        call popup_setoptions(popid, {'firstline': firstline + 1})
+    endif
+  endif
+endfunc
+
+
+" nn <silent> <c-k> <CMD>silent! call CocActionAsync('doHover')<CR>
+
+aug Coc
+autocmd!
+
+au CursorHold * if exists(":CocInfo") && CocActionAsync('hasProvider', 'hover') && (popup_list()->len() ==# 0)  && (CocAction('getHover') !=# []) | silent! call CocActionAsync('doHover') | echo coc#pum#visible() | endif
+
+au VimEnter *  ino <silent> <expr> <c-n> coc#pum#visible() ? coc#pum#next(1) : coc#refresh()
+au VimEnter *  ino <silent> <expr> <c-p> coc#pum#visible() ? coc#pum#prev(1) : coc#refresh()
+"au VimEnter *  ino <silent> <c-j> <Cmd>call ScrollPopup(0)<CR>
+"au VimEnter *  ino <silent> <c-k> <Cmd>call ScrollPopup(1)<CR>
+" au VimEnter *  no <silent> <c-j> <Cmd>call ScrollPopup(0)<CR>
+" au VimEnter *  no <silent> <c-k> <Cmd>call ScrollPopup(1)<CR>
+au VimEnter *  no gd <plug>(coc-definition)
+au VimEnter *  no gk <Cmd>call CocAction('definitionHover')<CR>
+
+" coc jump
+au VimEnter * nn <leader>n <Plug>(coc-rename)
+au VimEnter * nn <c-p> <Plug>(coc-diagnostic-prev)
+au VimEnter * nn <c-n> <Plug>(coc-diagnostic-next)
+aug end

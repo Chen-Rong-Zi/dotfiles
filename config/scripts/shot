@@ -6,12 +6,16 @@ shot_path=$shot_dir/$shot_name
 maim -m 5 -f png $shot_path
 
 if [[ -f "$shot_path" ]];then
-    dunstify -r $notification_id -t 1800 -I $shot_icon "截图保存为" "$shot_name"
+    $notify -r $notification_id -t 1800 -i $shot_icon "截图保存为" "$shot_name"
     echo "$shot_path" | gpaste-client add
     for id in $(kdeconnect-cli -a | grep -Po '(?<=^-.{,100}: ).[^[:blank:]]*');do
         kdeconnect-cli -d "$id" --share "$shot_path"
-        dunstify -t 1800 -I $shot_icon  "发送到" "$id"
+        if [[ $? -eq 0 ]];then
+            $notify -t 1800 -i $shot_icon  "发送到" "$id"
+        else
+            $notify -t 1800 -i $shot_icon  "没能发送到" "$id"
+        fi
     done
 else
-    dunstify -r $notification_id -I $error_icon "截图无效！"
+    $notify -r $notification_id -i $error_icon "截图无效！"
 fi

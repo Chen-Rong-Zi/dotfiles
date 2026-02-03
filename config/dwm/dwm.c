@@ -70,7 +70,7 @@ enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
     NetWMWindowTypeDialog, NetClientList, NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
-    ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
+    ClkClientWin, ClkRootWin, ClkLast, Clk }; /* clicks */
 
 typedef struct TagState TagState;
 struct TagState {
@@ -180,6 +180,7 @@ typedef struct {
 } Rule;
 
 /* function declarations */
+static void recordvoice(const Arg *record_cmd);
 static void applyrules(Client *c);
 static int applysizehints(Client *c, int *x, int *y, int *w, int *h, int interact);
 static void arrange(Monitor *m);
@@ -252,6 +253,7 @@ static void setupepoll(void);
 static void seturgent(Client *c, int urg);
 static void showhide(Client *c);
 static void spawn(const Arg *arg);
+static pid_t pid_spawn(const Arg *arg);
 static void spawnbar();
 static void tag(const Arg *arg);
 static void tagmon(const Arg *arg);
@@ -346,6 +348,34 @@ static Client *scratch = NULL;
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
 struct NumTags { char limitexceeded[LENGTH(tags) > 31 ? -1 : 1]; };
+
+
+void recordvoice(const Arg *record_cmd) {
+    pid_t pid = pid_spawn(record_cmd);
+
+    int grabbed = 1;
+    for (int i = 0;i < 1000;i++) {
+        if (XGrabKeyboard(dpy, DefaultRootWindow(dpy), True, GrabModeAsync, GrabModeAsync, CurrentTime) == GrabSuccess)
+            break;
+        struct timespec ts = { .tv_sec = 0, .tv_nsec = 1000000 };
+        nanosleep(&ts, NULL);
+        if (i == 1000 - 1)
+            grabbed = 0;
+    }
+
+    XEvent event;
+    while ( grabbed ) {
+        XNextEvent(dpy, &event);
+        Log("event.type %d", event.type)
+        if ((event.type == KeyRelease) && (event.xkey.keycode == MODKEY))
+            break;
+        Log("int loop");
+    }
+
+    XUngrabKeyboard(dpy, CurrentTime); /* stop taking all input from keyboard */
+    kill(pid, SIGTERM);
+    Log("kill recordvoice");
+}
 
 /* function implementations */
     void
@@ -541,8 +571,9 @@ buttonpress(XEvent *e)
         XAllowEvents(dpy, ReplayPointer, CurrentTime);
         click = ClkClientWin;
     }
+
     for (i = 0; i < LENGTH(buttons); i++)
-        if (click == buttons[i].click && buttons[i].func && buttons[i].button == ev->button
+        if ((click == buttons[i].click) && buttons[i].func && buttons[i].button == ev->button
                 && CLEANMASK(buttons[i].mask) == CLEANMASK(ev->state))
             buttons[i].func(click == ClkTagBar && buttons[i].arg.i == 0 ? &arg : &buttons[i].arg);
 }
@@ -2086,7 +2117,7 @@ showhide(Client *c)
     }
 }
 
-    void
+void
 spawn(const Arg *arg)
 {
     struct sigaction sa;
@@ -2095,7 +2126,8 @@ spawn(const Arg *arg)
         dmenumon[0] = '0' + selmon->num;
     }
     selmon->tagset[selmon->seltags] &= ~scratchtag;
-    if (fork() == 0) {
+    pid_t pid = fork();
+    if (pid == 0) {
         if (dpy)
             close(ConnectionNumber(dpy));
 
@@ -2109,6 +2141,33 @@ spawn(const Arg *arg)
         execvp(((char **)arg->v)[0], (char **)arg->v);
         die("dwm: execvp '%s' failed:", ((char **)arg->v)[0]);
     }
+}
+
+pid_t
+pid_spawn(const Arg *arg)
+{
+    struct sigaction sa;
+
+    if (arg->v == dmenucmd) {
+        dmenumon[0] = '0' + selmon->num;
+    }
+    selmon->tagset[selmon->seltags] &= ~scratchtag;
+    pid_t pid = fork();
+    if (pid == 0) {
+        if (dpy)
+            close(ConnectionNumber(dpy));
+
+        setsid();
+
+        sigemptyset(&sa.sa_mask);
+        sa.sa_flags = 0;
+        sa.sa_handler = SIG_DFL;
+        sigaction(SIGCHLD, &sa, NULL);
+
+        execvp(((char **)arg->v)[0], (char **)arg->v);
+        die("dwm: execvp '%s' failed:", ((char **)arg->v)[0]);
+    }
+    return pid;
 }
 
 void

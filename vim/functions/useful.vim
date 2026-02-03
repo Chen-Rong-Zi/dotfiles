@@ -1683,14 +1683,32 @@ enddef
 
 
 # function CommentToggle()  {{{
-export def CommentToggleMaker(comment: string): void
+export def CommentToggleMaker(): void
+    const comments = {
+        'c':      '//',
+        'cpp':    '//',
+        'java':   '//',
+        'rust':   '//',
+        'python': '#',
+        'bashrc': '#',
+        'mardown': '#',
+        'vim':    '#'
+    }
+    var comment = ''
+    if exists('g:comment')
+        g:_inner_comment = g:comment
+    elseif comments->keys()->index(&filetype) !=# -1
+        g:_inner_comment = comments[&filetype]
+    else
+        g:_inner_comment = '#'
+    endif
     &operatorfunc = CommentToggle
 enddef
 
 def CommentToggle(type: string): void
-    const [pos, min_number, max_number] = [getcharpos("']"), getcharpos("'[")[1], getcharpos("']")[1]]
+    const [min_number, max_number] = [getcharpos("'[")[1], getcharpos("']")[1]]
     getline(min_number, max_number)
-        ->fp.Map((key, val) => AddOrDelComment(val, g:comment))
+        ->fp.Map((key, val) => AddOrDelComment(val, g:_inner_comment))
         ->fp.Map((key, val) => setline(key + min_number, val))
 enddef
 # }}}

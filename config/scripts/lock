@@ -1,8 +1,7 @@
 #!/bin/bash
 
-if  pgrep i3lock ;then
-    exec logger --tag 'i3lock' 'screen is locked, i3lock is not starting'
-fi
+LOCK_FILE="/tmp/task.lock"
+
 BLANK='#00000000'
 CLEAR='#ffffff22'
 # DEFAULT='#00897bE6'
@@ -12,30 +11,38 @@ TEXT='#CCCCCC'
 WRONG='#880000bb'
 VERIFYING='#00564dE6'
 
-i3lock \
---insidever-color=$CLEAR     \
---ringver-color=$VERIFYING   \
-\
---insidewrong-color=$CLEAR   \
---ringwrong-color=$WRONG     \
-\
---inside-color=$BLANK        \
---ring-color=$DEFAULT        \
---line-color=$BLANK          \
---separator-color=$DEFAULT   \
-\
---verif-color=$TEXT          \
---wrong-color=$TEXT          \
---time-color=$TEXT           \
---date-color=$TEXT           \
---layout-color=$TEXT         \
---keyhl-color=$WRONG         \
---bshl-color=$WRONG          \
-\
---screen 1                   \
---blur 5                     \
---clock                      \
---indicator                  \
---time-str="%H:%M:%S"        \
---date-str=" %Y-%m-%d"       \
---keylayout 1
+lock_screen() {
+    i3lock \
+    --insidever-color=$CLEAR     \
+    --ringver-color=$VERIFYING   \
+    --insidewrong-color=$CLEAR   \
+    --ringwrong-color=$WRONG     \
+    --inside-color=$BLANK        \
+    --ring-color=$DEFAULT        \
+    --line-color=$BLANK          \
+    --separator-color=$DEFAULT   \
+    --verif-color=$TEXT          \
+    --wrong-color=$TEXT          \
+    --time-color=$TEXT           \
+    --date-color=$TEXT           \
+    --layout-color=$TEXT         \
+    --keyhl-color=$WRONG         \
+    --bshl-color=$WRONG          \
+    --screen 1                   \
+    --blur 5                     \
+    --clock                      \
+    --indicator                  \
+    --time-str="%H:%M:%S"        \
+    --date-str=" %Y-%m-%d"       \
+    --keylayout 1
+}
+
+# 使用 flock 确保任务单实例运行
+(
+  flock -n 9 || { logger -t lock "There is already a screen_lock"; exit 1; }
+
+  logger -t lock "lockscreen"
+  lock_screen
+  logger -t lock "unlockscreen"
+
+) 9>"$LOCK_FILE"

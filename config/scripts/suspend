@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# notify="notify-send"
 mpc -q pause
 # amixer set Master mute
 if [[ $(pulseaudio-ctl full-status | cut -d ' ' -f 2) -eq 'yes' ]];then
@@ -9,7 +10,7 @@ if [[ $(pulseaudio-ctl full-status | cut -d ' ' -f 3) -eq 'yes' ]];then
     pulseaudio-ctl mute-input
 fi
 DISPLAY=:0 sudo -u rongzi DISPLAY=:0 /home/rongzi/.config/scripts/lock
-dunstify -I /usr/share/icons/Papirus/64x64/apps/system-suspend-hibernate.svg Suspending...
+$notify -i /usr/share/icons/Papirus/64x64/apps/system-suspend-hibernate.svg Suspending...
 sleep 0.5
 sudo systemctl suspend
 sudo -u rongzi echo 'lid close and suspen' >> /home/rongzi/.log/acpi.log

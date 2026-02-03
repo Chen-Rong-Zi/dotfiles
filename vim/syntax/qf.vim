@@ -60,10 +60,12 @@ syntax keyword Keyword break    conceal cchar=✖
 " syntax region output     matchgroup=Constant   start=/\v-o\s/     end=/\s/ oneline contains=@hidden,@Spell        display contained
 
 hi def link RustCanNot Yellow
+hi def link RustCanNot Keyword
 " " A bunch of useful C keywords
 syntax region Yellow matchgroup=Error start=/\v(^\|\| *\|.*)@<=[-^]+\~*/ end=/$/ oneline
 
 
+syntax match Unmatch    /\v^\|\|/ conceal
 syntax match Error      /\v\+*$/
 syntax match Error      /\v- cannot .*$/     contains=RustCanNot
 syntax match RustCanNot /\v(- cannot )@<=.*$/  contained

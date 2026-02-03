@@ -1,2 +1,3 @@
 # dex $HOME/.local/share/applications/joshuto.desktop
-alacritty -t 'joshuto' -e joshuto
+
+alacritty -t 'joshuto' -e setsid -w joshuto

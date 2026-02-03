@@ -28,10 +28,11 @@ fj() {
 }
 
 jo() {
+    export EDITOR=/usr/bin/vim
+    # JOSHUTO="/home/rongzi/Downloads/Github/joshuto/target/release/joshuto"
     # JOSHUTO="/home/rongzi/Downloads/Github/joshuto/target/debug/joshuto"
-    JOSHUTO="/usr/bin/joshuto"
+    JOSHUTO="/usr/bin/joshuto --change-directory"
     if [[ $IN_JOSHUTO ]];then
-        echo in joshuto
         exit
         return
     fi
@@ -66,6 +67,14 @@ vman() {
     # Make it read-only
     # [[ -n "$(man $@ 2>/dev/null)" ]]  &&  man $@ 2>/dev/null | vim -MR +"set filetype=man" -
     vim --cmd 'runtime ftplugin/man.vim | Man '"$@" ' \| only'
+}
+
+fff() {
+    if [[ -z "$@" ]];then
+        fzf
+    else
+        fzf --with-nth "$@" --accept-nth "$@"
+    fi
 }
 
 export -f nopad

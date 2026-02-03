@@ -1,6 +1,7 @@
 [user]
 	email = 1398881912@qq.com
 	name = Chen-Rong-Zi
+	signingkey = 044F28463467599B
 [credential]
 	helper = store
 [alias]
@@ -23,3 +24,23 @@
 	ui = true
 [pull]
 	rebase = false
+[safe]
+	directory = .
+	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures/term4/操作系统/os2025
+	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures/term4/rust程序设计语言/git
+	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures/term4/计算机网络/network-exp
+	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures
+	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures/term3/科研实践/GMS
+	directory = /home/cxy/Downloads/github/ragflow-plus
+	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures/term4/rust程序设计语言/git/src/command/temp
+	directory = /home/cxy/Downloads/github/RuoYi-Vue3-FastAPI
+	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures/term4/rust程序设计语言/rust-git
+	directory = /home/cxy/Downloads/github/ragflow
+	directory = /home/cxy/Downloads/github/gitee/ragflow
+	directory = /home/cxy/Downloads/github/bozhi
+	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures/term5/编译原理/lab/lab1/src/Lab
+	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures/term5/编译原理/lab/lab1/src/Lab/.git
+	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures/term5/形式语言和自动机/lab
+	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures/term5/形式语言和自动机/lab/.git
+[core]
+	editor = vim

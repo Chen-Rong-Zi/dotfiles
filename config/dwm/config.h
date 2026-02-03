@@ -84,7 +84,7 @@ static const Layout layouts[] = {
     { MODKEY|ControlMask|ShiftMask, KEY, toggletag,  {.ui = 1 << TAG} },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
-#define SHCMD(cmd) ((Arg) { .v = (const char*[]) { "nohup", "/bin/sh", "-c", cmd, NULL } })
+#define SHCMD(cmd) ((Arg) { .v = (const char*[]) { "/bin/sh", "-c", cmd, NULL } })
 
 #define RUN_CMD(x, cmd) { \
     Arg arg = x(cmd); \
@@ -95,9 +95,10 @@ static const Layout layouts[] = {
     printf("%s\n", cmd); \
 }
 
-// #define Log(format, ...) \
-    // printf("[%s:%d %s] " format, \
-        // __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+/* 
+#define Log(format, ...) \
+    printf("[%s:%d %s] " format, \
+        __FILE__, __LINE__, __func__, ## __VA_ARGS__)   */
 
 #define Red(x) "\033[34m" x "\033[0m"
 
@@ -196,6 +197,7 @@ static const Key keys[] = {
     { MODKEY,                       XK_f,      togglefullscr,  {.i = 0  } },
     { Mod1Mask,                     XK_Tab,    altTabStart,    {.i = 1} },
     { Mod1Mask,                     XK_grave,  altTabStart,    {.i = 0} },
+    { MODKEY_ALT,                   XK_r,      recordvoice,    SHCMD("/home/rongzi/.config/scripts/recordvoice") },
     TAGKEYS(                        XK_1,                      0)
     TAGKEYS(                        XK_2,                      1)
     TAGKEYS(                        XK_3,                      2)

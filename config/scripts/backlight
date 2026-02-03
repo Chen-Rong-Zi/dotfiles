@@ -1,2 +1,3 @@
 #!/bin/bash
-brightnessctl set $1 >> /dev/null && dunstify -u low -t 600 -I /usr/share/icons/breeze-dark/status/32/input-keyboard-brightness.svg -r 123 BRIGHTNESS $(sudo xbacklight -get)%
+brightnessctl set $1 >> /dev/null \
+&&  $notify -u low -t 600 -i /usr/share/icons/breeze-dark/status/32/input-keyboard-brightness.svg -r 123 BRIGHTNESS $(sudo xbacklight -get)%
