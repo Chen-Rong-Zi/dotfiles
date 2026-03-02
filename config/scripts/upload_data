@@ -1,0 +1,5 @@
+#!/bin/bash
+susoss upload ~/Pictures
+susoss upload ~/Downloads
+susoss upload ~/Program
+susoss upload ~/Documents
