@@ -31,7 +31,7 @@ jo() {
     export EDITOR=/usr/bin/vim
     # JOSHUTO="/home/rongzi/Downloads/Github/joshuto/target/release/joshuto"
     # JOSHUTO="/home/rongzi/Downloads/Github/joshuto/target/debug/joshuto"
-    JOSHUTO="/usr/bin/joshuto --change-directory"
+    JOSHUTO="${HOME}/Project/joshuto/target/release/joshuto --change-directory"
     if [[ $IN_JOSHUTO ]];then
         exit
         return

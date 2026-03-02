@@ -4,4 +4,4 @@
 # selected_command=$(history | fzf --tac --preview "echo {}" --preview-window=up:30%)
 
 touch $1
-joshuto --file-chooser --output-file $1
+"${HOME}/Project/joshuto/target/release/joshuto" --file-chooser --output-file $1

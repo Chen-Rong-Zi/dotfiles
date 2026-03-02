@@ -12,14 +12,14 @@ mode = "default"
 automatically_count_files = true
 collapse_preview = false
 # ratios for parent view (optional), current view and preview
-column_ratio = [2, 4, 4]
+# column_ratio = [2, 4, 4]
 scroll_offset = 6
 show_borders = true
 show_hidden = false
 show_icons = true
 tilde_in_titlebar = true
 # none, absolute, relative
-line_number_style = "none"
+line_number_style = "relative"
 
 # size, mtime, user, gourp, perm. can be combined with |. 
 # `none` to disable, `all` to enable all

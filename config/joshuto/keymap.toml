@@ -18,8 +18,10 @@ keymap = [
   { keys = ["Q"], command = "quit --output-current-directory" },
 
   { keys = ["R"], command = "reload_dirlist" },
+  { keys = ["ctrl+r"], command = "reload_dirlist" },
   { keys = ["z", "h"], command = "toggle_hidden" },
   { keys = ["ctrl+h"], command = "toggle_hidden" },
+  { keys = ["ctrl+o"], command = "shell /home/rongzi/.config/scripts/joshuto_fc %p"},
   { keys = ["backspace"], command = "toggle_hidden" },
   { keys = ["\t"], command = "tab_switch 1" },
   { keys = ["backtab"], command = "tab_switch -1" },
@@ -94,6 +96,7 @@ keymap = [
 
   { keys = ["f", "t"], command = ":touch " },
 
+  { keys = ["ctrl+ "], command = "select --all=true --deselect=true" },
   { keys = [" "], command = "select --toggle=true" },
   { keys = ["t"], command = "select --all=true --toggle=true" },
   { keys = ["V"], command = "toggle_visual" },
@@ -108,6 +111,8 @@ keymap = [
   { keys = ["'"], command = ":shell " },
   { keys = ["m", "k"], command = ":mkdir " },
   { keys = ["c", "w"], command = ":rename " },
+  { keys = ["c", "x"], commands = ["shell chmod +x %p", "select --all=true --deselect=true", "reload_dirlist"] },
+  { keys = ["c", "m"], commands = [":shell chmod +x %p", "select --all=true --deselect=true",  "reload_dirlist"] },
 
   { keys = ["/"], command = ":search " },
   { keys = ["|"], command = ":search_inc " },
@@ -128,12 +133,13 @@ keymap = [
 
   { keys = ["m", "s"], command = "linemode size" },
   { keys = ["m", "m"], command = "linemode mtime" },
-#   { keys = ["m", "M"], command = "linemode size | mtime" },
-#   { keys = ["m", "u"], command = "linemode user" },
-#   { keys = ["m", "U"], command = "linemode user | group" },
-#   { keys = ["m", "p"], command = "linemode perm" },
+  { keys = ["m", "M"], command = "linemode size | mtime" },
+  { keys = ["m", "u"], command = "linemode user" },
+  { keys = ["m", "U"], command = "linemode user | group" },
+  { keys = ["m", "p"], command = "linemode perm" },
 
-  { keys = [",", "r"], command = "shell kdeconnect-cli -n 'MIX 2S' --share %s" },
+  # { keys = [",", "r"], command = "shell kdeconnect-cli -n 'MIX 2S' --share %s" },
+  { keys = [",", "r"], command = "shell /home/rongzi/.config/scripts/batch_kdeconnect_send %p"},
   { keys = [",", "d", "f"], command = "shell vimdiff %s" },
 #   { keys = ["c", "g"], command = "rg" },
   { keys = [",", "g", "/"], command = "cd /" },

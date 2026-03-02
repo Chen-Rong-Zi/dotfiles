@@ -1,17 +1,14 @@
 [class]
 default = [
-  { command = "kdeconnect-handler", fork = true}
 ]
 
 audio_default = [
   { command = "mpv", fork = false},
-  { command = "kdeconnect-handler", fork = true},
   { command = "mediainfo", confirm_exit = false }
 ]
 
 image_default = [
   { command = "viewnior", fork = true },
-  { command = "kdeconnect-handler", fork = true},
   { command = "qimgv", args = [
     "--",
   ], fork = true, silent = true },
@@ -26,7 +23,6 @@ image_default = [
 
 video_default = [
   { command = "mpv", fork = true, silent = true },
-  { command = "kdeconnect-handler", fork = true},
   { command = "mpv", args = [
     "--mute",
     "on",
@@ -37,7 +33,6 @@ video_default = [
 
 text_default = [
   { command = "vim" },
-  { command = "kdeconnect-handler", fork = true},
   { command = "code", fork = true, silent = true},
   { command = "micro" },
   { command = "gedit", fork = true, silent = true },
@@ -48,18 +43,15 @@ text_default = [
 
 md_default = [
     { command = 'vim'},
-    { command = 'kdeconnect-handler', fork = true},
     { command = 'typora', fork = true, silent = true},
 ]
 
 reader_default = [
   { command = "evince", fork = true, silent = true },
-  { command = "kdeconnect-handler", fork = true}
 ]
 
 libreoffice_default = [
   { command = "libreoffice", fork = true, silent = true },
-  { command = "kdeconnect-handler", fork = true}
 ]
 
 [extension]
@@ -207,7 +199,6 @@ xz.app_list = [
 ]
 zip.app_list = [
   { command = "unzip", confirm_exit = true },
-  { command = "kdeconnect-handler", fork = true},
   { command = "file-roller", fork = true, silent = true },
 ]
 
