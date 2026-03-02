@@ -1,0 +1,3 @@
+#!/bin/bash
+cd ~/Downloads/Github/tree-sitter-pair/
+tree-sitter query ~/Downloads/Github/tree-sitter-pair/queries/query.scm "$@"

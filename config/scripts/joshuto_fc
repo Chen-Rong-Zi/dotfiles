@@ -1,0 +1,53 @@
+#!/usr/bin/bash
+fcargs() {
+    local count=$#
+    if (( count == 0 )); then
+        fc
+        return
+    fi
+
+    # 目标目录
+    local hist_dir="$HOME/.config/joshuto/exe_history"
+    mkdir -p "$hist_dir" || {
+        echo "错误：无法创建目录 $hist_dir" >&2
+        return 1
+    }
+
+    # 生成带日期时间的基础文件名（例如：20250302_153045.sh）
+    local base_name="$(date +%Y%m%d_%H%M%S).sh"
+    local target_file="$hist_dir/$base_name"
+    local suffix=0
+    # 避免重名：如果文件已存在，则添加数字后缀
+    while [[ -e "$target_file" ]]; do
+        ((suffix++))
+        target_file="$hist_dir/${base_name%.sh}_${suffix}.sh"
+    done
+
+    # 将参数写入文件
+    {
+        printf "# Created: %s\n" "$(date)"
+        printf "# Will be executed in current shell\n"
+        printf "# Edit and save to run, or exit without saving.\n"
+        printf "#################################\n"
+        for arg in "$@"; do
+            printf "\"%s\"\n" "$arg"
+        done
+    } > "$target_file"
+
+    # 获取当前历史最后一条命令的编号
+    local last=$(history 1 | awk '{print $1}')
+    last=${last:-0}
+    local start=$((last + 1))
+    local lines=$(wc -l < "$target_file")
+    local end=$((start + lines - 1))
+
+    # 从文件加载历史（自动忽略注释行和空行？history -r 会原样加载，但注释行作为命令会报错，所以需处理）
+    # 方案：只加载非注释且非空的行作为命令，但保留文件完整内容用于编辑。
+    # 这里我们仍用 history -r 加载全部，但 fc 编辑时可以看到注释，执行时会跳过注释（bash 中 # 开头是注释）
+    history -r "$target_file"
+
+    # 编辑新加载的命令范围
+    fc "$start" "$end"
+}
+
+fcargs "${@}"
