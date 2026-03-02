@@ -10,4 +10,4 @@ if [[ -e /usr/share/zsh/manjaro-zsh-prompt ]]; then
 fi
 export EDITOR=/usr/bin/vim
 
-source /home/rongzi/.config/broot/launcher/bash/br
+source /Users/macbook/.config/broot/launcher/bash/br

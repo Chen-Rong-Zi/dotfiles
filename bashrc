@@ -3,7 +3,7 @@
 # esac
 
 # Path to your oh-my-bash installation.
-export OSH='/home/rongzi/.oh-my-bash'
+export OSH='/Users/macbook/.oh-my-bash'
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-bash is loaded.
@@ -114,7 +114,8 @@ source "$OSH"/oh-my-bash.sh
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+export LANG="zh_CN.UTF-8"
+export LC_ALL="zh_CN.UTF-8"
 
 # Preferred editor for local and remote sessions
 # if [[ -n $SSH_CONNECTION ]]; then
@@ -141,10 +142,10 @@ source "$OSH"/oh-my-bash.sh
 alias chrome="google-chrome-stable"
 alias vi="vim -o"
 alias vim="vim -o"
-alias la="exa --icons -alh --color=auto "
-alias ll="exa --icons -alg --color=auto"
-alias ls="exa  --color=auto"
-alias l="exa -lh --icons"
+alias la="eza --icons -alh --color=auto "
+alias ll="eza --icons -alg --color=auto"
+alias ls="eza  --color=auto"
+alias l="eza -lh --icons"
 alias please="sudo"
 alias ra="ranger "
 alias sudo="sudo -E"
@@ -152,8 +153,7 @@ alias sduo="sudo -E"
 alias ef="neofetch"
 alias scrot="scrot ~/Pictures/screenshot/%y-%m-%d_%T.jpg"
 alias volume="pavucontrol"
-alias s="neofetch"
-alias tl="tldr"
+alias s="fastfetch"
 alias ala="swl alacritty &"
 alias swl="swallow"
 alias trans="trans en:zh-CH -show-prompt-message n -show-original-dictionary N -show-alternatives n -show-translation-phonetics n -show-original-phonetics n -no-warn -show-translation-phonetics N -show-languages n -show-dictionary n"
@@ -184,12 +184,12 @@ alias figlet="figlet -f 'ANSI Shadow'"
 alias sql="rlwrap sql"
 
 export ubuntu="rongzi@139.224.128.37"
-export image_path="/home/rongzi/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S").jpg"
+export image_path="/Users/macbook/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S").jpg"
 # export MANPAGER="vim - -MR +'set filetype=man'"
 export MANPAGER="bat"
 export token="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"
 export EDITOR=/usr/bin/vim
-export PATH=$PATH:/home/rongzi/cProgram
+export PATH=$PATH:/Users/macbook/cProgram
 # export LC_CTYPE=zh_CN.UTF-8
 # export https_proxy="https://127.0.0.1:8090"
 # export http_proxy="http://127.0.0.1:8090"
@@ -211,7 +211,7 @@ export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS'
 # export GTK_IM_MODULE=fcitx
 # export QT_IM_MODULE=fcitx
 # export XMODIFIERS=@im=fcitx
-export bin="/home/rongzi/cProgram/a.out"
+export bin="/Users/macbook/cProgram/a.out"
 export BROWSER="google-chrome-stable"
 # setproxy
 
@@ -244,4 +244,8 @@ if [ -f "$HOME/.config/broot/launcher/bash/br" ]; then
 fi
 source $HOME/.config/shell/key-bindings.bash
 source $HOME/.config/scripts/marco.sh
-# source $HOME/.config/scripts/functions.sh
+source $HOME/.config/scripts/functions.sh
+export PATH="/opt/homebrew/bin:$PATH"
+alias tldr="tldr -l | fzf --preview \"tldr {1} --color\" --preview-window=right,70% | xargs tldr"
+alias tl="/opt/homebrew/bin/tldr"
+

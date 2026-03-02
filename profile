@@ -53,4 +53,6 @@ export LANG="zh_CN.UTF-8"
 [[ -n $DISPLAY ]] && source $HOME/.xprofile
 
 # for usefull functions
-source /home/rongzi/.config/scripts/functions.sh
+source /Users/macbook/.config/scripts/functions.sh
+. "$HOME/.cargo/env"
+. "$HOME/.bashrc"
