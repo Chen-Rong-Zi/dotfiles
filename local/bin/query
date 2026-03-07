@@ -1,0 +1,4 @@
+#!/bin/bash
+package=$@;
+info=$(pacman -Qi $package | grep '描述' | awk -F ":" '{print $2}');
+echo -e $package           "\t\tinfo:" $info

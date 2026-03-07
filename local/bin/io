@@ -1,0 +1,214 @@
+#!/bin/bash
+DEBUG=""
+compile_cmd=""
+execute_cmd=""
+
+Target=$HOME/Program/bin
+CC='gcc'
+CFLAGS=' -g3 -std=c23 -Wall -Werror'
+CPP='clang++'
+CPPFLAGS=' -g3 -std=c++23 -Wall -Werror'
+LDFLAG='-lm'
+INCLUDE_FLAGS=' -I..'
+
+check_file() {
+    file="$@"
+    [[ ! -e $file ]] && echo -e io:"$fg_red"Error!"$origin" "$fg_blue""$file" "$fg_red"does not exists!"$origin" >&2 && exit 1
+    echo $file
+}
+
+# parse arguments
+# args_number=$#
+# file=${!args_number}
+for i in "$@";do
+    case $i in
+    *solution.*)
+            merge_err_out=1
+            filename=$(realpath $(check_file $i))
+            file=$(basename $(dirname $filename)).solution
+        ;;
+    *.c*)
+            file=$(check_file $i)
+        ;;
+    *.java)
+            file=$(check_file $i)
+        ;;
+    *.rs)
+            file=$(check_file $i)
+        ;;
+    *.py)
+            file=$(check_file $i)
+        ;;
+    '-s')
+            strict=1
+        ;;
+    '-m')
+            merge_err_out=1
+        ;;
+    '-co')
+            compile_only=1
+        ;;
+    '-eq')
+            errorQuiet=1
+            quiet=1
+        ;;
+    '-q')
+            quiet=1
+        ;;
+    '-r')
+            run_only=1
+        ;;
+    '!io')
+            exit 1;
+        ;;
+    '--')
+            args=$(echo $@ | grep -Po '(?<=\-\- ).*$')
+            break
+        ;;
+    esac
+done
+
+
+filetype=$(echo $file | grep -Po '(?<=\.)([^.]*)$')
+case $filetype in
+    "cpp")
+        [[ $DEBUG ]] && echo cpp detected
+        if [[ -n $strict ]];then
+            compile_cmd="${CPP} ${INCLUDE_FLAGS} ${CPPFLAGS} ${LDFLAG} -o ${Target}"" ${file}"
+            # compile_cmd="clang++ -fcolor-diagnostics -I.. -std=c++11 -Wall -Werror -lm -g -o $HOME/Program/bin $file"
+        else
+            compile_cmd="${CPP} ${INCLUDE_FLAGS} ${CPPFLAGS} ${LDFLAG} -o ${Target}"" ${file}"
+            # compile_cmd="clang++ -fcolor-diagnostics -I.. -std=c++11 -lm -g -o $HOME/Program/bin $file"
+        fi
+        execute_cmd="$HOME/Program/bin $args"
+        ;;
+    "c")
+        [[ $DEBUG ]] && echo -e $fg_blue c detected$origin
+        [[ $DEBUG ]] && echo -e $fg_blue strict = $strict$origin
+
+        if [[ -n $strict ]];then
+            compile_cmd="$CC ${INCLUDE_FLAGS} ${CFLAGS}  -o ${Target} ${file}"
+            # compile_cmd="clang -fcolor-diagnostics  -std=c11 -Wall -Werror -lm -g -o $HOME/Program/bin $file"
+            execute_cmd="${Target} $args"
+            [[ $DEBUG ]] && echo -e $fg_blue compile_cmd $compile_cmd
+        else
+            # compile_cmd="clang -fdiagnostics-color=always  -std=c99 -lm -g -o $HOME/Program/bin $file"
+
+            curr_path=$(pwd)
+            while ! [[ -z $curr_path ]] && [[ $curr_path != '/' ]] ;do
+                if [[ -f $curr_path/Makefile ]];then
+                    # echo '检测到Make配置'
+                    cd $curr_path
+                    compile_cmd="make --directory $curr_path"
+                    execute_cmd="make --directory $curr_path run" "$args"
+                    break
+                fi
+                curr_path=$( dirname $curr_path)
+                # echo '当前在:' $curr_path/Makefile
+            done
+
+            if [[ -z $compile_cmd ]];then
+                compile_cmd="$CC ${INCLUDE_FLAGS} ${CFLAGS}  -o ${Target} ${file}"
+                # compile_cmd="clang -fcolor-diagnostics  -std=c11 -Wall -Werror -lm -g -o $HOME/Program/bin $file"
+                execute_cmd="$HOME/Program/bin $args"
+            fi
+        fi
+        ;;
+    "java")
+        [[ $DEBUG ]] && echo -e $fg_blue java detected$origin
+        [[ $DEBUG ]] && echo -e $fg_blue strict = $strict$origin
+
+            curr_path=$(pwd)
+            while ! [[ -z $curr_path ]] ;do
+                if [[ -f $curr_path/build.gradle.kts ]];then
+                    # echo '检测到gradle配置'
+                    cd $curr_path
+                    compile_cmd="gradle assemble -p ${curr_path}"
+                    if [[ -z $args ]];then
+                        execute_cmd="gradle run -p ${curr_path}"
+                    else
+                        execute_cmd="gradle run -p ${curr_path} --args='${args}'"
+                    fi
+                    break
+                fi
+                curr_path=$( dirname $curr_path)
+                # echo '当前在:' $curr_path
+            done
+
+            if [[ -z $compile_cmd ]];then
+                compile_cmd="javac $file -d $HOME/Program/java/"
+                execute_cmd="java -cp "$HOME/Program/java/" $(basename $file .java) $args"
+            fi
+        ;;
+    "rs")
+        [[ $DEBUG ]] && echo -e $fg_blue rust detected$origin
+        [[ $DEBUG ]] && echo -e $fg_blue strict = $strict$origin
+        if &>/dev/null cargo --color=always metadata;then
+            compile_cmd="cargo build"
+            # compile_cmd="cargo --color=always build"
+            # compile_cmd="exit 1; echo 1"
+            # execute_cmd="cargo --color=always run"
+            execute_cmd="cargo  run"
+            echo "in cargo --color=always project " >&2
+        else
+            compile_cmd="rustc -g -o $HOME/Program/bin --crate-type bin -D warnings $file"
+            # compile_cmd="rustc --color=always -o $HOME/Program/bin --crate-type bin -D warnings $file"
+            # compile_cmd="exit 1; echo 1"
+            execute_cmd="$HOME/Program/bin  $args"
+            echo "in rustc -g --color=always" >&2
+        fi
+        ;;
+    "py")
+        [[ $DEBUG ]] && echo -e $fg_blue python detected$origin
+        [[ $DEBUG ]] && echo -e $fg_blue strict = $strict$origin
+        compile_cmd=""
+        execute_cmd="python3 $file  $args"
+        ;;
+    "solution")
+        [[ $DEBUG ]] && echo -e $fg_blue leetgo test detected$origin
+        [[ $DEBUG ]] && echo -e $fg_blue strict = $strict$origin
+        compile_cmd=""
+        dirname=${file%.solution}
+        # execute_cmd="leetgo test ${dirname##*.} -L -s"
+        execute_cmd="leetgo test ${dirname##*.} -L -s"
+        ;;
+    *)
+        [[  -z $quiet ]] && echo -e "io: "$fg_red"Error!"$origin" Can't compfile "$purple"$filetype"$origin" file, "$purple"$file "$origin" is dismissed"
+        exit 1
+esac
+
+if ! [[ $run_only ]];then
+    [[ $DEBUG ]] && echo -e $fg_red"compile cmd = $compile_cmd" $origin"$fg_blue""args = ""$origin""$args"
+    if [[ -n $merge_err_out ]];then
+        eval $compile_cmd &> >(tee /dev/stderr)
+        result=${PIPESTATUS[0]}
+    else
+        eval $compile_cmd
+        result=$?
+    fi
+    # $compile_cmd 2> >(tee /dev/stderr)
+    # result=$?
+fi
+
+[[ $DEBUG ]] && echo -e $fg_red "compile result = $result" $origin, "cmd = " $execute_cmd
+if [[ $result -ne 0 ]];then
+    [[ $errorQuiet == "0"  ]] && echo -e "io: "$fg_red"Error!"$origin"" >&2
+    exit $result
+fi
+
+
+[[ -z $quiet ]] && echo --------------------------------------
+if [[  $compile_only -eq 1 ]];then
+    echo -e "io: compile OK!"
+    exit 0
+fi
+
+if [[ -n $merge_err_out ]];then
+    eval $execute_cmd &> >(tee /dev/stderr)
+    result=${PIPESTATUS[0]}
+else
+    eval $execute_cmd
+    result=$?
+fi
+
+exit $result

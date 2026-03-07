@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+if [ $# -eq 0 ];then
+    exec joshuto
+elif [[ $(file $1 | awk  '{print $2}') == 'directory' ]];then
+    exec joshuto $1
+else
+    exec joshuto $( echo $1 | awk -F / -v OFS=/ '{$NF="";print}' ) 
+fi

@@ -1,0 +1,25 @@
+#!/bin/bash
+range() {
+    if [[ $# -eq 0 ]]; then
+        assign="list(range(10))"
+    elif [[ $# -eq 1 ]]; then
+        assign="list(range($1))"
+    elif [[ $# -eq 2 ]]; then
+        assign="list(range($1, $2))"
+    elif [[ $# -ge 3 ]]; then
+        assign="list(range($1, $2, $3))"
+    fi
+
+    if [[ $4 = "{" ]]; then
+        cmd="set($assign)"
+    elif [[ $4 = "n" ]]; then
+        echo niaho
+        cmd="str($assign).strip('[').strip(']')"
+    else
+        cmd=$assign
+    fi
+
+    python3 -c "print($cmd)"
+}
+
+range $1 $2 $3 $4

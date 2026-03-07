@@ -1,0 +1,5 @@
+#!/bin/bash
+export OPENAI_API_KEY="sk-1b8a410f573744c1b7528ac1ceefe01d"
+export OPENAI_BASE_URL="https://dashscope.aliyuncs.com/compatible-mode/v1"
+export OPENAI_MODEL="qwen-max-latest"
+qwen

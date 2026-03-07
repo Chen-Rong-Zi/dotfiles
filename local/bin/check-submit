@@ -1,0 +1,38 @@
+#!/bin/bash
+
+for field in $@;do
+    case $field in
+    '-n')
+        norun='1'
+    ;;
+    'pa')
+        echo find
+        pa='1'
+    ;;
+    'lab'*)
+        labx=$field
+    ;;
+    esac
+done
+
+display_web() {
+    if [[ -n $norun ]];then
+        echo w3m -dump http://175.24.131.173:8080/oj/ICS2024/"$1"/"$TOKEN"
+    else
+        w3m -dump http://175.24.131.173:8080/oj/ICS2024/"$1"/"$TOKEN" | bat
+    fi
+}
+
+if [[ -n $pa ]];then
+    pax=$(2>/dev/null git branch | grep -Po '(?<=\* )pa.')
+    if [[ 0 -ne $? ]];then
+        echo '未找到pa的git分支，切换一下分支再试试？'
+    else
+        pax=$(echo $pax | tr a-z A-Z)
+        display_web $pax
+    fi
+elif [[ -n $labx ]];then
+    labx=$(echo $labx | tr l L)
+    display_web $labx
+fi
+

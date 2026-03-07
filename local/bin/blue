@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [[ $1 == 'on' ]];then
+    bluetoothctl power on
+    for mac_device in $(bluetoothctl devices | awk 'OFS=","{print $2, $3}');do
+        device_name=$(echo $mac_device | awk -F, '{print $2}')
+        mac=$(echo $mac_device | awk -F, '{print $1}')
+        # echo device_name: "$device_name", mac: "$mac"
+
+        notify-desktop -i /usr/share/icons/HighContrast/48x48/status/image-loading.png Bluetooth 正在连接"$device_name"
+        if bluetoothctl connect $mac;then
+            notify-desktop -i /usr/share/icons/HighContrast/48x48/status/bluetooth-active.png Bluetooth 连接"$device_name"成功
+        else
+            notify-desktop -i "/usr/share/icons/HighContrast/48x48/status/bluetooth-disabled.png" "Bluetooth" 连接$device_name失败
+        fi
+    done
+else
+    bluetoothctl power off
+    notify-desktop -i "/usr/share/icons/HighContrast/48x48/status/bluetooth-disabled.png" "Bluetooth" "关闭"
+fi

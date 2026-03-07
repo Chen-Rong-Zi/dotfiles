@@ -1,0 +1,10 @@
+$1
+timer=0
+while [[ $timer -le 1000 ]];do
+    xdotool key 'k'
+    if [[ $timer%50 ]];then
+        xdotool key 'l'
+    fi
+    timer=$(($timer + 1))
+    sleep 0.01
+done

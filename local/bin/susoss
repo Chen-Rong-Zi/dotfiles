@@ -1,0 +1,7 @@
+#!/bin/bash
+project_path="/home/rongzi/Downloads/Github"
+config_path="$project_path""/soss/config.json"
+
+source $project_path/soss/.env
+source $project_path/soss/venv/bin/activate
+python3 $project_path/soss/soss_fp.py "$@" -c "$config_path" 

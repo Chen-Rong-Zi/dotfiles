@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo $(cat /sys/devices/platform/coretemp.0/hwmon/hwmon4/temp1_input | cut --delimiter='0' --fields=1)°C
+

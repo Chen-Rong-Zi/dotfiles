@@ -1,0 +1,5 @@
+#!/usr/bin/bash
+# xinput set-prop $(xinput list | grep -Eio 'pad.*id=([1-9]+)' | cut -d"=" -f2) 'Device Enabled' 0
+
+source /home/rongzi/.config/scripts/functions.sh
+nopad

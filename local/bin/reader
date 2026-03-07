@@ -1,0 +1,2 @@
+export all_proxy="127.0.0.1:7890"
+exec /usr/bin/foliate

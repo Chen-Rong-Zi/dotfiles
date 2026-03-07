@@ -1,0 +1,5 @@
+#!/bin/bash
+for dep in $(pactree -l $@);do
+    # echo $dep
+    echo $@ '-->' $dep
+done
