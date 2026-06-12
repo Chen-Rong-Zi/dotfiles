@@ -147,7 +147,7 @@ keymap = [
   { keys = [",", "g", "s"], command = "cd ~/Pictures/screenshot/" },
   { keys = [",", "d", "w", "m"], command = "cd ~/.config/dwm" },
   { keys = [",", "i", "3"], command = "cd ~/.config/i3" },
-  { keys = [",", "g", "L"], command = "cd ~/.Lectures/term5" },
+  { keys = [",", "g", "L"], command = "cd ~/.Lectures/term6" },
   { keys = [",", "g", "t"], command = "cd ~/Program/tasks" },
   { keys = [",", "g", "w"], command = "cd /mnt/windows" },
   { keys = [",", "g", "c"], command = "cd ~/.config" },

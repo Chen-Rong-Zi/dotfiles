@@ -60,7 +60,7 @@
     insert_behavior: Bottom,
     scratchpad: [
         (name: "Alacritty", args: None, value: "alacritty", x: 0.25, y: 0.25, height: 0.5, width: 0.5),
-        (name: "Scrcpy", value: "scrcpy", args: Some(["-S", "-K", "--shortcut-mod", "lalt,lsuper,lctrl,rctrl"]), x: 0.25, y: 0.25, height: 0.5, width: 0.5),
+        (name: "Scrcpy", value: "scrcpy", args: Some(["-S", "-K", "--shortcut-mod", "lalt,lsuper,lctrl,rctrl", "--mouse-bind", "-+++", "--background-color=#000000"]), x: 0.69, y: 0.044, height: 0.942, width: 0.302)
     ],
     window_rules: [
         ( window_title: "joshuto", spawn_floating: true ),
