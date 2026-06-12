@@ -220,9 +220,11 @@ export BROWSER="google-chrome-stable"
 # python-symengine: optimized backend, set USE_SYMENGINE=1 to use
 export USE_SYMENGINE=1
 # PS1="MYTestPrompt> "
-export core_pattern="$(cat /proc/sys/kernel/core_pattern)"
-export core_dir="/home/rongzi/Downloads/Coredump"
-export src="/home/rongzi/Downloads/Coredump"
+if [ -f /proc/sys/kernel/core_pattern ]; then
+    export core_pattern="$(cat /proc/sys/kernel/core_pattern)"
+fi
+export core_dir="/Users/macbook/Downloads/Coredump"
+export src="/Users/macbook/Downloads/Coredump"
 
 if [ -z "$DISPLAY" ] && [ -z "$TMUX" ] && [ $(who | grep -oE tty[2-6] | wc -l ) -ge 1 ]; then
     setfont ter-228b.psf.gz
@@ -237,7 +239,9 @@ if [[ $(pgrep clash) ]];then
 fi
 
 
-source $HOME/.config/broot/launcher/bash/br
+if [ -f "$HOME/.config/broot/launcher/bash/br" ]; then
+    source $HOME/.config/broot/launcher/bash/br
+fi
 source $HOME/.config/shell/key-bindings.bash
 source $HOME/.config/scripts/marco.sh
 # source $HOME/.config/scripts/functions.sh
