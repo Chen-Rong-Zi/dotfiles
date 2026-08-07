@@ -244,8 +244,8 @@ class MypyMode
         this.mode.ModeInit()
         this.maping_ctrl_n = maparg('<c-n>', 'n', false, 1)
         this.maping_ctrl_p = maparg('<c-p>', 'n', false, 1)
-        nn  <c-n> <ScriptCmd> GrepMode.Cnext()<CR>
-        nn  <c-p> <ScriptCmd> GrepMode.Cprev()<CR>
+        nn  <c-n> <ScriptCmd>ModeManager.GetGrepMode(ModeManager.GetTabID()).Cnext()<CR>
+        nn  <c-p> <ScriptCmd>ModeManager.GetGrepMode(ModeManager.GetTabID()).Cprev()<CR>
         cgetexpr ''
         return true
     enddef
@@ -278,149 +278,85 @@ class MypyMode
 
 endclass
 
-export class GrepMode
-    public static var job: job
-    public static var count: number
-    public static var grep_buffer_limit: number
-    public static final mode = Mode.new(0)
-    public static var loaded_buf_nr: list<number> = []
-    # public static var GREP_BIN = 'grep'
-    # public static var GREP_OPTION = '-IRni'
-    # public static var GREP_OTHER_OPTION = []
-    public static var GREP_BIN = 'rg'
-    public static var GREP_OPTION = '--no-heading'
-    public static var GREP_SEARCH_PATH = '.'
-    public static var GREP_SEARCH_CONTENT = ''
-    public static var GREP_OTHER_OPTION = ['-n']
-    public static var maping_ctrl_p: dict<any>
-    public static var maping_ctrl_n: dict<any>
+export class GrepMode extends CommandRunner
+    # 与 Grep 搜索相关的配置（非执行机制）
+    public var count: number = 0
+    public var grep_buffer_limit: number = 0
+    public var GREP_BIN = 'rg'
+    public var GREP_OPTION = '--no-heading'
+    public var GREP_SEARCH_PATH = '.'
+    public var GREP_SEARCH_CONTENT = ''
+    public var GREP_OTHER_OPTION = ['-n']
 
-    static def GetQFbufnr(): dict<any>
-        return getqflist({'qfbufnr': 1})
+    def new(tabid: number)
+        # Vim9 无法调用 super.New()，手动初始化继承字段
+        this.tabid = tabid
+        this.tag   = nr2char(this.tabid + 65)
+        this.run_mode     = 'job'
+        this.cmd_template = ''
     enddef
 
-    static def Cnext()
-        # const bufnr_info: dict<number> = GrepMode.GetQFbufnr()
-        # if bufnr_info->has_key('qfbufnr') ==# 0
-        #     echom '没有打开qf窗口'
-        #     return
-        # endif
-        # const winid = bufwinid(bufnr_info.qfbufnr)
-        # const endline = line('$', winid)
-        # const currline = line('.', winid)
-        # if currline >=# endline
-        #     echom '没有更多错误, endline = ' .. string(endline) .. "   currline = " .. string(currline) .. " winid = " .. string(winid)
-        #     return
-        # endif
-        try
-            cnext
-        catch /E553/
-            echom '没有更多错误'
-        # catch /.*/
-        #     echo "caught" .. v:exception
-        #     # throw "opps"
-        endtry
-    enddef
-
-    static def Cprev()
-        # const bufnr_info: dict<number> = GrepMode.GetQFbufnr()
-        # if bufnr_info->has_key('qfbufnr') ==# 0
-        #     echom '没有打开qf窗口'
-        #     return
-        # endif
-        # const winid = bufwinid(bufnr_info.qfbufnr)
-        # const endline = line('$', winid)
-        # const currline = line('.', winid)
-        # if currline <=# 1
-        #     echom '没有更多错误, endline = ' .. string(endline) .. "   currline = " .. string(currline) .. " winid = " .. string(winid)
-        #     return
-        # endif
-        try
-            cprev
-        catch /E553/
-            echom '没有更多错误'
-        # catch /.*/
-        #     echo "caught" .. v:exception
-        #     # throw "opps"
-        endtry
-
-    enddef
-    static def Copen(text: string, search_path: string)
-        setqflist([], 'r')
-        setqflist([], 'r', {'title': '在目录' .. search_path .. '搜索' .. text, 'lines': float2nr(&lines * (3.0 / 14.0)) })
-        botright copen
-        setlocal nolist nonu nornu
-        @/ = text
-        set hlsearch
-        # execute "normal! \<c-w>k"
-    enddef
-
-    static def ModeInit(): bool
+    def ModeInit(): bool
+        # 先退出其他 mode，再进入 GrepMode
         ModeManager.ExitMode(ModeManager.GetTabID())
-        GrepMode.mode.ModeInit()
-        GrepMode.maping_ctrl_n = maparg('<c-n>', 'n', false, 1)
-        GrepMode.maping_ctrl_p = maparg('<c-p>', 'n', false, 1)
-        # echom GrepMode.maping_ctrl_n
-        # echom GrepMode.maping_ctrl_p
-        nn <c-n> <ScriptCmd> GrepMode.Cnext() \| normal! zR<CR>
-        nn <c-p> <ScriptCmd> GrepMode.Cprev() \| normal! zR<CR>
+        const ok = super.ModeInit()
+        if !ok
+            return false
+        endif
+        nn <c-n> <ScriptCmd>ModeManager.GetGrepMode(ModeManager.GetTabID()).Cnext() \| normal! zR<CR>
+        nn <c-p> <ScriptCmd>ModeManager.GetGrepMode(ModeManager.GetTabID()).Cprev() \| normal! zR<CR>
         &errorformat = &grepformat
-        GrepMode.grep_buffer_limit = g:grep_buffer_limit
-        GrepMode.loaded_buf_nr = getbufinfo({'buflisted': 1})->map((_, buf) => buf['bufnr'])
+        this.grep_buffer_limit = g:grep_buffer_limit
+        this.loaded_buf_nr = getbufinfo({'buflisted': 1})->map((_, buf) => buf['bufnr'])
         ModeManager.database[string(ModeManager.GetTabID())].curr_mode = "GrepMode"
         return true
     enddef
 
-    static def ModeExit()
+    def ModeExit()
         silent! cclose
-        GrepMode.mode.ModeExit()
-        job_stop(GrepMode.job)
+        this.Stop()
+        # 删除 grep 打开的无窗口临时 buffer
         const Valid = (_, buf) => {
             return buf['windows'] ==# []
-              && GrepMode.loaded_buf_nr->index(buf['bufnr']) ==# -1
+              && this.loaded_buf_nr->index(buf['bufnr']) ==# -1
               && bufnr(buf['bufnr']) !=# -1
         }
-
-        if GrepMode.maping_ctrl_n->len() !=# 0
-            mapset('n', false, GrepMode.maping_ctrl_n)
-        endif
-        if GrepMode.maping_ctrl_p->len() !=# 0
-            mapset('n', false, GrepMode.maping_ctrl_p)
-        endif
-
         getbufinfo({"buflisted": 1})->filter(Valid)
                     ->map((_, buf) => {
-                        # echom 'bdelete! ' .. buf['bufnr']
                         silent! execute 'bdelete! ' .. buf['name']
                         return 1
                     })
+        super.ModeExit()
     enddef
 
-    static def GrepHandler(ch: channel, msg: string)
-        if GrepMode.grep_buffer_limit ==# 0
-            job_stop(GrepMode.job)
+    def Copen()
+        CommandRunner.Copen()
+        setqflist([], 'r', {'title': '在目录' .. this.GREP_SEARCH_PATH .. '搜索' .. this.GREP_SEARCH_CONTENT})
+        @/ = this.GREP_SEARCH_CONTENT
+        set hlsearch
+    enddef
+
+    def GrepHandler(ch: channel, msg: string)
+        if this.grep_buffer_limit ==# 0
+            job_stop(this.job)
             return
         endif
-        GrepMode.grep_buffer_limit -= 1
+        this.grep_buffer_limit -= 1
         caddexpr msg
-
     enddef
 
-    static def Grep()
-        const winid = win_getid()
-        GrepMode.ModeInit()
-        # 清除qf列表
-        GrepMode.count = 0
-        GrepMode.GREP_SEARCH_PATH = GrepMode.GREP_SEARCH_PATH->fnamemodify(":p:h")
-        echom [GrepMode.GREP_BIN, GrepMode.GREP_OPTION, GrepMode.GREP_SEARCH_CONTENT, GrepMode.GREP_SEARCH_PATH] + GrepMode.GREP_OTHER_OPTION
-        GrepMode.job = job_start(
-            [GrepMode.GREP_BIN, GrepMode.GREP_OPTION, GrepMode.GREP_SEARCH_CONTENT, GrepMode.GREP_SEARCH_PATH] + GrepMode.GREP_OTHER_OPTION,
-            {'callback': GrepMode.GrepHandler, 'timeout': 100})
-        GrepMode.Copen(GrepMode.GREP_SEARCH_CONTENT, GrepMode.GREP_SEARCH_PATH)
-        WinFocusOn(winid)
+    def RunJob(...args: list<any>): bool
+        this.GREP_SEARCH_PATH = this.GREP_SEARCH_PATH->fnamemodify(":p:h")
+        const cmd_list = [this.GREP_BIN, this.GREP_OPTION, this.GREP_SEARCH_CONTENT, this.GREP_SEARCH_PATH] + this.GREP_OTHER_OPTION
+        echom cmd_list
+        this.job = job_start(
+            cmd_list,
+            {'callback': (ch: channel, msg: string) => this.GrepHandler(ch, msg), 'timeout': 100})
+        this.Copen()
+        return true
     enddef
 
-    static def Run(): func: void
+    def Run(): func: void
         return (_) => {
             var searchContent: string = ""
             const [_, l_row, l_col, _] = getcharpos("'[")
@@ -434,14 +370,24 @@ export class GrepMode
                 var lines: list<string> = getline(r_row, l_row)
                 lines[0]  = lines[0][r_col - 1 : ]
                 lines[-1] = lines[-1][ : l_col - 1]
+                searchContent = lines->join("\n")
             elseif l_row <# r_row
                 var lines: list<string> = getline(l_row, r_row)
                 lines[0]  = lines[0][l_col - 1 : ]
                 lines[-1] = lines[-1][ : r_col - 1]
+                searchContent = lines->join("\n")
             endif
-            GrepMode.GREP_SEARCH_CONTENT = '\<' .. searchContent .. '\>'
-            GrepMode.Grep()
+            this.GREP_SEARCH_CONTENT = '\<' .. searchContent .. '\>'
+            this.Grep()
         }
+    enddef
+
+    def Grep()
+        const winid = win_getid()
+        this.ModeInit()
+        this.count = 0
+        this.RunJob()
+        WinFocusOn(winid)
     enddef
 endclass
 
@@ -476,56 +422,25 @@ def AddFlag(flag: string): any
     }
 enddef
 
-export class RunMode
-    public var term_nr: number
+export class RunMode extends CommandRunner
     public var run_job: job
     public var src_path: string
     public var debug_buffer_limit: number = 0
     public var makeprg: string
-    public var tabid:   number
-    public var mode: Mode
-    public var open_term: bool = false
-    public var maping_ctrl_p: dict<any>
-    public var maping_ctrl_n: dict<any>
 
     def new(tabid: number)
+        # Vim9 无法调用 super.New()，手动初始化继承字段
         this.tabid = tabid
-        this.mode  = Mode.new(tabid)
+        this.tag   = nr2char(this.tabid + 65)
+        this.run_mode     = 'term'
+        this.cmd_template = 'io -m -eq %'
     enddef
 
-    def ModeExit()
-        this.mode.ModeExit()
-        if this.maping_ctrl_n->len() !=# 0
-            mapset('n', false, this.maping_ctrl_n)
-        endif
-        if this.maping_ctrl_p->len() !=# 0
-            mapset('n', false, this.maping_ctrl_p)
-        endif
-        # echom job_status(this.run_job)
-        if job_status(this.run_job) !=# 'fail'
-            job_stop(this.run_job, 'kill')
-        endif
-        if bufnr(this.term_nr) !=# -1
-            # echom 'exit'
-            const term_job = term_getjob(this.term_nr)
-            if job_status(term_job) ==# 'run'
-                job_setoptions(term_job, {'exit_cb': (exit_job: job, id: number) => 1})
-            endif
-            silent! execute 'bdelete! ' .. this.term_nr
-        endif
-        if this.open_term
-            this.open_term = false
-            cclose
-        endif
-    enddef
-
-    def _DecideSrc(): string
+    def _ResolveSrc(): string
         var curr_path = expand('%:p')
         const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
         if &buftype ==# '' && types->index(FileType(curr_path)) !=# -1
             this.makeprg = &makeprg
-            this.mode.ModeInit()
-            ModeManager.ExitMode(ModeManager.GetTabID())
             return curr_path
         endif
 
@@ -540,27 +455,25 @@ export class RunMode
     enddef
 
     def ModeInit(): bool
-        this.src_path = this._DecideSrc()
+        this.src_path = this._ResolveSrc()
         if this.src_path ==# ''
             return false
         endif
-        this.mode.ModeInit()
-        this.maping_ctrl_n = maparg('<c-n>', 'n', false, 1)
-        this.maping_ctrl_p = maparg('<c-p>', 'n', false, 1)
-        nn <c-n> <ScriptCmd> GrepMode.Cnext()<CR>
-        nn <c-p> <ScriptCmd> GrepMode.Cprev()<CR>
-        this.debug_buffer_limit = g:debug_buffer_limit
-        if getfsize($HOME .. '/.cache/vim/error') >=# 1
-            return true
+        const ok = super.ModeInit()
+        if !ok
+            return false
         endif
+        this.debug_buffer_limit = g:debug_buffer_limit
         return true
     enddef
 
-    static def Copen(filetype: string)
-        exe 'botright copen ' .. string(float2nr(&lines * (3.0 / 14.0)))
-        # exe 'set filetype=' .. filetype
-        # source ~/.vim/syntax/qf.vim
-        setlocal nonumber norelativenumber nolist
+    def ModeExit()
+        this.Stop()
+        super.ModeExit()
+    enddef
+
+    def Copen()
+        CommandRunner.Copen()
     enddef
 
     static def ExitHandler(exit_job: job, winid: number, runmode: RunMode)
@@ -572,15 +485,14 @@ export class RunMode
         if bufnr(runmode.term_nr) !=# -1 && bufnr(runmode.term_nr) !=# 0
             execute 'bdelete! ' .. runmode.term_nr
         endif
-
         if runmode.open_term
             execute 'cgetfile ' .. $HOME .. '/.cache/vim/error'
             setqflist([], 'r',  {'title': '退出代码: ' .. string(exitval)})
-            RunMode.Copen(&filetype)
+            CommandRunner.Copen()
         endif
     enddef
 
-    def Run(...args: list<any>): bool
+    def RunTerm(...args: list<any>): bool
         if this.ModeInit() ==# false
             echom 'ModeInit失败，不进入RunMode'
             return false
@@ -597,7 +509,7 @@ export class RunMode
             'err_name': $HOME .. '/.cache/vim/error',
             'exit_cb': (exit_job: job, id: number) => RunMode.ExitHandler(exit_job, id, this)}
         const time_passby = TimeStamp(false)
-        const run_cmd     = "io -m -eq " .. this.src_path
+        const run_cmd     = this.BuildCommand()
         this.open_term = true
 
         if time_passby <# 1.0
@@ -615,33 +527,94 @@ export class RunMode
     static def RunHandler(ch: channel, msg: string, runmode: RunMode)
         caddexpr msg
         runmode.debug_buffer_limit -= 1
-        # echom runmode.debug_buffer_limit
         if runmode.debug_buffer_limit <=# 0
             ch_close(ch)
             caddexpr '超出最大缓冲区限制: ' .. g:debug_buffer_limit .. "  修改g:debug_buffer_limit以增大容量"
         endif
     enddef
 
+    def Run(...args: list<any>): bool
+        return this.RunTerm(args)
+    enddef
+
     def Debug(): bool
+        ModeManager.Debug(ModeManager.GetTabID())
+        return true
+    enddef
+endclass
+
+export class DebugMode extends CommandRunner
+    public var src_path: string
+    public var debug_buffer_limit: number = 0
+    public var makeprg: string
+
+    def new(tabid: number)
+        # Vim9 无法调用 super.New()，手动初始化继承字段
+        this.tabid = tabid
+        this.tag   = nr2char(this.tabid + 65)
+        this.run_mode     = 'job'
+        this.cmd_template = ''
+    enddef
+
+    def ModeInit(): bool
+        const curr_path = expand('%:p')
+        const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
+        if types->index(FileType(curr_path)) ==# -1
+            return false
+        endif
+        this.src_path = curr_path
+        this.makeprg = &makeprg
+        const ok = super.ModeInit()
+        if !ok
+            return false
+        endif
+        this.debug_buffer_limit = g:debug_buffer_limit
+        return true
+    enddef
+
+    def ModeExit()
+        this.Stop()
+        super.ModeExit()
+    enddef
+
+    def Copen()
+        CommandRunner.Copen()
+    enddef
+
+    def BuildCommand(): string
+        # 若用户通过 :Run -d 提供了自定义命令则用之，否则用 &makeprg
+        if this.cmd_template !=# ''
+            return substitute(this.cmd_template, '%', this.src_path, 'g')
+        endif
+        return this.makeprg
+            ->split(' ')
+            ->map((_, token) => (token =~# '\v\%.*') ? this.src_path : token)
+            ->join(' ')
+    enddef
+
+    def RunHandler(ch: channel, msg: string)
+        caddexpr msg
+        this.debug_buffer_limit -= 1
+        if this.debug_buffer_limit <=# 0
+            ch_close(ch)
+            caddexpr '超出最大缓冲区限制: ' .. g:debug_buffer_limit .. "  修改g:debug_buffer_limit以增大容量"
+        endif
+    enddef
+
+    def RunJob(...args: list<any>): bool
         if this.ModeInit() ==# false
-            echom 'ModeInit失败，不进入RunMode'
+            echom 'ModeInit失败，不进入DebugMode'
             return false
         endif
         const winid = win_getid()
-        const option   = {'callback': (ch: channel, msg: string) => {
-                RunMode.RunHandler(ch, msg, this)
-            },
+        const option = {'callback': (ch: channel, msg: string) => this.RunHandler(ch, msg),
             'exit_cb': (exit_job: job, msg: number) => {
                 const exitval = job_info(exit_job)['exitval']
                 setqflist([], 'r',  {'title': '退出代码: ' .. string(exitval)})
             }}
-        const run_cmd  = this.makeprg
-            ->split(' ')
-            ->map((_, token) => (token =~# '\v\%.*') ? this.src_path : token)
-            ->join(' ')
         cgetexpr ''
-        this.run_job = job_start(run_cmd, option)
-        RunMode.Copen(&filetype)
+        this.job = job_start(this.BuildCommand(), option)
+        this.Copen()
         this.open_term = true
         WinFocusOn(winid)
         return true
@@ -653,12 +626,16 @@ class TabPage
     public var tabid: number
     public var curr_mode: string = ''
     public var run_mode:  RunMode
+    public var debug_mode: DebugMode
+    public var grep_mode: GrepMode
     public var mypy_mode: MypyMode
 
     def new(tabid: number)
         this.tabid = tabid
         this.curr_mode = ''
         this.run_mode  = RunMode.new(tabid)
+        this.debug_mode = DebugMode.new(tabid)
+        this.grep_mode = GrepMode.new(tabid)
         this.mypy_mode = MypyMode.new(tabid)
     enddef
     def SetCurrMode(mode_type: string)
@@ -666,12 +643,12 @@ class TabPage
     enddef
     def ExitMode()
         if this.curr_mode ==# ''
-        elseif this.curr_mode ==# 'Mode'
-            # mode_state.ModeExit()
         elseif this.curr_mode ==# 'GrepMode'
-            GrepMode.ModeExit()
+            this.grep_mode.ModeExit()
         elseif this.curr_mode ==# 'RunMode'
             this.run_mode.ModeExit()
+        elseif this.curr_mode ==# 'DebugMode'
+            this.debug_mode.ModeExit()
         elseif this.curr_mode ==# 'MypyMode'
             this.mypy_mode.ModeExit()
         endif
@@ -692,6 +669,26 @@ export class ModeManager
         endif
     enddef
 
+    static def GetGrepMode(tabid: number): GrepMode
+        final mode_state: TabPage = ModeManager.database[string(tabid)]
+        return mode_state.grep_mode
+    enddef
+
+    static def GetRunMode(tabid: number): RunMode
+        final mode_state: TabPage = ModeManager.database[string(tabid)]
+        return mode_state.run_mode
+    enddef
+
+    static def GetDebugMode(tabid: number): DebugMode
+        final mode_state: TabPage = ModeManager.database[string(tabid)]
+        return mode_state.debug_mode
+    enddef
+
+    static def GetMypyMode(tabid: number): MypyMode
+        final mode_state: TabPage = ModeManager.database[string(tabid)]
+        return mode_state.mypy_mode
+    enddef
+
     static def Register(tabnr: number): number
         const tabid = ModeManager.tab_num
         settabvar(tabnr, 'tabid', tabid)
@@ -710,25 +707,29 @@ export class ModeManager
     enddef
 
     static def Run(tabid: number, ...args: list<any>)
-        # echom 'tabid = ' .. string(tabid) .. '  keys = ' .. string(ModeManager.database->keys())
         final mode_state: TabPage = ModeManager.database[string(tabid)]
         var result: bool
         if len(args) ==# 0
-            result = mode_state.run_mode.Run()
+            # 无自定义命令：使用 RunMode 默认 io -m -eq %
+            mode_state.run_mode.cmd_template = 'io -m -eq %'
         else
-            result = mode_state.run_mode.Run(args[0], args[1 : ]->join(' '))
+            # 自定义命令（如 'python3 %'）：设置 cmd_template，% 在 BuildCommand 中替换
+            mode_state.run_mode.cmd_template = args->join(' ')
         endif
+        result = mode_state.run_mode.Run()
         if result
             mode_state.SetCurrMode('RunMode')
         endif
     enddef
 
-    static def Debug(tabid: number)
-        # echom 'tabid = ' .. string(tabid) .. '  keys = ' .. string(ModeManager.database->keys())
+    static def Debug(tabid: number, ...args: list<any>)
         final mode_state: TabPage = ModeManager.database[string(tabid)]
-        final result: bool = mode_state.run_mode.Debug()
+        if len(args) !=# 0
+            mode_state.debug_mode.cmd_template = args->join(' ')
+        endif
+        final result: bool = mode_state.debug_mode.RunJob()
         if result
-            mode_state.SetCurrMode('RunMode')
+            mode_state.SetCurrMode('DebugMode')
         endif
     enddef
 
@@ -741,35 +742,37 @@ export class ModeManager
 endclass
 
 def ParseGrepArgs(...args: list<string>)
+    final gm = ModeManager.GetGrepMode(ModeManager.GetTabID())
     const argc = len(args)
-    GrepMode.GREP_OTHER_OPTION = []
+    gm.GREP_OTHER_OPTION = []
     if argc ==# 1
-        GrepMode.GREP_SEARCH_CONTENT = args[0]
+        gm.GREP_SEARCH_CONTENT = args[0]
     elseif argc ==# 2
-        GrepMode.GREP_OPTION      = args[0]
-        GrepMode.GREP_SEARCH_PATH = system('realpath ' .. shellescape(args[1]) )->trim()
+        gm.GREP_OPTION      = args[0]
+        gm.GREP_SEARCH_PATH = system('realpath ' .. shellescape(args[1]) )->trim()
     elseif argc ==# 3
-        GrepMode.GREP_OPTION         = args[0]
-        GrepMode.GREP_SEARCH_CONTENT = args[1]
-        GrepMode.GREP_SEARCH_PATH    = system('realpath ' .. shellescape(args[2]) )->trim()
-        GrepMode.Grep()
+        gm.GREP_OPTION         = args[0]
+        gm.GREP_SEARCH_CONTENT = args[1]
+        gm.GREP_SEARCH_PATH    = system('realpath ' .. shellescape(args[2]) )->trim()
+        gm.Grep()
     else
-        GrepMode.GREP_OPTION         = args[0]
-        GrepMode.GREP_SEARCH_CONTENT = args[1]
-        GrepMode.GREP_SEARCH_PATH    = system('realpath ' .. shellescape(args[2]) )->trim()
-        GrepMode.GREP_OTHER_OPTION   = args[3 : ]
-        GrepMode.Grep()
+        gm.GREP_OPTION         = args[0]
+        gm.GREP_SEARCH_CONTENT = args[1]
+        gm.GREP_SEARCH_PATH    = system('realpath ' .. shellescape(args[2]) )->trim()
+        gm.GREP_OTHER_OPTION   = args[3 : ]
+        gm.Grep()
     endif
 enddef
 
 
 command GrepModeOper {
-    &operatorfunc = GrepMode.Run()
+    &operatorfunc = ModeManager.GetGrepMode(ModeManager.GetTabID()).Run()
 }
 
 command GrepModeEdit {
-    echom (["Grep", GrepMode.GREP_OPTION, GrepMode.GREP_SEARCH_CONTENT, GrepMode.GREP_SEARCH_PATH] + GrepMode.GREP_OTHER_OPTION)
-    autocmd CmdwinEnter * ++once setline('.', (["Grep", GrepMode.GREP_OPTION, escape(GrepMode.GREP_SEARCH_CONTENT, '/ '), GrepMode.GREP_SEARCH_PATH] + GrepMode.GREP_OTHER_OPTION)->join(' ')) | cursor(0, line('.'))
+    final gm = ModeManager.GetGrepMode(ModeManager.GetTabID())
+    echom (["Grep", gm.GREP_OPTION, gm.GREP_SEARCH_CONTENT, gm.GREP_SEARCH_PATH] + gm.GREP_OTHER_OPTION)
+    autocmd CmdwinEnter * ++once setline('.', (["Grep", gm.GREP_OPTION, escape(gm.GREP_SEARCH_CONTENT, '/ '), gm.GREP_SEARCH_PATH] + gm.GREP_OTHER_OPTION)->join(' ')) | cursor(0, line('.'))
 }
 
 command -nargs=0 RunMode         ModeManager.Run(ModeManager.GetTabID())
