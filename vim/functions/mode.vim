@@ -305,6 +305,8 @@ export class GrepMode extends CommandRunner
     def ModeExit()
         silent! cclose
         this.Stop()
+        # 退出时清空 quickfix list（用户要求退出 Grep 模式后不留残留结果）
+        setqflist([], 'r')
         # 删除 grep 打开的无窗口临时 buffer
         const Valid = (_, buf) => {
             return buf['windows'] ==# []
@@ -393,17 +395,14 @@ export class RunMode extends CommandRunner
     enddef
 
     def _ResolveSrc(): string
-        var curr_path = expand('%:p')
+        # 必须在 ExitMode 之前取 expand('%:p')：Mode.ModeExit 的 JumpTo 会把光标
+        # 切到首次进入 mode 时的标记文件，污染之后的 expand('%:p')，导致 Run
+        # 无法作用到切换后的新文件上。
+        const curr_path = expand('%:p')
         const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
-        if &buftype ==# '' && types->index(FileType(curr_path)) !=# -1
-            # 先退出其他 mode，再进入 RunMode
-            ModeManager.ExitMode(ModeManager.GetTabID())
-            return curr_path
-        endif
-
+        # 先退出其他 mode，再进入 RunMode
         ModeManager.ExitMode(ModeManager.GetTabID())
-        curr_path = expand('%:p')
-        if types->index(FileType(curr_path)) !=# -1
+        if &buftype ==# '' && types->index(FileType(curr_path)) !=# -1
             return curr_path
         else
             return ''
@@ -415,7 +414,11 @@ export class RunMode extends CommandRunner
         if this.src_path ==# ''
             return false
         endif
-        return super.ModeInit()
+        const ok = super.ModeInit()
+        # super.ModeInit 里的 this.filepath = expand('%:p') 在 ExitMode 之后执行，
+        # 已被 JumpTo 污染成首次标记文件；用 _ResolveSrc 解析的 src_path 覆盖。
+        this.filepath = this.src_path
+        return ok
     enddef
 
     def ModeExit()
@@ -490,9 +493,10 @@ export class DebugMode extends CommandRunner
     enddef
 
     def ModeInit(): bool
+        # 必须在 ExitMode 之前取 expand('%:p')：JumpTo 会切换光标到标记文件
+        const curr_path = expand('%:p')
         # 先退出其他 mode，再进入 DebugMode
         ModeManager.ExitMode(ModeManager.GetTabID())
-        const curr_path = expand('%:p')
         const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
         if types->index(FileType(curr_path)) ==# -1
             return false
@@ -531,7 +535,11 @@ export class DebugMode extends CommandRunner
         caddexpr msg
         this.debug_buffer_limit -= 1
         if this.debug_buffer_limit <=# 0
-            ch_close(ch)
+            # job 退出后 Vim 仍会 flush 缓冲消息并继续调用 callback，此时
+            # channel 已被 Vim 自动关闭；再次 ch_close 会报 E906，需先判断状态。
+            if ch_status(ch) !=# 'closed'
+                ch_close(ch)
+            endif
             caddexpr '超出最大缓冲区限制: ' .. g:debug_buffer_limit .. "  修改g:debug_buffer_limit以增大容量"
         endif
     enddef
