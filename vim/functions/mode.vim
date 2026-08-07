@@ -201,37 +201,23 @@ export class CommandRunner extends Mode
     enddef
 endclass
 
-class MypyMode
-    public var tabid: number
-    public var job:   job
-    public var mode:  Mode
-    public var timer_id: number
-    public var filepath: string
-    public var mtime: number = 0
-    public var maping_ctrl_p: dict<any>
-    public var maping_ctrl_n: dict<any>
-
+class MypyMode extends CommandRunner
     def new(tabid: number)
+        # Vim9 无法调用 super.New()，手动初始化继承字段
         this.tabid = tabid
-        this.mode  = Mode.new(tabid)
+        this.tag   = nr2char(this.tabid + 65)
+        this.run_mode     = 'job'
+        this.cmd_template = 'dmypy check %'
     enddef
 
     def ModeExit()
-        # job_stop(this.job, 'kill')
-        timer_stop(this.timer_id)
+        this.Stop()
         cclose
-        if this.maping_ctrl_n->len() !=# 0
-            mapset('n', false, this.maping_ctrl_n)
-        endif
-        if this.maping_ctrl_p->len() !=# 0
-            mapset('n', false, this.maping_ctrl_p)
-        endif
-        this.mode.ModeExit()
+        super.ModeExit()
     enddef
 
     def Copen()
-        exe 'botright copen ' .. string(float2nr(&lines * (3.0 / 14.0)))
-        setlocal nonumber norelativenumber nolist
+        CommandRunner.Copen()
         execute "normal! \<c-w>k"
     enddef
 
@@ -240,41 +226,43 @@ class MypyMode
         if FileType(this.filepath) !=# 'python'
             return false
         endif
-        this.mode.ModeInit()
-        this.maping_ctrl_n = maparg('<c-n>', 'n', false, 1)
-        this.maping_ctrl_p = maparg('<c-p>', 'n', false, 1)
+        const ok = super.ModeInit()
+        if !ok
+            return false
+        endif
         nn  <c-n> <ScriptCmd> CommandRunner.Cnext()<CR>
         nn  <c-p> <ScriptCmd> CommandRunner.Cprev()<CR>
         cgetexpr ''
         return true
     enddef
 
-    def Run()
-        if this.ModeInit() ==# false
-            echom 'ModeInit失败，不进入MypyMode'
+    def RunMypy(timer_id: number, ...args: list<any>)
+        const ftime = getftime(this.filepath)
+        if ftime ==# this.mtime
             return
         endif
-        def RunMypy(timer_id: number, ...args: list<any>)
-            const ftime = getftime(this.filepath)
-            # echom ['dmypy', 'check', this.filepath]
-            if ftime ==# this.mtime
-                return
-            endif
-            this.mtime = ftime
-            if this.job !=# null && job_status(this.job) ==# 'run'
-                job_stop(this.job, 'kill')
-            endif
-            cgetexpr ''
-            this.job = job_start(['dmypy', 'check', this.filepath], {'callback': MypyMode.RunHandler})
-        enddef
-        this.timer_id = timer_start(5 * 1000, RunMypy, {'repeat': -1})
-        this.Copen()
+        this.mtime = ftime
+        if this.job !=# null && job_status(this.job) ==# 'run'
+            job_stop(this.job, 'kill')
+        endif
+        cgetexpr ''
+        this.job = job_start(['dmypy', 'check', this.filepath], {'callback': (ch: channel, msg: string) => this.RunHandler(ch, msg)})
     enddef
 
-    static def RunHandler(ch: channel, msg: string)
+    def RunHandler(ch: channel, msg: string)
         caddexpr msg
     enddef
 
+    def Execute(...args: list<any>): bool
+        if this.ModeInit() ==# false
+            echom 'ModeInit失败，不进入MypyMode'
+            return false
+        endif
+        this.mtime = getftime(this.filepath)
+        this.timer_id = timer_start(5 * 1000, (timer_id: number) => this.RunMypy(timer_id), {'repeat': -1})
+        this.Copen()
+        return true
+    enddef
 endclass
 
 export class GrepMode extends CommandRunner
@@ -710,8 +698,9 @@ export class ModeManager
 
     static def Mypy(tabid: number)
         final mode_state: TabPage = ModeManager.database[string(tabid)]
-        mode_state.mypy_mode.Run()
-        mode_state.SetCurrMode('MypyMode')
+        if mode_state.mypy_mode.Execute()
+            mode_state.SetCurrMode('MypyMode')
+        endif
     enddef
 
 endclass
