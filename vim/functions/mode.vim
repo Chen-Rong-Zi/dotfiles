@@ -84,7 +84,6 @@ export class CommandRunner extends Mode
     # ---- 配置 ----
     public var run_mode: string          # 'term' | 'job'
     public var cmd_template: string      # 命令模板，'%' = 当前文件 %:p
-    public var title: string             # quickfix 标题
 
     # ---- 状态 ----
     public var job: job
@@ -106,8 +105,8 @@ export class CommandRunner extends Mode
     enddef
 
     def BuildCommand(): string
-        # 将 cmd_template 中的 '%' 替换为当前文件绝对路径
-        return substitute(this.cmd_template, '%', this.filepath, 'g')
+        # 将 cmd_template 中的 '%' 替换为当前文件绝对路径（转义替换串特殊字符）
+        return substitute(this.cmd_template, '%', escape(this.filepath, '&\~'), 'g')
     enddef
 
     def ModeInit(): bool
@@ -161,7 +160,7 @@ export class CommandRunner extends Mode
     static def Cnext()
         try
             cnext
-        catch /E553/
+        catch /E42\|E553/
             echom '没有更多错误'
         endtry
     enddef
@@ -169,7 +168,7 @@ export class CommandRunner extends Mode
     static def Cprev()
         try
             cprev
-        catch /E553/
+        catch /E42\|E553/
             echom '没有更多错误'
         endtry
     enddef
@@ -423,10 +422,7 @@ def AddFlag(flag: string): any
 enddef
 
 export class RunMode extends CommandRunner
-    public var run_job: job
     public var src_path: string
-    public var debug_buffer_limit: number = 0
-    public var makeprg: string
 
     def new(tabid: number)
         # Vim9 无法调用 super.New()，手动初始化继承字段
@@ -440,14 +436,14 @@ export class RunMode extends CommandRunner
         var curr_path = expand('%:p')
         const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
         if &buftype ==# '' && types->index(FileType(curr_path)) !=# -1
-            this.makeprg = &makeprg
+            # 先退出其他 mode，再进入 RunMode
+            ModeManager.ExitMode(ModeManager.GetTabID())
             return curr_path
         endif
 
         ModeManager.ExitMode(ModeManager.GetTabID())
         curr_path = expand('%:p')
         if types->index(FileType(curr_path)) !=# -1
-            this.makeprg = &makeprg
             return curr_path
         else
             return ''
@@ -459,21 +455,12 @@ export class RunMode extends CommandRunner
         if this.src_path ==# ''
             return false
         endif
-        const ok = super.ModeInit()
-        if !ok
-            return false
-        endif
-        this.debug_buffer_limit = g:debug_buffer_limit
-        return true
+        return super.ModeInit()
     enddef
 
     def ModeExit()
         this.Stop()
         super.ModeExit()
-    enddef
-
-    def Copen()
-        CommandRunner.Copen()
     enddef
 
     static def ExitHandler(exit_job: job, winid: number, runmode: RunMode)
@@ -524,22 +511,8 @@ export class RunMode extends CommandRunner
         return true
     enddef
 
-    static def RunHandler(ch: channel, msg: string, runmode: RunMode)
-        caddexpr msg
-        runmode.debug_buffer_limit -= 1
-        if runmode.debug_buffer_limit <=# 0
-            ch_close(ch)
-            caddexpr '超出最大缓冲区限制: ' .. g:debug_buffer_limit .. "  修改g:debug_buffer_limit以增大容量"
-        endif
-    enddef
-
     def Run(...args: list<any>): bool
         return this.RunTerm(args)
-    enddef
-
-    def Debug(): bool
-        ModeManager.Debug(ModeManager.GetTabID())
-        return true
     enddef
 endclass
 
@@ -557,6 +530,8 @@ export class DebugMode extends CommandRunner
     enddef
 
     def ModeInit(): bool
+        # 先退出其他 mode，再进入 DebugMode
+        ModeManager.ExitMode(ModeManager.GetTabID())
         const curr_path = expand('%:p')
         const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
         if types->index(FileType(curr_path)) ==# -1
@@ -582,9 +557,9 @@ export class DebugMode extends CommandRunner
     enddef
 
     def BuildCommand(): string
-        # 若用户通过 :Run -d 提供了自定义命令则用之，否则用 &makeprg
+        # 若用户通过 ModeManager.Debug 提供了自定义命令则用之，否则用 &makeprg
         if this.cmd_template !=# ''
-            return substitute(this.cmd_template, '%', this.src_path, 'g')
+            return substitute(this.cmd_template, '%', escape(this.src_path, '&\~'), 'g')
         endif
         return this.makeprg
             ->split(' ')
