@@ -73,6 +73,135 @@ export class Mode
     enddef
 endclass
 
+#  ██████╗ ██████╗ ███╗   ███╗███╗   ███╗ █████╗ ███╗   ██╗██████╗
+# ██╔════╝██╔═══██╗████╗ ████║████╗ ████║██╔══██╗██║   ██║██╔══██╗
+# ██║     ██║   ██║██╔████╔██║██╔████╔██║███████║██║   ██║██████╔╝
+# ██║     ██║   ██║██║╚██╔╝██║██║╚██╔╝██║██╔══██║██║   ██║██╔══██╗
+# ╚██████╗╚██████╔╝██║ ╚═╝ ██║██║ ╚═╝ ██║██║  ██║██║   ██║██████╔╝
+#  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝   ╚═╝╚═════╝
+
+export class CommandRunner extends Mode
+    # ---- 配置 ----
+    public var run_mode: string          # 'term' | 'job'
+    public var cmd_template: string      # 命令模板，'%' = 当前文件 %:p
+    public var title: string             # quickfix 标题
+
+    # ---- 状态 ----
+    public var job: job
+    public var term_nr: number
+    public var timer_id: number
+    public var filepath: string
+    public var mtime: number = 0
+    public var open_term: bool = false
+    public var loaded_buf_nr: list<number> = []
+    public var maping_ctrl_p: dict<any>
+    public var maping_ctrl_n: dict<any>
+
+    def new(tabid: number, run_mode: string, cmd_template: string)
+        # Vim9 无法调用 super.New()，手动初始化继承字段
+        this.tabid = tabid
+        this.tag   = nr2char(this.tabid + 65)
+        this.run_mode     = run_mode
+        this.cmd_template = cmd_template
+    enddef
+
+    def BuildCommand(): string
+        # 将 cmd_template 中的 '%' 替换为当前文件绝对路径
+        return substitute(this.cmd_template, '%', this.filepath, 'g')
+    enddef
+
+    def ModeInit(): bool
+        # 保存快捷键 + 设置 filepath + 继承 Mode 的 mark 初始化
+        const ok = super.ModeInit()
+        this.filepath = expand('%:p')
+        this.maping_ctrl_n = maparg('<c-n>', 'n', false, 1)
+        this.maping_ctrl_p = maparg('<c-p>', 'n', false, 1)
+        return ok
+    enddef
+
+    def ModeExit()
+        # 恢复快捷键 + 继承 Mode 的 mark 退出
+        if this.maping_ctrl_n !=# null && this.maping_ctrl_n->len() !=# 0
+            mapset('n', false, this.maping_ctrl_n)
+        endif
+        if this.maping_ctrl_p !=# null && this.maping_ctrl_p->len() !=# 0
+            mapset('n', false, this.maping_ctrl_p)
+        endif
+        this.Stop()
+        super.ModeExit()
+    enddef
+
+    def Stop()
+        # 停止 job / term / timer，由子类按需调用
+        if this.job !=# null && job_status(this.job) ==# 'run'
+            job_stop(this.job, 'kill')
+        endif
+        if this.timer_id !=# 0
+            timer_stop(this.timer_id)
+            this.timer_id = 0
+        endif
+        if bufnr(this.term_nr) !=# -1
+            const term_job = term_getjob(this.term_nr)
+            if job_status(term_job) ==# 'run'
+                job_setoptions(term_job, {'exit_cb': (exit_job: job, id: number) => 1})
+            endif
+            silent! execute 'bdelete! ' .. this.term_nr
+        endif
+        if this.open_term
+            this.open_term = false
+            silent! cclose
+        endif
+    enddef
+
+    static def Copen(height_ratio: float = 3.0 / 14.0)
+        exe 'botright copen ' .. string(float2nr(&lines * height_ratio))
+        setlocal nonumber norelativenumber nolist
+    enddef
+
+    static def Cnext()
+        try
+            cnext
+        catch /E553/
+            echom '没有更多错误'
+        endtry
+    enddef
+
+    static def Cprev()
+        try
+            cprev
+        catch /E553/
+            echom '没有更多错误'
+        endtry
+    enddef
+
+    # 子类可覆盖的钩子
+    def DecideSrc(): bool
+        # 默认：仅当前 buffer 为代码文件时才进入 mode
+        const curr_path = expand('%:p')
+        const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
+        return &buftype ==# '' && types->index(FileType(curr_path)) !=# -1
+    enddef
+
+    def Execute(...args: list<any>): bool
+        # 按 run_mode 分发，子类可覆盖（如 MypyMode 的 timer 触发）
+        if this.run_mode ==# 'job'
+            return this.RunJob()
+        else
+            return this.RunTerm()
+        endif
+    enddef
+
+    def RunJob(...args: list<any>): bool
+        # 子类覆盖
+        return true
+    enddef
+
+    def RunTerm(...args: list<any>): bool
+        # 子类覆盖
+        return true
+    enddef
+endclass
+
 class MypyMode
     public var tabid: number
     public var job:   job
