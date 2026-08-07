@@ -346,32 +346,6 @@ export class GrepMode extends CommandRunner
         return true
     enddef
 
-    def Run(): func: void
-        return (_) => {
-            var searchContent: string = ""
-            const [_, l_row, l_col, _] = getcharpos("'[")
-            const [_, r_row, r_col, _] = getcharpos("']")
-            if l_row ==# r_row
-                const left_col  = min([l_col, r_col])
-                const right_col = max([l_col, r_col])
-                g:line = getline(l_row)
-                searchContent = getline(l_row)[left_col - 1 : right_col - 1]
-            elseif l_row ># r_row
-                var lines: list<string> = getline(r_row, l_row)
-                lines[0]  = lines[0][r_col - 1 : ]
-                lines[-1] = lines[-1][ : l_col - 1]
-                searchContent = lines->join("\n")
-            elseif l_row <# r_row
-                var lines: list<string> = getline(l_row, r_row)
-                lines[0]  = lines[0][l_col - 1 : ]
-                lines[-1] = lines[-1][ : r_col - 1]
-                searchContent = lines->join("\n")
-            endif
-            this.GREP_SEARCH_CONTENT = '\<' .. searchContent .. '\>'
-            this.Grep()
-        }
-    enddef
-
     def Grep()
         const winid = win_getid()
         this.ModeInit()
@@ -743,15 +717,48 @@ def ParseRunArgs(...args: list<string>)
 enddef
 
 
+# 脚本级 operatorfunc：Vim9 实例方法返回的闭包（引用 this）经 g@ 调用会报 E1248，
+# 故改用脚本级函数，内部通过 ModeManager.GetGrepMode 获取实例。
+def GrepModeOperFunc(_type: string)
+    const gm = ModeManager.GetGrepMode(ModeManager.GetTabID())
+    var searchContent: string = ""
+    const [_, l_row, l_col, _] = getcharpos("'[")
+    const [_, r_row, r_col, _] = getcharpos("']")
+    if l_row ==# r_row
+        const left_col  = min([l_col, r_col])
+        const right_col = max([l_col, r_col])
+        g:line = getline(l_row)
+        searchContent = getline(l_row)[left_col - 1 : right_col - 1]
+    elseif l_row ># r_row
+        var lines: list<string> = getline(r_row, l_row)
+        lines[0]  = lines[0][r_col - 1 : ]
+        lines[-1] = lines[-1][ : l_col - 1]
+        searchContent = lines->join("\n")
+    elseif l_row <# r_row
+        var lines: list<string> = getline(l_row, r_row)
+        lines[0]  = lines[0][l_col - 1 : ]
+        lines[-1] = lines[-1][ : r_col - 1]
+        searchContent = lines->join("\n")
+    endif
+    gm.GREP_SEARCH_CONTENT = '\<' .. searchContent .. '\>'
+    gm.Grep()
+enddef
+
 command GrepModeOper {
-    &operatorfunc = ModeManager.GetGrepMode(ModeManager.GetTabID()).Run()
+    &operatorfunc = function('GrepModeOperFunc')
 }
 
-command GrepModeEdit {
+# 脚本级变量：存储 cmdline 预填内容（autocmd 触发时命令体局部变量不可用，需用脚本级变量）
+var g_grep_edit_prefill: string = ''
+
+def GrepModeEditFunc()
     final gm = ModeManager.GetGrepMode(ModeManager.GetTabID())
     echom (["Grep", gm.GREP_OPTION, gm.GREP_SEARCH_CONTENT, gm.GREP_SEARCH_PATH] + gm.GREP_OTHER_OPTION)
-    autocmd CmdwinEnter * ++once setline('.', (["Grep", gm.GREP_OPTION, escape(gm.GREP_SEARCH_CONTENT, '/ '), gm.GREP_SEARCH_PATH] + gm.GREP_OTHER_OPTION)->join(' ')) | cursor(0, line('.'))
-}
+    g_grep_edit_prefill = (["Grep", gm.GREP_OPTION, escape(gm.GREP_SEARCH_CONTENT, '/ '), gm.GREP_SEARCH_PATH] + gm.GREP_OTHER_OPTION)->join(' ')
+    autocmd CmdwinEnter * ++once setline('.', g_grep_edit_prefill) | cursor(0, line('.'))
+enddef
+
+command GrepModeEdit GrepModeEditFunc()
 
 # :Run 命令 —— 无参数由映射追加 q: 打开 cmdline 预填默认命令；-d 切 DebugMode(job)
 command -nargs=* Run ParseRunArgs(<f-args>)
