@@ -115,6 +115,9 @@ export class CommandRunner extends Mode
         this.filepath = expand('%:p')
         this.maping_ctrl_n = maparg('<c-n>', 'n', false, 1)
         this.maping_ctrl_p = maparg('<c-p>', 'n', false, 1)
+        # 所有 mode 的 quickfix 导航快捷键（子类 ModeInit 会在 super 之后覆盖定义）
+        nn <c-n> <ScriptCmd>CommandRunner.Cnext()<CR>
+        nn <c-p> <ScriptCmd>CommandRunner.Cprev()<CR>
         return ok
     enddef
 
