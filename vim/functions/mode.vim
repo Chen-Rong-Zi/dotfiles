@@ -399,10 +399,11 @@ export class RunMode extends CommandRunner
         # 切到首次进入 mode 时的标记文件，污染之后的 expand('%:p')，导致 Run
         # 无法作用到切换后的新文件上。
         const curr_path = expand('%:p')
-        const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
+        # 暂时注释文件类型验证：允许 :Run 在任意文件上使用
+        # const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
         # 先退出其他 mode，再进入 RunMode
         ModeManager.ExitMode(ModeManager.GetTabID())
-        if &buftype ==# '' && types->index(FileType(curr_path)) !=# -1
+        if &buftype ==# ''  # && types->index(FileType(curr_path)) !=# -1
             return curr_path
         else
             return ''
@@ -497,10 +498,11 @@ export class DebugMode extends CommandRunner
         const curr_path = expand('%:p')
         # 先退出其他 mode，再进入 DebugMode
         ModeManager.ExitMode(ModeManager.GetTabID())
-        const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
-        if types->index(FileType(curr_path)) ==# -1
-            return false
-        endif
+        # 暂时注释文件类型验证：允许 :Run -d 在任意文件上使用
+        # const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
+        # if types->index(FileType(curr_path)) ==# -1
+        #     return false
+        # endif
         this.src_path = curr_path
         this.makeprg = &makeprg
         const ok = super.ModeInit()
@@ -535,11 +537,15 @@ export class DebugMode extends CommandRunner
         caddexpr msg
         this.debug_buffer_limit -= 1
         if this.debug_buffer_limit <=# 0
-            # job 退出后 Vim 仍会 flush 缓冲消息并继续调用 callback，此时
-            # channel 已被 Vim 自动关闭；再次 ch_close 会报 E906，需先判断状态。
-            if ch_status(ch) !=# 'closed'
-                ch_close(ch)
-            endif
+            # job 结束后 Vim 会 flush 剩余 buffered 数据并继续调用 callback，此时
+            # ch_status 返回 "buffered"（非 "open"）；ch_close 会报 E906，需只在 open 时关闭。
+            try
+                if ch_status(ch) ==# 'open'
+                    ch_close(ch)
+                endif
+            catch /E906/
+                # channel 已关闭，忽略
+            endtry
             caddexpr '超出最大缓冲区限制: ' .. g:debug_buffer_limit .. "  修改g:debug_buffer_limit以增大容量"
         endif
     enddef
