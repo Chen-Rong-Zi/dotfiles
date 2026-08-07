@@ -244,8 +244,8 @@ class MypyMode
         this.mode.ModeInit()
         this.maping_ctrl_n = maparg('<c-n>', 'n', false, 1)
         this.maping_ctrl_p = maparg('<c-p>', 'n', false, 1)
-        nn  <c-n> <ScriptCmd>ModeManager.GetGrepMode(ModeManager.GetTabID()).Cnext()<CR>
-        nn  <c-p> <ScriptCmd>ModeManager.GetGrepMode(ModeManager.GetTabID()).Cprev()<CR>
+        nn  <c-n> <ScriptCmd> CommandRunner.Cnext()<CR>
+        nn  <c-p> <ScriptCmd> CommandRunner.Cprev()<CR>
         cgetexpr ''
         return true
     enddef
@@ -303,8 +303,8 @@ export class GrepMode extends CommandRunner
         if !ok
             return false
         endif
-        nn <c-n> <ScriptCmd>ModeManager.GetGrepMode(ModeManager.GetTabID()).Cnext() \| normal! zR<CR>
-        nn <c-p> <ScriptCmd>ModeManager.GetGrepMode(ModeManager.GetTabID()).Cprev() \| normal! zR<CR>
+        nn <c-n> <ScriptCmd>CommandRunner.Cnext() \| normal! zR<CR>
+        nn <c-p> <ScriptCmd>CommandRunner.Cprev() \| normal! zR<CR>
         &errorformat = &grepformat
         this.grep_buffer_limit = g:grep_buffer_limit
         this.loaded_buf_nr = getbufinfo({'buflisted': 1})->map((_, buf) => buf['bufnr'])
