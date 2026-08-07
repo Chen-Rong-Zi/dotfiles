@@ -394,11 +394,6 @@ enddef
 var TimeStamp = MakeTimeStamp()
 var term_bufnr: number = -1
 
-export def RunModeWithArgs()
-    const args = input("请输入参数： ")
-    ModeManager.Run(ModeManager.GetTabID(), '--', args)
-enddef
-
 def AddFlag(flag: string): any
     return (condition: bool) => {
         if condition
@@ -728,6 +723,22 @@ def ParseGrepArgs(...args: list<string>)
     endif
 enddef
 
+def ParseRunArgs(...args: list<string>)
+    const tabid = ModeManager.GetTabID()
+    if len(args) ==# 0
+        # 无参数：注册 autocmd，由映射后的 q: 打开 cmdline 窗口并预填默认命令
+        autocmd CmdwinEnter * ++once setline('.', 'Run io -m -eq %') | cursor(0, line('.'))
+        return
+    endif
+    if args[0] ==# '-d'
+        # debug 模式：job_start + quickfix
+        ModeManager.Debug(tabid, args[1 : ]->join(' '))
+        return
+    endif
+    # term 模式：自定义命令（% 在 BuildCommand 中替换为当前文件路径）
+    ModeManager.Run(tabid, args->join(' '))
+enddef
+
 
 command GrepModeOper {
     &operatorfunc = ModeManager.GetGrepMode(ModeManager.GetTabID()).Run()
@@ -739,15 +750,10 @@ command GrepModeEdit {
     autocmd CmdwinEnter * ++once setline('.', (["Grep", gm.GREP_OPTION, escape(gm.GREP_SEARCH_CONTENT, '/ '), gm.GREP_SEARCH_PATH] + gm.GREP_OTHER_OPTION)->join(' ')) | cursor(0, line('.'))
 }
 
-command -nargs=0 RunMode         ModeManager.Run(ModeManager.GetTabID())
-command -nargs=0 RunModeStrict   ModeManager.Run(ModeManager.GetTabID(), '-s')
-command -nargs=0 RunModeWithArgs RunModeWithArgs()
-command -nargs=0 DebugMode       ModeManager.Debug(ModeManager.GetTabID())
-command -nargs=0 MypyMode        ModeManager.Mypy(ModeManager.GetTabID())
-# nn <leader>gp <ScriptCmd>g:GrepMode_SearchPath = system('realpath ' .. input('要搜索的目录：'))->trim()<CR>
-
-
+# :Run 命令 —— 无参数由映射追加 q: 打开 cmdline 预填默认命令；-d 切 DebugMode(job)
+command -nargs=* Run ParseRunArgs(<f-args>)
 command -nargs=+ Grep ParseGrepArgs(<f-args>)
+command -nargs=0 MypyMode        ModeManager.Mypy(ModeManager.GetTabID())
 
 
 

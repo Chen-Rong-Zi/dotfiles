@@ -1070,10 +1070,9 @@ au VimEnter * nn cd <ScriptCMD>call s:util.Quick_CD()<CR>
 au VimEnter * nn <silent> <leader>g <CMD>GrepModeOper<CR>g@
 au VimEnter * vn <silent> <leader>g <CMD>GrepModeOper<CR>g@
 au VimEnter * nn <silent> <leader>ig <CMD>GrepModeEdit<CR>q:
-au VimEnter * nn <silent> <leader>r <CMD>RunMode<CR>
-au VimEnter * nn <silent> <leader>ir <CMD>RunModeWithArgs<CR>
-au VimEnter * nn <silent> <leader>sr <CMD>RunModeStrict<CR>
-au VimEnter * nn <silent> <leader>d <CMD>DebugMode<CR>
+au VimEnter * nn <silent> <leader>r <CMD>Run<CR>q:
+au VimEnter * nn <silent> <leader>ir <CMD>Run<CR>q:
+au VimEnter * nn <silent> <leader>d <CMD>Run -d<CR>
 au VimEnter * nn <silent> <leader>py <CMD>MypyMode<CR>
 
 au VimEnter * source ~/.vim/functions/mode.vim
