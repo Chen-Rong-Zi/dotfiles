@@ -736,38 +736,36 @@ enddef
 # autocmd 触发时引用脚本级变量而非函数局部变量）
 var g_run_prefill: string = ''
 
-def ParseRunArgs(...args: list<string>)
+def ParseRunArgs(raw: string)
     const tabid = ModeManager.GetTabID()
-    if len(args) ==# 0
-        # 无参数：自动运行上次命令（term 模式），首次默认 io -m -eq %
-        const auto_cmd = g_run_prefill ==# '' ? 'io -m -eq %' : g_run_prefill
-        ModeManager.Run(tabid, auto_cmd)
-        return
-    endif
-    # 先剥离 --once：本次命令不写入 g_run_prefill（不污染上次记忆），-i / -d 仍按标志处理
+    # <q-args> 传入单字符串（逐字含引号/管道/多空格）；仅识别前缀标志 -i/-d/--once
+    var line = trim(raw)
     var once = false
-    var cmd_args: list<string> = []
-    for arg in args
-        if arg ==# '--once'
+    var mode = 'term'
+    while line !=# ''
+        const first = matchstr(line, '^\S\+')
+        if first ==# '--once'
             once = true
+            line = trim(line[strlen(first) : ])
+        elseif first ==# '-d'
+            mode = 'debug'
+            line = trim(line[strlen(first) : ])
+        elseif first ==# '-i'
+            mode = 'interactive'
+            line = trim(line[strlen(first) : ])
+            break
         else
-            cmd_args->add(arg)
+            break
         endif
-    endfor
-    if len(cmd_args) ==# 0
-        # --once 单独使用：等价于自动运行但不保存
-        const auto_cmd = g_run_prefill ==# '' ? 'io -m -eq %' : g_run_prefill
-        ModeManager.Run(tabid, auto_cmd)
-        return
-    endif
-    if cmd_args[0] ==# '-i'
+    endwhile
+    if mode ==# 'interactive'
         # 交互模式：注册 autocmd，由映射后的 q: 打开 cmdline 窗口并预填默认命令
         autocmd CmdwinEnter * ++once setline('.', (g_run_prefill ==# '' ? 'Run io -m -eq %' : 'Run ' .. g_run_prefill)) | cursor(0, line('.'))
         return
     endif
-    if cmd_args[0] ==# '-d'
-        # debug 模式：-d 后的参数视为命令本体；无后续命令则复用上次保存的命令（空则回退 &makeprg）
-        if len(cmd_args) ==# 1
+    if mode ==# 'debug'
+        if line ==# ''
+            # 无后续命令：复用上次保存的命令（空则回退 &makeprg）
             if g_run_prefill !=# ''
                 ModeManager.Debug(tabid, g_run_prefill)
             else
@@ -775,19 +773,23 @@ def ParseRunArgs(...args: list<string>)
             endif
             return
         endif
-        const cmd = cmd_args[1 : ]->join(' ')
         if !once
-            g_run_prefill = cmd
+            g_run_prefill = line
         endif
-        ModeManager.Debug(tabid, cmd)
+        ModeManager.Debug(tabid, line)
         return
     endif
-    # term 模式：自定义命令（% 在 BuildCommand 中替换为当前文件路径）
-    const cmd = cmd_args->join(' ')
-    if !once
-        g_run_prefill = cmd
+    # term 模式
+    if line ==# ''
+        # 无参数：自动运行上次命令（term 模式），首次默认 io -m -eq %
+        const auto_cmd = g_run_prefill ==# '' ? 'io -m -eq %' : g_run_prefill
+        ModeManager.Run(tabid, auto_cmd)
+        return
     endif
-    ModeManager.Run(tabid, cmd)
+    if !once
+        g_run_prefill = line
+    endif
+    ModeManager.Run(tabid, line)
 enddef
 
 
@@ -835,7 +837,7 @@ enddef
 command GrepModeEdit GrepModeEditFunc()
 
 # :Run 命令 —— 无参数由映射追加 q: 打开 cmdline 预填默认命令；-d 切 DebugMode(job)
-command -nargs=* Run ParseRunArgs(<f-args>)
+command -nargs=* Run ParseRunArgs(<q-args>)
 command -nargs=+ Grep ParseGrepArgs(<f-args>)
 command -nargs=0 MypyMode        ModeManager.Mypy(ModeManager.GetTabID())
 
