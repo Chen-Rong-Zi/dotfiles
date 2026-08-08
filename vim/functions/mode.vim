@@ -714,13 +714,24 @@ def ParseGrepArgs(...args: list<string>)
     endif
 enddef
 
+# 脚本级变量：存储上次 :Run 的命令（cmdline 预填 / 自动运行用，autocmd 触发时引用脚本级变量而非函数局部变量）
+var g_run_prefill: string = ''
+
 def ParseRunArgs(...args: list<string>)
     const tabid = ModeManager.GetTabID()
     if len(args) ==# 0
-        # 无参数：注册 autocmd，由映射后的 q: 打开 cmdline 窗口并预填默认命令
-        autocmd CmdwinEnter * ++once setline('.', 'Run io -m -eq %') | cursor(0, line('.'))
+        # 无参数：自动运行（用上次命令重新分发，首次默认 io -m -eq %）
+        const auto_cmd = g_run_prefill ==# '' ? 'io -m -eq %' : g_run_prefill
+        call('ParseRunArgs', auto_cmd->split(' '))
         return
     endif
+    if args[0] ==# '-i'
+        # 交互模式：注册 autocmd，由映射后的 q: 打开 cmdline 窗口并预填默认命令
+        autocmd CmdwinEnter * ++once setline('.', (g_run_prefill ==# '' ? 'Run io -m -eq %' : 'Run ' .. g_run_prefill)) | cursor(0, line('.'))
+        return
+    endif
+    # 记录本次命令，供下次 <leader>r 自动运行（保存含 -d 的完整参数）
+    g_run_prefill = args->join(' ')
     if args[0] ==# '-d'
         # debug 模式：job_start + quickfix
         ModeManager.Debug(tabid, args[1 : ]->join(' '))
