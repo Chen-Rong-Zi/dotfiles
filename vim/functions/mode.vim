@@ -732,31 +732,62 @@ def ParseGrepArgs(...args: list<string>)
     endif
 enddef
 
-# 脚本级变量：存储上次 :Run 的命令（cmdline 预填 / 自动运行用，autocmd 触发时引用脚本级变量而非函数局部变量）
+# 脚本级变量：存储上次 :Run 的命令本体（不含 -d 等模式标志；cmdline 预填 / 自动运行用，
+# autocmd 触发时引用脚本级变量而非函数局部变量）
 var g_run_prefill: string = ''
 
 def ParseRunArgs(...args: list<string>)
     const tabid = ModeManager.GetTabID()
     if len(args) ==# 0
-        # 无参数：自动运行（用上次命令重新分发，首次默认 io -m -eq %）
+        # 无参数：自动运行上次命令（term 模式），首次默认 io -m -eq %
         const auto_cmd = g_run_prefill ==# '' ? 'io -m -eq %' : g_run_prefill
-        call('ParseRunArgs', auto_cmd->split(' '))
+        ModeManager.Run(tabid, auto_cmd)
         return
     endif
-    if args[0] ==# '-i'
+    # 先剥离 --once：本次命令不写入 g_run_prefill（不污染上次记忆），-i / -d 仍按标志处理
+    var once = false
+    var cmd_args: list<string> = []
+    for arg in args
+        if arg ==# '--once'
+            once = true
+        else
+            cmd_args->add(arg)
+        endif
+    endfor
+    if len(cmd_args) ==# 0
+        # --once 单独使用：等价于自动运行但不保存
+        const auto_cmd = g_run_prefill ==# '' ? 'io -m -eq %' : g_run_prefill
+        ModeManager.Run(tabid, auto_cmd)
+        return
+    endif
+    if cmd_args[0] ==# '-i'
         # 交互模式：注册 autocmd，由映射后的 q: 打开 cmdline 窗口并预填默认命令
         autocmd CmdwinEnter * ++once setline('.', (g_run_prefill ==# '' ? 'Run io -m -eq %' : 'Run ' .. g_run_prefill)) | cursor(0, line('.'))
         return
     endif
-    # 记录本次命令，供下次 <leader>r 自动运行（保存含 -d 的完整参数）
-    g_run_prefill = args->join(' ')
-    if args[0] ==# '-d'
-        # debug 模式：job_start + quickfix
-        ModeManager.Debug(tabid, args[1 : ]->join(' '))
+    if cmd_args[0] ==# '-d'
+        # debug 模式：-d 后的参数视为命令本体；无后续命令则复用上次保存的命令（空则回退 &makeprg）
+        if len(cmd_args) ==# 1
+            if g_run_prefill !=# ''
+                ModeManager.Debug(tabid, g_run_prefill)
+            else
+                ModeManager.Debug(tabid)
+            endif
+            return
+        endif
+        const cmd = cmd_args[1 : ]->join(' ')
+        if !once
+            g_run_prefill = cmd
+        endif
+        ModeManager.Debug(tabid, cmd)
         return
     endif
     # term 模式：自定义命令（% 在 BuildCommand 中替换为当前文件路径）
-    ModeManager.Run(tabid, args->join(' '))
+    const cmd = cmd_args->join(' ')
+    if !once
+        g_run_prefill = cmd
+    endif
+    ModeManager.Run(tabid, cmd)
 enddef
 
 
