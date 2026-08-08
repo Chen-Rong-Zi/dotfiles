@@ -487,7 +487,7 @@ export class RunMode extends CommandRunner
             .. AddFlag('-r')(run_only && is_io)
             .. AddFlag(input_args)(input && is_io)
         this.last_cmd = cmd
-        botright this.term_nr = term_start(cmd, option)
+        botright this.term_nr = term_start([&shell, &shellcmdflag, cmd], option)
         TimeStamp(!run_only)
         WinFocusOn(winid)
         return true
@@ -581,7 +581,7 @@ export class DebugMode extends CommandRunner
                 this.SetQflistTitle(exitval)
             }}
         cgetexpr ''
-        this.job = job_start(this.last_cmd, option)
+        this.job = job_start([&shell, &shellcmdflag, this.last_cmd], option)
         this.Copen()
         this.open_term = true
         WinFocusOn(winid)
