@@ -106,8 +106,9 @@ export class CommandRunner extends Mode
     enddef
 
     def BuildCommand(): string
-        # 将 cmd_template 中的 '%' 替换为当前文件绝对路径（转义替换串特殊字符）
-        return substitute(this.cmd_template, '%', escape(this.filepath, '&\~'), 'g')
+        # 将 cmd_template 中的 '%' 替换为当前文件绝对路径（shellescape 处理空格/$/引号；
+        # 用 split/join 而非 substitute，避免替换串元字符 & \ ~ 污染 shellescape 输出）
+        return split(this.cmd_template, '%', true)->join(shellescape(this.filepath))
     enddef
 
     def SetQflistTitle(exitval: number = -1)
@@ -542,11 +543,11 @@ export class DebugMode extends CommandRunner
     def BuildCommand(): string
         # 若用户通过 ModeManager.Debug 提供了自定义命令则用之，否则用 &makeprg
         if this.cmd_template !=# ''
-            return substitute(this.cmd_template, '%', escape(this.src_path, '&\~'), 'g')
+            return split(this.cmd_template, '%', true)->join(shellescape(this.src_path))
         endif
         return this.makeprg
             ->split(' ')
-            ->map((_, token) => (token =~# '\v\%.*') ? this.src_path : token)
+            ->map((_, token) => (token =~# '\v\%.*') ? shellescape(this.src_path) : token)
             ->join(' ')
     enddef
 
