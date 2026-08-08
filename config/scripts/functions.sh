@@ -29,9 +29,10 @@ fj() {
 
 jo() {
     export EDITOR=/usr/bin/vim
-    # JOSHUTO="/home/rongzi/Downloads/Github/joshuto/target/release/joshuto"
-    # JOSHUTO="/home/rongzi/Downloads/Github/joshuto/target/debug/joshuto"
-    JOSHUTO="${HOME}/Project/joshuto/target/release/joshuto --change-directory"
+    # JOSHUTO="/Users/macbook/Downloads/Github/joshuto/target/release/joshuto"
+    # JOSHUTO="/Users/macbook/Downloads/Github/joshuto/target/debug/joshuto"
+    JOSHUTO="/opt/homebrew/bin/joshuto --change-directory"
+    echo $JOSHUTO
     if [[ $IN_JOSHUTO ]];then
         exit
         return

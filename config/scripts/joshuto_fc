@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
 fcargs() {
     local count=$#
     if (( count == 0 )); then

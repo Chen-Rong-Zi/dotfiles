@@ -144,11 +144,11 @@ case $filetype in
         [[ $DEBUG ]] && echo -e $fg_blue rust detected$origin
         [[ $DEBUG ]] && echo -e $fg_blue strict = $strict$origin
         if &>/dev/null cargo --color=always metadata;then
-            compile_cmd="cargo build"
+            compile_cmd="RUSTFLAGS=\"--remap-path-prefix src=$(pwd)/\" cargo build"
             # compile_cmd="cargo --color=always build"
             # compile_cmd="exit 1; echo 1"
             # execute_cmd="cargo --color=always run"
-            execute_cmd="cargo  run"
+            compile_cmd="RUSTFLAGS=\"--remap-path-prefix src=$(pwd)/\" cargo run"
             echo "in cargo --color=always project " >&2
         else
             compile_cmd="rustc -g -o $HOME/Program/bin --crate-type bin -D warnings $file"

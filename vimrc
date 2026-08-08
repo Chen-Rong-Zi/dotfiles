@@ -517,7 +517,7 @@ Plug 'neoclide/coc.nvim', { 'frozen': 1, 'branch': 'release', 'for': ['c', 'pyth
 Plug 'easymotion/vim-easymotion', {'on': '<plug>(easymotion-prefix)s', 'frozen': 1}
 
 " Plug 'puremourning/vimspector', {}
-Plug 'whonore/Coqtail'
+" Plug 'whonore/Coqtail'
 let g:vimspector_enable_mappings = 'HUMAN'
 
 " " If you don't have nodejs and yarn
@@ -525,6 +525,8 @@ let g:vimspector_enable_mappings = 'HUMAN'
 " see: https://github.com/iamcco/markdown-preview.nvim/issues/50
 " Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 " If you have nodejs
+let g:mkdp_open_to_the_world = 1
+let g:mkdp_open_ip = "0.0.0.0"
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install', 'for': 'markdown' }
 " Plug 'pycqa/pylint'
 " Plug 'vim-scripts/pylint.vim'

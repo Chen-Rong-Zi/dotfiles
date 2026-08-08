@@ -1,5 +1,5 @@
 #!/bin/bash
-project_path="/home/rongzi/Downloads/Github"
+project_path="~/Downloads/Github"
 config_path="$project_path""/soss/config.json"
 
 source $project_path/soss/.env

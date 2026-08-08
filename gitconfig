@@ -44,5 +44,6 @@
 	directory = /mnt/windows/Users/Administrator/Downloads/linux/.Lectures/term5/形式语言和自动机/lab/.git
 [core]
 	editor = vim
+	quotepath = false
 [safe]
 	directory = *

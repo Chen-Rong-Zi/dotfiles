@@ -1,6 +1,6 @@
 custom_commands = [
-#    { name = "gfzf", command = "/home/rongzi/.config/joshuto/rgfzf '%text' %s" },
-   { name = "rg", command = "/home/rongzi/.config/joshuto/rg '%text' %s" }
+#    { name = "gfzf", command = "/Users/macbook/.config/joshuto/rgfzf '%text' %s" },
+   { name = "rg", command = "/Users/macbook/.config/joshuto/rg '%text' %s" }
 ]
 [default_view]
 
@@ -21,7 +21,7 @@ keymap = [
   { keys = ["ctrl+r"], command = "reload_dirlist" },
   { keys = ["z", "h"], command = "toggle_hidden" },
   { keys = ["ctrl+h"], command = "toggle_hidden" },
-  { keys = ["ctrl+o"], command = "shell /home/rongzi/.config/scripts/joshuto_fc %p"},
+  { keys = ["ctrl+o"], command = "shell /Users/macbook/.config/scripts/joshuto_fc %p"},
   { keys = ["backspace"], command = "toggle_hidden" },
   { keys = ["\t"], command = "tab_switch 1" },
   { keys = ["backtab"], command = "tab_switch -1" },
@@ -139,7 +139,7 @@ keymap = [
   { keys = ["m", "p"], command = "linemode perm" },
 
   # { keys = [",", "r"], command = "shell kdeconnect-cli -n 'MIX 2S' --share %s" },
-  { keys = [",", "r"], command = "shell /home/rongzi/.config/scripts/batch_kdeconnect_send %p"},
+  { keys = [",", "r"], command = "shell /Users/macbook/.config/scripts/batch_kdeconnect_send %p"},
   { keys = [",", "d", "f"], command = "shell vimdiff %s" },
 #   { keys = ["c", "g"], command = "rg" },
   { keys = [",", "g", "/"], command = "cd /" },

@@ -224,7 +224,7 @@ enddef
 
 export def RecoverSession()
     const dir = '~/.cache/vim/session/'
-    const cmd = '/usr/bin/ls --sort time '
+    const cmd = 'ls '
     const sessions = system(cmd .. dir)->split('\n')
     popup_menu(sessions, {
         'borderchars': ['─', '│', '─', '│', '╭', '╮', '╯', '╰'],

@@ -189,7 +189,9 @@ export image_path="/home/rongzi/Pictures/screenshot/$(date "+%y-%m-%d_%H:%M:%S")
 export MANPAGER="bat"
 export token="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"
 export EDITOR=/usr/bin/vim
-export PATH=$PATH:/home/rongzi/cProgram
+export PATH=$PATH:/Users/macbook/cProgram
+export PATH=$PATH:/Users/macbook/.local/bin
+PATH="/opt/homebrew/opt/grep/libexec/gnubin:$PATH"
 # export LC_CTYPE=zh_CN.UTF-8
 # export https_proxy="https://127.0.0.1:8090"
 # export http_proxy="http://127.0.0.1:8090"
@@ -244,4 +246,7 @@ if [ -f "$HOME/.config/broot/launcher/bash/br" ]; then
 fi
 source $HOME/.config/shell/key-bindings.bash
 source $HOME/.config/scripts/marco.sh
-# source $HOME/.config/scripts/functions.sh
+source $HOME/.config/scripts/functions.sh
+export PATH="/opt/homebrew/bin:$PATH"
+alias tldr="tldr -l | fzf --preview \"tldr {1} --color\" --preview-window=right,70% | xargs tldr"
+alias tl="/opt/homebrew/bin/tldr"
