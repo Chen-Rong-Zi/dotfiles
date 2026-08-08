@@ -472,13 +472,19 @@ export class RunMode extends CommandRunner
         const time_passby = TimeStamp(false)
         const run_cmd     = this.BuildCommand()
         this.open_term = true
+        # 默认命令（io -m -eq %）支持 -r 防重复 / -s strict / -- 输入参数；
+        # 自定义命令（如 fastfetch、python3 %）原样执行，不追加这些 io 特有 flag
+        const is_io = this.cmd_template =~# '^io\s'
 
-        if time_passby <# 1.0
+        if time_passby <# 1.0 && is_io
             run_only = 1
             echom '运行过快,据上一次运行只有 ' .. time_passby .. 's'
         endif
 
-        const cmd = run_cmd .. AddFlag('-s')(strict) .. AddFlag('-r')(run_only) .. AddFlag(input_args)(input)
+        const cmd = run_cmd
+            .. AddFlag('-s')(strict && is_io)
+            .. AddFlag('-r')(run_only && is_io)
+            .. AddFlag(input_args)(input && is_io)
         this.last_cmd = cmd
         botright this.term_nr = term_start(cmd, option)
         TimeStamp(!run_only)
