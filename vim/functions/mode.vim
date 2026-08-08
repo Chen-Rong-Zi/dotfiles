@@ -95,6 +95,7 @@ export class CommandRunner extends Mode
     public var loaded_buf_nr: list<number> = []
     public var maping_ctrl_p: dict<any>
     public var maping_ctrl_n: dict<any>
+    public var last_cmd: string = ''   # 本次实际执行的命令（quickfix title 用）
 
     def new(tabid: number, run_mode: string, cmd_template: string)
         # Vim9 无法调用 super.New()，手动初始化继承字段
@@ -107,6 +108,15 @@ export class CommandRunner extends Mode
     def BuildCommand(): string
         # 将 cmd_template 中的 '%' 替换为当前文件绝对路径（转义替换串特殊字符）
         return substitute(this.cmd_template, '%', escape(this.filepath, '&\~'), 'g')
+    enddef
+
+    def SetQflistTitle(exitval: number = -1)
+        # 统一的 quickfix title：显示本次执行的命令（可选附带退出代码）
+        var title = this.last_cmd
+        if exitval !=# -1
+            title ..= ' (退出代码: ' .. string(exitval) .. ')'
+        endif
+        setqflist([], 'r', {'title': title})
     enddef
 
     def ModeInit(): bool
@@ -438,7 +448,7 @@ export class RunMode extends CommandRunner
         endif
         if runmode.open_term
             execute 'cgetfile ' .. $HOME .. '/.cache/vim/error'
-            setqflist([], 'r',  {'title': '退出代码: ' .. string(exitval)})
+            runmode.SetQflistTitle(exitval)
             CommandRunner.Copen()
         endif
     enddef
@@ -469,6 +479,7 @@ export class RunMode extends CommandRunner
         endif
 
         const cmd = run_cmd .. AddFlag('-s')(strict) .. AddFlag('-r')(run_only) .. AddFlag(input_args)(input)
+        this.last_cmd = cmd
         botright this.term_nr = term_start(cmd, option)
         TimeStamp(!run_only)
         WinFocusOn(winid)
@@ -556,13 +567,14 @@ export class DebugMode extends CommandRunner
             return false
         endif
         const winid = win_getid()
+        this.last_cmd = this.BuildCommand()
         const option = {'callback': (ch: channel, msg: string) => this.RunHandler(ch, msg),
             'exit_cb': (exit_job: job, msg: number) => {
                 const exitval = job_info(exit_job)['exitval']
-                setqflist([], 'r',  {'title': '退出代码: ' .. string(exitval)})
+                this.SetQflistTitle(exitval)
             }}
         cgetexpr ''
-        this.job = job_start(this.BuildCommand(), option)
+        this.job = job_start(this.last_cmd, option)
         this.Copen()
         this.open_term = true
         WinFocusOn(winid)
