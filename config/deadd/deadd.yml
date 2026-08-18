@@ -3,3 +3,18 @@ notification:
     default-timeout: 30000
     margin-top: 50
     margin-right: 50
+  modifications:
+    - match:
+        title: "保存为"
+      script: "/home/rongzi/.config/ocr_client/ocr_modify.py"
+    - match:
+        title: "截图保存为"
+      script: "/home/rongzi/.config/ocr_client/ocr_modify.py"
+    - match:
+        title: "OCR 失败"
+      script: "/home/rongzi/.config/ocr_client/ocr_modify.py"
+    - match:
+        title: "OCR 结果"
+      modify:
+        action-commands:
+          copy: "/bin/bash -c 'exec nohup /home/rongzi/.config/ocr_client/ocr_copy.sh >/dev/null 2>&1 &'"
