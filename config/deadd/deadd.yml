@@ -1,0 +1,5 @@
+notification:
+  popup:
+    default-timeout: 30000
+    margin-top: 50
+    margin-right: 50
