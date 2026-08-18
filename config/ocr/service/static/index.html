@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>局域网 OCR</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root { --bg:#f5f6f8; --card:#fff; --line:#e2e5ea; --text:#1f2430; --muted:#6b7280; --accent:#2f6fed; --ok:#16a34a; --err:#dc2626; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+  header { background:var(--card); border-bottom:1px solid var(--line); padding:14px 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  header h1 { font-size:18px; font-weight:600; }
+  header .spacer { flex:1; }
+  header label { font-size:13px; color:var(--muted); }
+  header select, header input { margin-left:6px; padding:6px 8px; border:1px solid var(--line); border-radius:6px; font-size:13px; background:#fff; }
+  main { max-width:980px; margin:24px auto; padding:0 16px; display:flex; flex-direction:column; gap:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; }
+  #drop { border:2px dashed var(--line); border-radius:10px; padding:34px 16px; text-align:center; color:var(--muted); cursor:pointer; transition:border-color .15s, background .15s; }
+  #drop.dragover { border-color:var(--accent); background:#f0f5ff; color:var(--accent); }
+  #drop strong { color:var(--text); }
+  #meta { display:flex; gap:12px; align-items:center; flex-wrap:wrap; font-size:13px; color:var(--muted); }
+  #meta .ok { color:var(--ok); } #meta .err { color:var(--err); }
+  #resultWrap { display:none; }
+  #stage { position:relative; }
+  canvas { max-width:100%; border:1px solid var(--line); border-radius:8px; display:block; }
+  #lines { margin-top:14px; display:flex; flex-direction:column; gap:6px; }
+  .line { display:flex; align-items:center; gap:10px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:#fafbfc; font-size:14px; }
+  .line .txt { flex:1; word-break:break-all; }
+  .line .conf { color:var(--muted); font-size:12px; white-space:nowrap; }
+  button { border:1px solid var(--line); background:#fff; border-radius:6px; padding:5px 10px; font-size:12px; cursor:pointer; color:var(--text); }
+  button:hover { border-color:var(--accent); color:var(--accent); }
+  #copySel { margin-left:8px; border-color:var(--accent); color:var(--accent); }
+  #copySel:disabled { opacity:.45; cursor:not-allowed; }
+  .line.selected { border-color:var(--accent); background:#e8f1ff; }
+  #toast { position:fixed; left:50%; bottom:28px; transform:translateX(-50%); background:#1f2430; color:#fff; padding:9px 18px; border-radius:8px; font-size:13px; opacity:0; transition:opacity .2s; pointer-events:none; z-index:9; }
+  #toast.show { opacity:1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>📄 局域网 OCR</h1>
+  <label>Token <input id="token" type="password" placeholder="访问令牌" size="22"></label>
+  <label>模型
+    <select id="model">
+      <option value="tiny" selected>tiny · 最快</option>
+      <option value="small">small · 均衡</option>
+      <option value="medium">medium · 最准</option>
+    </select>
+  </label>
+  <span class="spacer"></span>
+  <span id="health" style="font-size:12px;color:var(--muted)"></span>
+</header>
+
+<main>
+  <div class="card">
+    <div id="drop">拖拽图片到此处，或 <strong>点击选择</strong><br><span style="font-size:12px">支持 png / jpg / jpeg / bmp / tiff，单文件 ≤ 20MB</span></div>
+    <input id="file" type="file" accept="image/*" hidden>
+    <div id="meta" style="margin-top:10px"><span id="status"></span><span id="elapsed"></span></div>
+  </div>
+
+  <div class="card" id="resultWrap">
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px">
+      <label style="font-size:13px; display:flex; align-items:center; gap:4px; cursor:pointer; margin-right:auto">
+        <input type="checkbox" id="showLabels" checked> 显示文字标签
+      </label>
+      <button id="copySel" disabled>复制选中 (0)</button>
+      <button id="copyAll" style="margin-top:0">复制全部文本</button>
+    </div>
+    <div id="stage"><canvas id="cv"></canvas></div>
+    <div id="lines"></div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const token = $("token"), modelSel = $("model"), drop = $("drop"), file = $("file");
+  const cv = $("cv"), ctx = cv.getContext("2d");
+  const status = $("status"), elapsed = $("elapsed"), linesBox = $("lines");
+  const resultWrap = $("resultWrap");
+  let currentImg = null, currentResults = [];
+  const bgCanvas = document.createElement("canvas");   // 背景缓存, 选中重绘无需重载原图
+  let selected = new Set();                            // 已选中的行索引
+  let viewSx = 1, viewSy = 1;                          // 原图 → canvas 缩放比
+  let showLabels = true;                               // 是否在框上显示识别文字
+
+  // 记住 token
+  token.value = localStorage.getItem("ocr_token") || "";
+  token.addEventListener("input", () => localStorage.setItem("ocr_token", token.value.trim()));
+
+  // 拖拽 + 点击
+  drop.addEventListener("click", () => file.click());
+  file.addEventListener("change", () => { if (file.files[0]) handle(file.files[0]); });
+  ["dragenter", "dragover"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add("dragover"); }));
+  ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove("dragover"); }));
+  drop.addEventListener("drop", e => { const f = e.dataTransfer.files[0]; if (f) handle(f); });
+
+  modelSel.addEventListener("change", () => { if (currentImg) run(currentImg); });
+
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 1800); }
+
+  async function handle(f) {
+    if (!f.type.startsWith("image/")) { status.textContent = "✗ 请选择图片文件"; status.className = "err"; return; }
+    status.textContent = "图片已载入"; status.className = "ok"; elapsed.textContent = "";
+    currentImg = f;
+    showPreview(f);
+    run(f);
+  }
+
+  function showPreview(f) {
+    const url = URL.createObjectURL(f);
+    const img = new Image();
+    img.onload = () => {
+      // 按容器宽度缩放绘制
+      const maxW = Math.min(img.naturalWidth, 900);
+      const scale = maxW / img.naturalWidth;
+      cv.width = maxW; cv.height = Math.round(img.naturalHeight * scale);
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      ctx.drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      resultWrap.style.display = "block";
+    };
+    img.src = url;
+  }
+
+  async function run(f) {
+    const tk = token.value.trim();
+    if (!tk) { status.textContent = "✗ 请先填写 Token"; status.className = "err"; return; }
+    const fd = new FormData();
+    fd.append("file", f);
+    status.textContent = "⏳ 识别中..."; status.className = ""; elapsed.textContent = "";
+    try {
+      const resp = await fetch(`/ocr?model=${modelSel.value}`, { method: "POST", headers: { "X-OCR-Token": tk }, body: fd });
+      const data = await resp.json();
+      if (!resp.ok) { status.textContent = `✗ ${data.detail || resp.status}`; status.className = "err"; return; }
+      status.textContent = `✓ ${data.results.length} 行文本`; status.className = "ok";
+      elapsed.textContent = `耗时 ${data.elapsed_ms} ms · 模型 ${data.model}`;
+      currentResults = data.results;
+      drawBoxes(data.results);
+      renderLines(data.results);
+    } catch (e) { status.textContent = "✗ 网络错误"; status.className = "err"; }
+  }
+
+  function drawBoxes(results) {
+    // 首次绘制: 载入原图并缓存背景
+    currentResults = results;
+    selected.clear();
+    updateCopySel();
+    const url = currentImg ? URL.createObjectURL(currentImg) : null;
+    const img = new Image();
+    img.onload = () => {
+      bgCanvas.width = cv.width; bgCanvas.height = cv.height;
+      bgCanvas.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+      URL.revokeObjectURL(url);
+      viewSx = cv.width / img.naturalWidth; viewSy = cv.height / img.naturalHeight;
+      paintBoxes();
+    };
+    img.src = url;
+  }
+
+  // 重绘: 背景 + 全部框 (选中框高亮橙色)
+  function paintBoxes() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.drawImage(bgCanvas, 0, 0);
+    ctx.font = "13px sans-serif";
+    currentResults.forEach((r, i) => {
+      const sel = selected.has(i);
+      ctx.beginPath();
+      r.box.forEach((p, k) => { k ? ctx.lineTo(p[0]*viewSx, p[1]*viewSy) : ctx.moveTo(p[0]*viewSx, p[1]*viewSy); });
+      ctx.closePath();
+      if (sel) { ctx.lineWidth = 3; ctx.strokeStyle = "#ff8c00"; ctx.fillStyle = "rgba(255,140,0,.25)"; ctx.fill(); }
+      else     { ctx.lineWidth = 2; ctx.strokeStyle = "#2f6fed"; ctx.fillStyle = "rgba(47,109,237,.9)"; }
+      ctx.stroke();
+      if (showLabels) {
+        const top = Math.min(...r.box.map(p => p[1])) * viewSy;
+        const left = Math.min(...r.box.map(p => p[0])) * viewSx;
+        ctx.fillStyle = sel ? "#ff8c00" : "#2f6fed";
+        ctx.fillText(r.text.slice(0, 20), left, Math.max(12, top - 5));
+      }
+    });
+    syncLineSelected();
+  }
+
+  // 点在多边形内 (射线法)
+  function pointInPoly(pt, poly) {
+    let inside = false;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const [xi, yi] = poly[i], [xj, yj] = poly[j];
+      const intersect = ((yi > pt[1]) !== (yj > pt[1])) &&
+        (pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  // canvas 点击: 命中框则切换选中
+  cv.addEventListener("click", (e) => {
+    if (!currentResults.length) return;
+    const rect = cv.getBoundingClientRect();
+    const px = (e.clientX - rect.left) * (cv.width / rect.width);   // CSS → canvas 像素
+    const py = (e.clientY - rect.top) * (cv.height / rect.height);
+    const ox = px / viewSx, oy = py / viewSy;                        // → 原图坐标
+    let hit = -1;
+    currentResults.forEach((r, i) => { if (pointInPoly([ox, oy], r.box)) hit = i; });
+    if (hit >= 0) {
+      selected.has(hit) ? selected.delete(hit) : selected.add(hit);
+      paintBoxes();
+      updateCopySel();
+    }
+  });
+
+  // 显示/隐藏框上文字标签
+  $("showLabels").addEventListener("change", () => {
+    showLabels = $("showLabels").checked;
+    paintBoxes();
+  });
+
+  // 行列表点击: 同步切换选中
+  function toggleLine(i) {
+    selected.has(i) ? selected.delete(i) : selected.add(i);
+    paintBoxes();
+    updateCopySel();
+  }
+
+  function syncLineSelected() {
+    [...linesBox.children].forEach((row, i) => {
+      row.classList.toggle("selected", selected.has(i));
+    });
+  }
+
+  function updateCopySel() {
+    const btn = $("copySel");
+    const n = selected.size;
+    btn.disabled = n === 0;
+    btn.textContent = n ? `复制选中 (${n})` : "复制选中 (0)";
+  }
+
+  function renderLines(results) {
+    linesBox.innerHTML = "";
+    results.forEach((r, i) => {
+      const row = document.createElement("div"); row.className = "line";
+      row.innerHTML = `<span class="txt"></span><span class="conf">${(r.score*100).toFixed(1)}%</span>`;
+      row.querySelector(".txt").textContent = r.text;
+      const btn = document.createElement("button"); btn.textContent = "复制"; btn.title = "复制该行";
+      btn.addEventListener("click", (e) => { e.stopPropagation(); copy(r.text); });
+      row.appendChild(btn);
+      row.style.cursor = "pointer"; row.title = "点击选中/取消该行";
+      row.addEventListener("click", () => toggleLine(i));
+      linesBox.appendChild(row);
+    });
+  }
+
+  $("copyAll").addEventListener("click", () => {
+    const all = currentResults.map(r => r.text).join("\n");
+    if (all) copy(all); else toast("暂无可复制内容");
+  });
+
+  // 复制选中: 按原顺序拼接已选中行的文本
+  $("copySel").addEventListener("click", () => {
+    if (!selected.size) { toast("请先点击图片上的蓝框选中内容"); return; }
+    const texts = currentResults
+      .map((r, i) => selected.has(i) ? r.text : null)
+      .filter(Boolean);
+    if (texts.length) copy(texts.join("\n"));
+  });
+
+  function copy(text) {
+    // navigator.clipboard 仅 secure context (https/localhost) 可用;
+    // http://局域网IP 访问时降级用 execCommand 兼容复制
+    const fallback = () => {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed"; ta.style.left = "-9999px"; ta.style.top = "0";
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta);
+      toast(ok ? "已复制" : "复制失败");
+    };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => toast("已复制")).catch(fallback);
+    } else {
+      fallback();
+    }
+  }
+
+  // 健康检查
+  fetch("/health").then(r => r.json()).then(d => { $("health").textContent = `就绪 · ${d.models.join("/")} · RSS ${d.rss_mb}MB`; }).catch(() => {});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.local.rapidocr</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/Caskroom/miniconda/base/envs/rapidocr/bin/python</string>
+        <string>/Users/macbook/.config/ocr/service/main.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/macbook/.config/ocr/service</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>OCR_TOKEN</key>
+        <string>768b311a99278747ac967b286348699c</string>
+        <key>OCR_HOST</key>
+        <string>0.0.0.0</string>
+        <key>OCR_PORT</key>
+        <string>8000</string>
+        <key>OCR_CONCURRENCY</key>
+        <string>2</string>
+        <key>OCR_MEM_SOFT_MB</key>
+        <string>1536</string>
+        <key>OCR_MEM_HARD_MB</key>
+        <string>2048</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- 资源治理 (决策 #8): 软降权, 不设 CPU/RSS 硬 rlimit -->
+    <!--   - ProcessType=Background + Nice + LowPriorityIO: 调度/I/O 降权 -->
+    <!--   - 硬内存管控在应用层 (main.py 内存闸门, 超硬限自杀由 KeepAlive 拉起) -->
+    <!--   - macOS 不强制 RLIMIT_RSS; CPU rlimit 是累计秒数会误杀推理中进程 -->
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>Nice</key>
+    <integer>10</integer>
+    <key>LowPriorityIO</key>
+    <true/>
+
+    <!-- rlimit: 仅防句柄/进程泄漏 -->
+    <key>SoftResourceLimits</key>
+    <dict>
+        <key>NPROC</key>
+        <integer>128</integer>
+        <key>NOFILE</key>
+        <integer>1024</integer>
+    </dict>
+    <key>HardResourceLimits</key>
+    <dict>
+        <key>NPROC</key>
+        <integer>256</integer>
+        <key>NOFILE</key>
+        <integer>2048</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/macbook/Library/Logs/rapidocr.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/macbook/Library/Logs/rapidocr.err.log</string>
+
+    <!-- 防崩溃后秒级重启风暴 -->
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+</dict>
+</plist>

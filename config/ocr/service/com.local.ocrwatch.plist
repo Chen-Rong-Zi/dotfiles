@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.local.ocrwatch</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/Caskroom/miniconda/base/envs/rapidocr/bin/python</string>
+        <string>/Users/macbook/.config/ocr/service/watch_screenshot.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/macbook/.config/ocr/service</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <!-- 轻量轮询任务, 无需降权 -->
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <!-- 防崩溃后秒级重启风暴 -->
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+
+    <key>StandardOutPath</key>
+    <string>/Users/macbook/Library/Logs/ocrwatch.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/macbook/Library/Logs/ocrwatch.err.log</string>
+</dict>
+</plist>
