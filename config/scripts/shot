@@ -6,17 +6,18 @@ shot_path=$shot_dir/$shot_name
 maim -m 5 -f png $shot_path
 
 if [[ -f "$shot_path" ]];then
-    # timeout 5 $notify -r $notification_id -t 15000 -i $shot_icon -A "ocr:$shot_path=识别" "截图保存为" "$shot_name"
+    # timeout 8 $notify -r $notification_id -t 15000 -i $shot_icon -A "ocr:$shot_path=识别" "截图保存为" "$shot_name"
     echo "$shot_path" | gpaste-client add
-    timeout 5 $notify -r $notification_id -t 5000 -A "ocr:$shot_path=识别" "截图保存为" "$shot_name"
+    anchor=$(timeout 8 $notify -p -t 2000 --hint string:app_icon:/usr/share/swcatalog/icons/archlinux-arch-extra/48x48/spectacle_spectacle.png "截图" "处理中…")
+    timeout 8 $notify -p -r "$anchor" -t 5000 --hint string:app_icon:/usr/share/swcatalog/icons/archlinux-arch-extra/48x48/spectacle_spectacle.png -A "ocr:$((anchor+1)):$shot_path=识别" "截图保存为" "$shot_name"
     for id in $(kdeconnect-cli -a | grep -Po '(?<=^-.{,100}: ).[^[:blank:]]*');do
         kdeconnect-cli -d "$id" --share "$shot_path"
         if [[ $? -eq 0 ]];then
-            $notify -t 1800 -i $shot_icon  "发送到" "$id"
+            $notify -t 1800 --hint string:app_icon:/usr/share/swcatalog/icons/archlinux-arch-extra/48x48/spectacle_spectacle.png  "发送到" "$id"
         else
-            $notify -t 1800 -i $shot_icon  "没能发送到" "$id"
+            $notify -t 1800 --hint string:app_icon:/usr/share/swcatalog/icons/archlinux-arch-extra/48x48/spectacle_spectacle.png  "没能发送到" "$id"
         fi
     done
 else
-    $notify -r $notification_id -i $error_icon "截图无效！"
+    timeout 8 $notify -p -t 3000 --hint string:app_icon:$error_icon "截图无效！"
 fi

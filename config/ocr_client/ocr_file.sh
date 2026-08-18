@@ -2,23 +2,36 @@
 set -u
 
 SCRIPT_DIR=$(cd "$(dirname "$(readlink -f "$0")")" && pwd)
-IMG="${1:-}"
+IMG="${2:-}"
+REPLACE_ID=""
+if [[ "${1:-}" =~ ^[0-9]+$ ]]; then
+    REPLACE_ID="$1"
+else
+    IMG="${1:-}"
+fi
 HOST="http://10.22.33.188:8000"
 TOKEN="768b311a99278747ac967b286348699c"
 MODEL="tiny"
 RESULT_FILE="${OCR_RESULT_FILE:-/tmp/ocr_last.txt}"
-REPLACE_ID="${notification_id:-1234}"
 notify_cmd="${notify:-notify-send}"
-notifyx() { timeout 5 "$notify_cmd" "$@"; }
-ICON="${shot_icon:-/usr/share/swcatalog/icons/archlinux-arch-extra/64x64/flameshot_org.flameshot.Flameshot.png}"
+notifyx() { timeout 8 "$notify_cmd" "$@"; }
+ICON="/usr/share/swcatalog/icons/archlinux-arch-extra/48x48/gimagereader-gtk_gimagereader.png"
 ERR_ICON="${error_icon:-/usr/share/icons/breeze-dark/status/64/dialog-error.svg}"
 
+noti() {
+    if [[ -n "$REPLACE_ID" ]]; then
+        REPLACE_ID="$(notifyx -p -r "$REPLACE_ID" "$@")"
+    else
+        REPLACE_ID="$(notifyx -p "$@")"
+    fi
+}
+
 if [[ ! -f "$IMG" ]]; then
-    notifyx -r "$REPLACE_ID" -t 10000 -i "$ERR_ICON" "OCR 失败" "图片不存在: $IMG"
+    noti -t 5000 --hint string:app_icon:$ERR_ICON "OCR 失败" "图片不存在: $IMG"
     exit 1
 fi
 
-notifyx -r "$REPLACE_ID" -t 15000 -i "$ICON" "OCR 识别中…" "$(basename "$IMG")"
+noti -t 5000 --hint string:app_icon:$ICON "OCR 识别中…" "$(basename "$IMG")"
 
 err_tmp=$(mktemp)
 http_code=$(curl -sS --max-time 10 -o "$RESULT_FILE" -w "%{http_code}" \
@@ -36,7 +49,7 @@ if [[ $curl_rc -ne 0 ]]; then
         28) msg="请求超时（10s），服务器无响应" ;;
         *)  msg="网络错误（curl $curl_rc）：$(printf '%s' "$curl_err" | head -c 80)" ;;
     esac
-    notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" -A "ocr:$IMG=重试" "OCR 失败" "$msg"
+    noti -t 5000 --hint string:app_icon:$ERR_ICON -A "ocr:$IMG=重试" "OCR 失败" "$msg"
     exit 1
 fi
 
@@ -47,12 +60,12 @@ t = sys.stdin.read().rstrip("\n")
 if len(t) > 200:
     t = t[:200] + "…"
 sys.stdout.write(t)' < "$RESULT_FILE")
-        notifyx -r "$REPLACE_ID" -t 15000 -i "$ICON" \
+        noti -t 5000 --hint string:app_icon:$ICON \
             -A "copy=复制" \
             "OCR 结果" "$text"
         ;;
-    401) notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" -A "ocr:$IMG=重试" "OCR 失败" "鉴权失败（X-OCR-Token 无效）" ;;
-    429) notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" -A "ocr:$IMG=重试" "OCR 失败" "服务繁忙（并发满载），请稍后重试" ;;
-    503) notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" -A "ocr:$IMG=重试" "OCR 失败" "服务内存超限，请稍后重试" ;;
-    *)   notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" -A "ocr:$IMG=重试" "OCR 失败" "服务返回 HTTP $http_code" ;;
+    401) noti -t 5000 --hint string:app_icon:$ERR_ICON -A "ocr:$IMG=重试" "OCR 失败" "鉴权失败（X-OCR-Token 无效）" ;;
+    429) noti -t 5000 --hint string:app_icon:$ERR_ICON -A "ocr:$IMG=重试" "OCR 失败" "服务繁忙（并发满载），请稍后重试" ;;
+    503) noti -t 5000 --hint string:app_icon:$ERR_ICON -A "ocr:$IMG=重试" "OCR 失败" "服务内存超限，请稍后重试" ;;
+    *)   noti -t 5000 --hint string:app_icon:$ERR_ICON -A "ocr:$IMG=重试" "OCR 失败" "服务返回 HTTP $http_code" ;;
 esac
