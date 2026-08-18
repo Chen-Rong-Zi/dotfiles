@@ -17,4 +17,4 @@ notification:
         title: "OCR 结果"
       modify:
         action-commands:
-          copy: "/bin/bash -c 'exec nohup /home/rongzi/.config/ocr_client/ocr_copy.sh >/dev/null 2>&1 &'"
+          copy: "nohup /home/rongzi/.config/ocr_client/ocr_copy.sh >/dev/null 2>&1 &"

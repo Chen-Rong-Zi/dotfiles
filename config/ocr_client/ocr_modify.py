@@ -7,6 +7,9 @@ def main():
     except Exception:
         print(json.dumps({"modify": {}, "match": {}}))
         return
+    if not isinstance(noti, dict) or not isinstance(noti.get("actions"), list):
+        print(json.dumps({"modify": {}, "match": {}}))
+        return
     actions = noti.get("actions", [])
     key = None
     for k in actions:
