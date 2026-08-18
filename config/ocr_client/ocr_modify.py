@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-import json, sys
-
-def shell_quote(s):
-    return "'" + s.replace("'", "'\\''") + "'"
+import json, shlex, sys
 
 def main():
     try:
@@ -20,7 +17,7 @@ def main():
         print(json.dumps({"modify": {}, "match": {}}))
         return
     img = key[4:]
-    cmd = "/bin/bash -c 'exec nohup /home/rongzi/.config/ocr_client/ocr_file.sh %s >/dev/null 2>&1 &'" % shell_quote(img)
+    cmd = "nohup /home/rongzi/.config/ocr_client/ocr_file.sh %s >/dev/null 2>&1 &" % shlex.quote(img)
     print(json.dumps({"modify": {"action-commands": {key: cmd}}, "match": {}}))
 
 if __name__ == "__main__":
