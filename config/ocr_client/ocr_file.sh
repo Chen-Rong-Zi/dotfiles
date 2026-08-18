@@ -8,11 +8,7 @@ TOKEN="768b311a99278747ac967b286348699c"
 MODEL="tiny"
 RESULT_FILE="${OCR_RESULT_FILE:-/tmp/ocr_last.txt}"
 REPLACE_ID="${notification_id:-1234}"
-if command -v dunstify >/dev/null 2>&1; then
-    notify_cmd="dunstify"
-else
-    notify_cmd="${notify:-notify-send}"
-fi
+notify_cmd="${notify:-notify-send}"
 notifyx() { timeout 5 "$notify_cmd" "$@"; }
 ICON="${shot_icon:-/usr/share/swcatalog/icons/archlinux-arch-extra/64x64/flameshot_org.flameshot.Flameshot.png}"
 ERR_ICON="${error_icon:-/usr/share/icons/breeze-dark/status/64/dialog-error.svg}"
@@ -40,7 +36,7 @@ if [[ $curl_rc -ne 0 ]]; then
         28) msg="请求超时（10s），服务器无响应" ;;
         *)  msg="网络错误（curl $curl_rc）：$(printf '%s' "$curl_err" | head -c 80)" ;;
     esac
-    notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" --action="ocr:$IMG,重试" "OCR 失败" "$msg"
+    notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" -A "ocr:$IMG=重试" "OCR 失败" "$msg"
     exit 1
 fi
 
@@ -52,11 +48,11 @@ if len(t) > 200:
     t = t[:200] + "…"
 sys.stdout.write(t)' < "$RESULT_FILE")
         notifyx -r "$REPLACE_ID" -t 15000 -i "$ICON" \
-            --action="copy,复制" \
+            -A "copy=复制" \
             "OCR 结果" "$text"
         ;;
-    401) notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" --action="ocr:$IMG,重试" "OCR 失败" "鉴权失败（X-OCR-Token 无效）" ;;
-    429) notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" --action="ocr:$IMG,重试" "OCR 失败" "服务繁忙（并发满载），请稍后重试" ;;
-    503) notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" --action="ocr:$IMG,重试" "OCR 失败" "服务内存超限，请稍后重试" ;;
-    *)   notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" --action="ocr:$IMG,重试" "OCR 失败" "服务返回 HTTP $http_code" ;;
+    401) notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" -A "ocr:$IMG=重试" "OCR 失败" "鉴权失败（X-OCR-Token 无效）" ;;
+    429) notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" -A "ocr:$IMG=重试" "OCR 失败" "服务繁忙（并发满载），请稍后重试" ;;
+    503) notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" -A "ocr:$IMG=重试" "OCR 失败" "服务内存超限，请稍后重试" ;;
+    *)   notifyx -r "$REPLACE_ID" -t 15000 -i "$ERR_ICON" -A "ocr:$IMG=重试" "OCR 失败" "服务返回 HTTP $http_code" ;;
 esac

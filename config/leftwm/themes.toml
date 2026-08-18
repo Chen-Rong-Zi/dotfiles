@@ -13,7 +13,6 @@ current = false
 
 [[repos.themes]]
 name = "arch-one-dark"
-directory = "/home/rongzi/.config/leftwm/themes/arch-one-dark"
 repository = "https://github.com/jamesbaker1901/leftwm-arch-one-dark/"
 commit = "*"
 version = "1.0.0"

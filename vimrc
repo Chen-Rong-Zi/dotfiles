@@ -517,7 +517,7 @@ Plug 'neoclide/coc.nvim', { 'frozen': 1, 'branch': 'release', 'for': ['c', 'pyth
 
 Plug 'easymotion/vim-easymotion', {'on': '<plug>(easymotion-prefix)s', 'frozen': 1}
 
-Plug 'puremourning/vimspector', {}
+" Plug 'puremourning/vimspector', {}
 Plug 'whonore/Coqtail'
 let g:vimspector_enable_mappings = 'HUMAN'
 
