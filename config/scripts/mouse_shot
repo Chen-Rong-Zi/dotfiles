@@ -7,8 +7,9 @@ $notify -r $notification_id -t 2000 -i $shot_icon "截图" "选择窗口或框�
 maim -m 6 -f png -s $shot_path
 
 if [[ -f "$shot_path" ]];then
-    timeout 5 $notify -r $notification_id -t 15000 -i $shot_icon -A "ocr:$shot_path=识别" "保存为" "$shot_name"
+    # timeout 5 $notify -r $notification_id -t 15000 -i $shot_icon -A "ocr:$shot_path=识别" "保存为" "$shot_name"
     echo "$shot_path" | gpaste-client add
+    timeout 5 $notify -r $notification_id -t 5000 -A "ocr:$shot_path=识别" "保存为" "$shot_name"
 
     for id in $(kdeconnect-cli -a | grep -Po '(?<=^-.{,100}: ).[^[:blank:]]*');do
         kdeconnect-cli -d "$id" --share "$shot_path" &

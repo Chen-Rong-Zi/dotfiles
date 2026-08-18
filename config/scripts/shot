@@ -6,8 +6,9 @@ shot_path=$shot_dir/$shot_name
 maim -m 5 -f png $shot_path
 
 if [[ -f "$shot_path" ]];then
-    timeout 5 $notify -r $notification_id -t 15000 -i $shot_icon -A "ocr:$shot_path=识别" "截图保存为" "$shot_name"
+    # timeout 5 $notify -r $notification_id -t 15000 -i $shot_icon -A "ocr:$shot_path=识别" "截图保存为" "$shot_name"
     echo "$shot_path" | gpaste-client add
+    timeout 5 $notify -r $notification_id -t 5000 -A "ocr:$shot_path=识别" "截图保存为" "$shot_name"
     for id in $(kdeconnect-cli -a | grep -Po '(?<=^-.{,100}: ).[^[:blank:]]*');do
         kdeconnect-cli -d "$id" --share "$shot_path"
         if [[ $? -eq 0 ]];then

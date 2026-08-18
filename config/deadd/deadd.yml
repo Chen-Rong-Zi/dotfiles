@@ -1,4 +1,6 @@
 notification:
+  dbus:
+    send-noti-closed: true
   popup:
     default-timeout: 30000
     margin-top: 50
@@ -11,7 +13,7 @@ notification:
         title: "截图保存为"
       script: "/home/rongzi/.config/ocr_client/ocr_modify.py"
     - match:
-        title: "OCR 失败"
+        title: "OCR"
       script: "/home/rongzi/.config/ocr_client/ocr_modify.py"
     - match:
         title: "OCR 结果"
