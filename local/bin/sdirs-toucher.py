@@ -13,12 +13,30 @@ import sys
 import time
 
 
+def parse_interval(s):
+    """Parse an interval like '300', '50ms', '30s', '5m' into seconds."""
+    s = s.strip().lower()
+    if not s:
+        raise argparse.ArgumentTypeError("interval must not be empty")
+    if s.endswith("ms"):
+        return float(s[:-2]) / 1000.0
+    if s.endswith("s"):
+        return float(s[:-1])
+    if s.endswith("m"):
+        return float(s[:-1]) * 60.0
+    try:
+        return float(s)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"invalid interval: {s!r}")
+
+
 def parse_args(argv):
     p = argparse.ArgumentParser(
         description="Keep a file's mtime fresh via a held file handle."
     )
-    p.add_argument("-i", "--interval", type=int, default=300,
-                   help="seconds between mtime updates (default: 300)")
+    p.add_argument("-i", "--interval", type=parse_interval, default=300,
+                   help="seconds between mtime updates (default: 300; "
+                        "supports suffixes 'ms', 's', 'm', e.g. -i 50ms)")
     p.add_argument("-p", "--path", default="~/.sdirs",
                    help="target file path (default: ~/.sdirs)")
     p.add_argument("-q", "--quiet", action="store_true",
@@ -67,10 +85,13 @@ def main(argv=None):
         print(f"sdirs-toucher: holding {path}, touching mtime every {args.interval}s",
               flush=True)
 
+    last_heartbeat = 0.0
     while True:
         touch_mtime(fd)
-        if not args.quiet:
+        now = time.monotonic()
+        if not args.quiet and now - last_heartbeat >= 1.0:
             print(f"sdirs-toucher: tick {time.strftime('%H:%M:%S')}", flush=True)
+            last_heartbeat = now
         time.sleep(args.interval)
         # Self-heal: if the path was removed, re-open to keep it alive.
         if not os.path.exists(path):
