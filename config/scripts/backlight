@@ -1,3 +1,33 @@
 #!/bin/bash
-brightnessctl set $1 >> /dev/null \
-&&  $notify -u low -t 600 -i /usr/share/icons/breeze-dark/status/32/input-keyboard-brightness.svg -r 123 BRIGHTNESS $(sudo xbacklight -get)%
+# backlight - 屏幕亮度百分比步进 + notify-send 原地刷新
+# 用法: backlight 10  /  backlight -10
+set -euo pipefail
+
+ID_FILE="${XDG_RUNTIME_DIR:-/tmp}/backlight_notify_id"
+
+case "$1" in
+    -*) step="${1#-}%-" ;;   # -10 -> 10%- （brightnessctl 减量语法，不是 -10%）
+    *)  step="+$1%" ;;
+esac
+
+brightnessctl set "$step"
+
+# 无 sudo 读百分比: intel_backlight,backlight,655,70%,937 -> 第4列
+pct=$(brightnessctl -m | awk -F, '$2=="backlight" {print $4; exit}')
+pct_num=${pct%\%}
+pct_num=${pct_num:-0}
+
+# 10 格进度条（四舍五入到格）
+filled=$(( (pct_num + 5) / 10 ))
+bar=""
+for ((i = 0; i < 10; i++)); do
+    (( i < filled )) && bar+="▓" || bar+="░"
+done
+
+# 原地替换: --id-fd 让 daemon 把本次通知 id 直接写进状态文件，下次 -r 复用
+prev_id=""
+[ -f "$ID_FILE" ] && prev_id=$(cat "$ID_FILE")
+args=()
+[ -n "$prev_id" ] && args+=(-r "$prev_id")
+notify-send --id-fd 9 "${args[@]}" -u low -t 600 -i input-keyboard-brightness \
+    "BRIGHTNESS" "$bar $pct" 9> "$ID_FILE" || true
