@@ -63,7 +63,8 @@ key-bindings。Ctrl-T 绑定到 `fzf-file-widget`，其「用光标下词替换�
 
 ```bash
 _fzf_word_bounds() {
-  local line="$READLINE_LINE" point="$READLINE_POINT" s=$point e=$point
+  local line="$READLINE_LINE" point="$READLINE_POINT"
+  local s="$point" e="$point"   # 必须分两条 local：同一 local 里 s/e 读到的是外层 point（bind -x 下为空）
   while (( s > 0 )) && [[ "${line:s-1:1}" =~ [^[:space:]] ]]; do (( s-- )); done
   if (( e < ${#line} )) && [[ "${line:e:1}" =~ [^[:space:]] ]]; then
     while (( e < ${#line} )) && [[ "${line:e:1}" =~ [^[:space:]] ]]; do (( e++ )); done
@@ -83,15 +84,21 @@ __fzf_select__() {
   local typed_dir="$1" scope="$2" query="$3"
   shift 3
   local cmd opts out
-  if [[ -n "$FZF_CTRL_T_COMMAND" ]]; then
+  if [[ -n "${FZF_CTRL_T_COMMAND-}" ]]; then
     cmd="$FZF_CTRL_T_COMMAND"
   else
     cmd="command find -L $(printf %q "$scope") -mindepth 1 -printf '%P\n' 2>/dev/null"
   fi
-  opts="--height ${FZF_TMUX_HEIGHT:-40%} --reverse --scheme=path --bind=ctrl-z:ignore ${FZF_DEFAULT_OPTS-} ${FZF_CTRL_T_OPTS-} -m"
-  out=$(set +o pipefail; eval "$cmd" | FZF_DEFAULT_OPTS="$opts" $(__fzfcmd) -q "$query" "$@" | while IFS= read -r item; do
-    if [[ -n "$typed_dir" ]]; then printf '%q ' "$typed_dir$item"; else printf '%q ' "$item"; fi
-  done)
+  opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore --reverse --scheme=path ${FZF_DEFAULT_OPTS-} ${FZF_CTRL_T_OPTS-} -m"
+  out=$(set +o pipefail; eval "$cmd" |
+    FZF_DEFAULT_OPTS="$opts" $(__fzfcmd) -q "$query" "$@" |
+    while IFS= read -r item; do
+      if [[ -n "$typed_dir" ]]; then
+        printf '%s%q ' "$typed_dir" "$item"   # typed 前缀原样保留，只对 item 转义
+      else
+        printf '%q ' "$item"
+      fi
+    done)
   printf '%s' "${out% }"
 }
 
@@ -107,13 +114,18 @@ fzf-file-widget() {
   else
     typed_dir=""; base="$word"
   fi
-  local d="${typed_dir%/}"
-  if [[ -z "$d" ]]; then
-    scope='/'          # 词是根路径 `/`（typed_dir='/' 被剥空）
+  if [[ -z "$typed_dir" ]]; then
+    scope='.'        # 词无路径分隔符：在当前目录补全
   else
-    scope="$(_fzf_expand_home "$d")"
+    d="${typed_dir%/}"
+    if [[ -z "$d" ]]; then
+      scope='/'      # 词是根路径 `/`
+    else
+      scope="$(_fzf_expand_home "$d")"
+    fi
   fi
-  local nth=()
+  local nth
+  nth=()
   [[ -n "${FZF_WITH_NTH-}" ]] && nth+=(--with-nth "$FZF_WITH_NTH")
   [[ -n "${FZF_ACCEPT_NTH-}" ]] && nth+=(--accept-nth "$FZF_ACCEPT_NTH")
   selected="$(__fzf_select__ "$typed_dir" "$scope" "$base" "${nth[@]}")"
