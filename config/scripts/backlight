@@ -1,5 +1,5 @@
 #!/bin/bash
-# backlight - 屏幕亮度百分比步进 + notify-send 原地刷新
+# backlight - 屏幕亮度百分比步进 + deadd 原生进度条通知
 # 用法: backlight 10  /  backlight -10
 set -euo pipefail
 
@@ -17,17 +17,11 @@ pct=$(brightnessctl -m | awk -F, '$2=="backlight" {print $4; exit}')
 pct_num=${pct%\%}
 pct_num=${pct_num:-0}
 
-# 10 格进度条（四舍五入到格）
-filled=$(( (pct_num + 5) / 10 ))
-bar=""
-for ((i = 0; i < 10; i++)); do
-    (( i < filled )) && bar+="▓" || bar+="░"
-done
-
 # 原地替换: --id-fd 让 daemon 把本次通知 id 直接写进状态文件，下次 -r 复用
 prev_id=""
 [ -f "$ID_FILE" ] && prev_id=$(cat "$ID_FILE")
 args=()
 [ -n "$prev_id" ] && args+=(-r "$prev_id")
-notify-send --id-fd 9 "${args[@]}" -u low -t 600 -i input-keyboard-brightness \
-    "BRIGHTNESS" "$bar $pct" 9> "$ID_FILE" || true
+notify-send --id-fd 9 "${args[@]}" -u low -t 600 \
+    -h int:has-percentage:"$pct_num" -h boolean:transient:true \
+    -i "$brightness_icon" "BRIGHTNESS" "$pct" 9> "$ID_FILE" || true
