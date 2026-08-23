@@ -80,7 +80,9 @@ __fzf_select__() {
   if [[ -n "${FZF_CTRL_T_COMMAND-}" ]]; then
     cmd="$FZF_CTRL_T_COMMAND"
   else
-    cmd="command find -L $(printf %q "$scope") -mindepth 1 -printf '%P\n' 2>/dev/null"
+    # BSD find (macOS) 不支持 -printf；cd 进 scope 后 find -print + sed
+    # 得到同样的相对路径列表，GNU/Linux 亦兼容，故无需区分平台。
+    cmd="(cd $(printf %q "$scope") 2>/dev/null && find -L . -mindepth 1 -print 2>/dev/null) | sed 's|^\./||'"
   fi
   opts="--height ${FZF_TMUX_HEIGHT:-40%} --bind=ctrl-z:ignore --reverse --scheme=path ${FZF_DEFAULT_OPTS-} ${FZF_CTRL_T_OPTS-} -m"
   out=$(set +o pipefail; eval "$cmd" |
