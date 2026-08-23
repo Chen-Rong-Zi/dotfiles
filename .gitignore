@@ -5,5 +5,16 @@ host-rongzi
 # Claude Code runtime
 .claude/
 
+# Vim swap files
+*.swp
+*.swo
+
 # Python bytecode
 __pycache__/
+*.pyc
+
+# Large OCR models (downloaded at runtime, not tracked)
+config/ocr/models/
+
+# Third-party repo cloned into workspace (has its own .git)
+config/ocr/RapidOCRWeb/

@@ -410,15 +410,21 @@ export class RunMode extends CommandRunner
         # 切到首次进入 mode 时的标记文件，污染之后的 expand('%:p')，导致 Run
         # 无法作用到切换后的新文件上。
         const curr_path = expand('%:p')
+        # 是否普通文件要在 ExitMode 之前判定：ExitMode 会把焦点切回原窗口，
+        # 之后 &buftype 会变成 ''，导致误取 ExitMode 前的 quickfix/终端路径。
+        const curr_is_file = &buftype ==# '' && curr_path !=# ''
         # 暂时注释文件类型验证：允许 :Run 在任意文件上使用
         # const types = ['java', 'cpp', 'c', 'python', 'rust', 'bash', 'sh']
         # 先退出其他 mode，再进入 RunMode
         ModeManager.ExitMode(ModeManager.GetTabID())
-        if &buftype ==# ''  # && types->index(FileType(curr_path)) !=# -1
+        if curr_is_file
             return curr_path
-        else
-            return ''
+        elseif this.src_path !=# '' && filereadable(this.src_path)
+            # 当前在 quickfix/终端等非文件 buffer 里再次 :Run 时，回退到上次成功
+            # 运行的源文件，避免报 'ModeInit失败，不进入RunMode' 卡死流程。
+            return this.src_path
         endif
+        return ''
     enddef
 
     def ModeInit(): bool

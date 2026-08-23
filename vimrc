@@ -148,7 +148,7 @@ au filetype rust ino <silent> <buffer> <expr> <leader><leader> Expand('= 0')
 au filetype rust ino <buffer> <leader>d ::
 au filetype rust ino <buffer> <leader>sd std::
 au filetype rust ino <buffer> : :<space><ScriptCmd>call util.RustTypeCompletion()<CR>
-au filetype rust iabbr <buffer> as as<ScriptCmd>call util.RustTypeCompletion()<CR>
+" au filetype rust iabbr <buffer> as as<ScriptCmd>call util.RustTypeCompletion()<CR>
 au filetype rust iabbr <buffer> -> -><ScriptCmd>call util.RustTypeCompletion()<CR>
 
 " au filetype rust ino <buffer> <leader>f for ( <++> )<CR>{}<left><CR><esc>O<++><esc>2k0f<cf>
@@ -743,7 +743,8 @@ au VimEnter * inorea 123 {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 au VimEnter * vn #    <c-v>0I#<space><esc>
 " au VimEnter * vn /    <C-v>0I//<space><esc>
 au VimEnter * vn ;    <C-v>0I;<esc>
-au VimEnter * vn <CR> !copy<CR>
+" visual Enter: send selection to system clipboard via macOS pbcopy, keep selection intact
+au VimEnter * vn <silent> <CR> y:call system('pbcopy', @")<CR>gv
 au VimEnter * nn *    *N:set hlsearch<CR>
 " return to the file .vimrc
 au VimEnter * nn <leader>V :e $MYVIMRC<CR>
