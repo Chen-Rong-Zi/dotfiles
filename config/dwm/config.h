@@ -23,7 +23,7 @@ static const int topbar             = 1;        /* 0 means bottom bar */
 static const int usealtbar          = 1;        /* 1 means use non-dwm status bar */
 static const char *altbarclass      = "Polybar"; /* Alternate bar class name */
 static const char *alttrayname      = "tray";    /* Polybar tray instance name */
-static const char *altbarcmd        = "/Users/macbook/.config/polybar/pwidgets/launch dwm"; /* Alternate bar launch command */
+static const char *altbarcmd        = "/home/rongzi/.config/polybar/pwidgets/launch dwm"; /* Alternate bar launch command */
 static const char *fonts[]          = { "Source Han Sans CN:size=18:style=regular" };
 static const char dmenufont[]       = "monospace:size=20";
 static const char col_gray1[]       = "#222222";
@@ -104,7 +104,7 @@ static const Layout layouts[] = {
 
 #define Log(fmt, ...) {                                                  \
     char buf[1024];                                                         \
-    sprintf(buf, "echo -e '[" Red("%s:%d %s") " ]   " fmt "'" " >> /Users/macbook/.log/dwm.log",\
+    sprintf(buf, "echo -e '[" Red("%s:%d %s") " ]   " fmt "'" " >> /home/rongzi/.log/dwm.log",\
                         __FILE__, __LINE__, __func__, ## __VA_ARGS__);   \
     system(buf);                                                         \
 }
@@ -127,23 +127,23 @@ static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() 
 static const char *dmenucmd[]   = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_cyan, "-sf", col_gray4, NULL  };
 static const char *termcmd[]    = { "alacritty", NULL  };
 static const char scratchpadname[] = "scratchpad";
-static const char *scratchpadcmd[] = { "/Users/macbook/.config/scripts/note", NULL };
-static const char *note[]       = { "/Users/macbook/.config/scripts/note", NULL  };
-static const char *powerMenu[]  = { "/Users/macbook/.config/polybar/pwidgets/scripts/powermenu.sh", NULL  };
-static const char *drun[]       = { "rofi", "-modi", "drun", "-show", "drun", "-config", "/Users/macbook/.config/rofi/main_menu.rasi", NULL };
-static const char *winMenu[]    = { "rofi", "-modi", "window", "-show", "window", "-config", "/Users/macbook/.config/rofi/main_menu.rasi", NULL };
+static const char *scratchpadcmd[] = { "/home/rongzi/.config/scripts/note", NULL };
+static const char *note[]       = { "/home/rongzi/.config/scripts/note", NULL  };
+static const char *powerMenu[]  = { "/home/rongzi/.config/polybar/pwidgets/scripts/powermenu.sh", NULL  };
+static const char *drun[]       = { "rofi", "-modi", "drun", "-show", "drun", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL };
+static const char *winMenu[]    = { "rofi", "-modi", "window", "-show", "window", "-config", "/home/rongzi/.config/rofi/main_menu.rasi", NULL };
 static const char *chrome[]     = { "google-chrome-stable", NULL };
-static const char *lock[]       = { "/Users/macbook/.config/scripts/lock", NULL };
-static const char *shot[]       = { "/Users/macbook/.config/scripts/shot", NULL };
-static const char *mouseShot[]  = { "/Users/macbook/.config/scripts/mouse_shot", NULL };
-static const char *picom[]      = { "/Users/macbook/.config/scripts/picom", NULL };
-static const char *myPicom[]    = { "/Users/macbook/.config/scripts/my_picom", NULL };
-static const char *btop[]       = { "/Users/macbook/.config/scripts/btop", NULL };
-static const char *joshuto[]    = { "/Users/macbook/.config/scripts/joshuto", NULL };
-static const char *clipboard[]  = { "/Users/macbook/.config/scripts/clipboard", NULL };
+static const char *lock[]       = { "/home/rongzi/.config/scripts/lock", NULL };
+static const char *shot[]       = { "/home/rongzi/.config/scripts/shot", NULL };
+static const char *mouseShot[]  = { "/home/rongzi/.config/scripts/mouse_shot", NULL };
+static const char *picom[]      = { "/home/rongzi/.config/scripts/picom", NULL };
+static const char *myPicom[]    = { "/home/rongzi/.config/scripts/my_picom", NULL };
+static const char *btop[]       = { "/home/rongzi/.config/scripts/btop", NULL };
+static const char *joshuto[]    = { "/home/rongzi/.config/scripts/joshuto", NULL };
+static const char *clipboard[]  = { "/home/rongzi/.config/scripts/clipboard", NULL };
 static const char *pcmanfm[]    = { "pcmanfm", NULL };
-static const char *lightup[]    = { "/Users/macbook/.config/scripts/backlight", "+10%",  NULL };
-static const char *lightdown[]  = { "/Users/macbook/.config/scripts/backlight","10%-",  NULL };
+static const char *lightup[]    = { "/home/rongzi/.config/scripts/backlight", "+10%",  NULL };
+static const char *lightdown[]  = { "/home/rongzi/.config/scripts/backlight","10%-",  NULL };
 static const char *volumeup[]   = { "pactl", "set-sink-volume","@DEFAULT_SINK@", "+10%", NULL };
 static const char *volumedown[] = { "pactl", "set-sink-volume","@DEFAULT_SINK@", "-10%", NULL };
 static const char *volumemute[] = { "pactl", "set-sink-mute","@DEFAULT_SINK@", "toggle", NULL };
@@ -172,7 +172,7 @@ static const Key keys[] = {
     { MODKEY,                       XK_b,      spawn,          {.v = myPicom } },
     { ControlMask|ShiftMask,        XK_Return, spawn,          {.v = btop } },
     { ControlMask|ShiftMask,        XK_h,      spawn,          {.v = joshuto } },
-    // { ControlMask|ShiftMask,        XK_h,      spawn,          SHCMD("/Users/macbook/.config/scripts/joshuto") },
+    // { ControlMask|ShiftMask,        XK_h,      spawn,          SHCMD("/home/rongzi/.config/scripts/joshuto") },
     { MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
     { MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
     { MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
@@ -197,7 +197,7 @@ static const Key keys[] = {
     { MODKEY,                       XK_f,      togglefullscr,  {.i = 0  } },
     { Mod1Mask,                     XK_Tab,    altTabStart,    {.i = 1} },
     { Mod1Mask,                     XK_grave,  altTabStart,    {.i = 0} },
-    { MODKEY_ALT,                   XK_r,      recordvoice,    SHCMD("/Users/macbook/.config/scripts/recordvoice") },
+    { MODKEY_ALT,                   XK_r,      recordvoice,    SHCMD("/home/rongzi/.config/scripts/recordvoice") },
     TAGKEYS(                        XK_1,                      0)
     TAGKEYS(                        XK_2,                      1)
     TAGKEYS(                        XK_3,                      2)
