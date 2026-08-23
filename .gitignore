@@ -1,3 +1,9 @@
 host-rongzi
 .dmypy.json
 .mypy.json
+
+# Claude Code runtime
+.claude/
+
+# Python bytecode
+__pycache__/
