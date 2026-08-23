@@ -259,7 +259,7 @@ def GetFuncname(waste: number, str: string): dict<dict<dict<any>>>
 enddef
 
 class MethodBase
-    static var file: dict<any> = json_decode(readfile("/home/rongzi/.vim/dictionary/method.json")->fp.Reduce((pre, curr) => pre .. curr, ''))
+    static var file: dict<any> = json_decode(readfile("/Users/macbook/.vim/dictionary/method.json")->fp.Reduce((pre, curr) => pre .. curr, ''))
 
     static def AddToFile(keys_: list<string>, result: dict<any>)
         def Helper(sofar_keys: list<string>, sofar: dict<any>)
@@ -287,8 +287,8 @@ class MethodBase
             endif
         enddef
         Helper(keys_, MethodBase.file)
-        writefile([json_encode(MethodBase.file)], '/home/rongzi/.vim/dictionary/method.json')
-        writefile(GetKeys(MethodBase.file), '/home/rongzi/.vim/dictionary/methods.txt')
+        writefile([json_encode(MethodBase.file)], '/Users/macbook/.vim/dictionary/method.json')
+        writefile(GetKeys(MethodBase.file), '/Users/macbook/.vim/dictionary/methods.txt')
     enddef
 
     static def Query(keys_: list<string>): dict<any>

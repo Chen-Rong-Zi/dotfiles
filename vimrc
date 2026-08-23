@@ -17,7 +17,7 @@ set eventignore+=FocusGained
 set viewoptions=options,cursor,curdir,localoptions,
 set confirm
 set cursorline
-set dictionary+=/home/rongzi/.vim/dictionary/methods.txt
+set dictionary+=/Users/macbook/.vim/dictionary/methods.txt
 set expandtab
 set signcolumn=yes
 " set fillchars=vert:|
@@ -28,6 +28,7 @@ set list
 set tags+=~/.cache/vim/tags
 
 set listchars=leadmultispace:│\ \ \ ,trail:-,precedes:>,extends:<,tab:│\ 
+" set listchars=trail:-,precedes:>,extends:<
 set linebreak
 set hlsearch
 set rnu nu
@@ -349,10 +350,10 @@ au filetype java inorea <silent> <buffer> fuck     Are you alright?
 "  <tab> and <space> visualised
 au filetype java setl cindent
 au filetype java let $src=expand('%:p')
-au filetype java setl include="/home/rongzi/.vim/dictionary"
-au filetype java setl path="/home/rongzi/.vim/dictionary"
+au filetype java setl include="/Users/macbook/.vim/dictionary"
+au filetype java setl path="/Users/macbook/.vim/dictionary"
 au filetype java setl includeexpr='method\.json'
-au filetype java setl dictionary+=/home/rongzi/.vim/dictionary/method.json
+au filetype java setl dictionary+=/Users/macbook/.vim/dictionary/method.json
 " au BufEnter *.c,*.h,*.cpp highlight link Conceal Keyword
 aug end
 
@@ -1019,8 +1020,8 @@ aug end
 " vim filetype script settings--------<++>------------{{{
 aug scripts
 au!
-import autoload "/home/rongzi/.vim/functions/useful.vim" as util
-import autoload "/home/rongzi/.vim/functions/mode.vim"   as mode
+import autoload "/Users/macbook/.vim/functions/useful.vim" as util
+import autoload "/Users/macbook/.vim/functions/mode.vim"   as mode
 au vimenter * nn <leader><c-j> <ScriptCmd>keepjumps call s:util.JoshutoSelectFile()<CR>
 au VimEnter * nn <leader><c-f> <ScriptCmd>call s:util.FZFfile()<CR>
 au VimEnter * nn <leader>b     <ScriptCmd>call s:util.SelectBuffer()<CR>
